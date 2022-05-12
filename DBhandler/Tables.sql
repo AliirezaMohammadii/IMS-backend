@@ -7,12 +7,15 @@ CREATE TABLE `employee` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `firstName` VARCHAR(100) NOT NULL,
   `lastName` VARCHAR(100) NOT NULL,
+  `username` VARCHAR(100) NOT NULL,
+  `password` VARCHAR(100) NOT NULL,
   `mobile` VARCHAR(15) NULL,
   `email` VARCHAR(50) NULL,
   `committeeMember` BOOL NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `uq_mobile` (`mobile`),
-  UNIQUE INDEX `uq_email` (`email`)
+  UNIQUE INDEX `uq_email` (`email`),
+  UNIQUE INDEX `uq_username` (`username`),
 );
 
 
@@ -21,6 +24,7 @@ DROP TABLE IF EXISTS `idea`;
 CREATE TABLE `idea` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `employeeId` INT UNSIGNED NOT NULL,
+  `categoryId` INT UNSIGNED NOT NULL,
   `title` VARCHAR(200) NOT NULL,
   `text` MEDIUMTEXT NOT NULL,
   `costReduction` FLOAT NULL ,
@@ -28,6 +32,7 @@ CREATE TABLE `idea` (
   `status` ENUM( 'NotChecked','Pending' , 'Accepted' , 'Rejected' , 'Implemented' ) NOT NULL ,
   PRIMARY KEY (`id`),
   INDEX `idx_idea_employee` (`employeeId`),
+  FOREIGN KEY (`categoryId`) REFERENCES `ideaCategory`(`id`),
   FOREIGN KEY (`employeeId`) REFERENCES `employee`(`id`)
 );
 
@@ -83,6 +88,7 @@ CREATE TABLE `award` (
   `ideaId` INT UNSIGNED NOT NULL,
   `value` FLOAT NOT NULL ,
   `time` DATETIME NOT NULL,
+  `type` ENUM( 'committee','lottery' ) NOT NULL ,
   PRIMARY KEY (`id`),
   INDEX `idx_award_employeeIdea` (`employeeId`, `ideaId`),
   FOREIGN KEY (`employeeId`) REFERENCES `employee`(`id`),
@@ -111,6 +117,14 @@ CREATE TABLE `evaluationCriteria` (
   `weight` FLOAT NOT NULL ,
   PRIMARY KEY (`id`)
 );
+
+DROP TABLE IF EXISTS `ideaCategory`;
+CREATE TABLE `ideaCategory` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `title` VARCHAR(200) NOT NULL,
+  PRIMARY KEY (`id`)
+);
+
 
 
 DROP TABLE IF EXISTS `committeeScoreDetail`;
