@@ -5,6 +5,8 @@ from markupsafe import escape
 import sys, os, time
 import json
 from datetime import datetime, timedelta, timezone
+
+from numpy import identity
 from Requirements import *
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt, get_jwt_identity, unset_jwt_cookies
 from flask_jwt_extended import jwt_required as login_required
@@ -51,41 +53,49 @@ def refresh_expiring_jwts(response):
 @app.route('/test')
 @login_required()
 def test():
-    return {'message': 'user is login'}, STATUS_OK
+    return {'message': 'user is logged in'}, STATUS_OK
 
 
-@app.route('/time', methods=['POST'])
-def get_current_time():
-    log(request.headers)
-    return {'time': time.time()}
+@app.route('/test2')
+@login_required(optional=True)
+def tets2():
+    get_identity = get_jwt_identity()
+    log(get_identity)
+    if get_identity:
+        return {'identity': get_identity}, STATUS_OK
 
-
-@app.route('/')
-def index():
-    if user_is_logged_in(session):
-        return '', STATUS_OK
-    return '', STATUS_UNAUTHORIZED
-
+    else:
+        return {'identity': 'Anonymous'}, STATUS_OK
 
 # ------ LOGIN/LOGOUT ------
 
 @app.route('/login', methods=['POST'])
 def login():
     personal_id = request.json['id']
-    # user_exist = employee_DB.user_exist(phone_number)
+    # user_exist = employee_DB.user_exist(personal_id)
     user_exist = True
 
     if user_exist:
-        access_token = create_access_token(identity=personal_id)
-        return '', STATUS_OK
+
+        password = request.json['password']
+        # correct_password = employee_DB.check_password(personal_id, password)
+        correct_password = True
+
+        if correct_password:
+            access_token = create_access_token(identity=personal_id)
+            response = {"access_token": access_token}
+            return response
+
+        else:
+            return {'message', WRONG_PASSWORD}, STATUS_BAD_REQUEST
 
     else:
-        return {}, STATUS_BAD_REQUEST
+        return {'message', USER_NOT_FOUND}, STATUS_BAD_REQUEST
 
 
 @app.route('/logout')
 def logout():
-    # session.pop('personal_id', None)
+    revoke_jwt()
     return {}, STATUS_OK
 
 
@@ -93,76 +103,63 @@ def logout():
 
 @app.route('/register/user', methods=['POST'])
 def signup():
-    log(request.json)
-    # message = employee_DB.create(request.json)
+    
+    error = ''
+    # error = employee_DB.create(request.json)
 
-    # CHECK MESSAGE FOR ERRORS
+    # if error != '':
+    #     if error == ...:
+    #         ...
+    #     elif error == ...:
+    #         ...
+
+    
     personal_id = request.json['id']
-
     access_token = create_access_token(identity=personal_id)
-    log(access_token)
-    response = {"access_token": access_token}
-    return response
-    # session['personal_id'] = request.json['id']      # login user
-    # resp = make_response('hello', STATUS_CREATED)
-    # resp.headers['Access-Control-Allow-Origin'] = '*'
-    # return resp
-    return {'message': 'created'}, STATUS_CREATED
+    body = {'access_token': access_token}
+    return body, STATUS_CREATED
 
 
-@app.route('/profile', )
-def get_profile():
-    # message = employee_DB.create(request.json)
+# @app.route('/register/check/id/<personal_id>')
+# def check_duplicated_user(personal_id):
+#     # personal_id_already_exists = employee_DB.user_exist(personal_id)
+#     personal_id_already_exists = ''
 
-    # CHECK MESSAGE FOR ERRORS
+#     if personal_id_already_exists:
+#         return '', STATUS_BAD_REQUEST
 
-    # session['personal_id'] = request.json['personal_id']      # login user
-    # resp = make_response('update', 200)
-    # resp.headers['Access-Control-Allow-Origin'] = '*'
-    # return resp
-    return 'ok', STATUS_OK
+#     return '', STATUS_OK
 
 
-@app.route('/register/check/id/<personal_id>')
-def check_duplicated_user(personal_id):
-    # personal_id_already_exists = employee_DB.user_exist(personal_id)
-    personal_id_already_exists = ''
+# @app.route('/get_user_inf')
+# def get_user():
+#     if user_is_logged_in(session):
+#         personal_id = session['personal_id']
+#         # data = employee_DB.get_by_phone_number(personal_id)
+#         data = ''
 
-    if personal_id_already_exists:
-        return '', STATUS_BAD_REQUEST
+#         # CHECK DATA FOR ERRORS
 
-    return '', STATUS_OK
+#         user_inf = {
+#             'personal_id'   : personal_id,
+#             'firstname'     : 'Alireza',
+#             'lastname'      : 'Mohammadi',
+#             # ...
+#         }
+#         return user_inf, STATUS_OK
 
-
-@app.route('/get_user_inf')
-def get_user():
-    if user_is_logged_in(session):
-        personal_id = session['personal_id']
-        # data = employee_DB.get_by_phone_number(personal_id)
-        data = ''
-
-        # CHECK DATA FOR ERRORS
-
-        user_inf = {
-            'personal_id'   : personal_id,
-            'firstname'     : 'Alireza',
-            'lastname'      : 'Mohammadi',
-            # ...
-        }
-        return user_inf, STATUS_OK
-
-    else:
-        return '', STATUS_UNAUTHORIZED
+#     else:
+#         return '', STATUS_UNAUTHORIZED
 
 
 # ------ IDEA ------
 
 @app.route('/create_idea', methods=['POST'])
+@login_required()
 def create_idea():
-    if not user_is_logged_in(session):
-        return '', STATUS_UNAUTHORIZED
 
-    # message = idea_DB.create(request.json)
+    error = ''
+    # error = idea_DB.create(request.json)
 
     # CHECK MESSAGE FOR ERRORS
 
@@ -175,28 +172,41 @@ def create_idea():
 #     pass
 
 
+@app.route('/get_idea/<int:idea_id>')
+@login_required()
+def get_idea(idea_id):
+
+    data = ''
+    # data = idea_DB.get_idea(idea_id)
+
+    if type(data) == dict:
+        return data
+
+    else:   # some error is returned
+        return {'error': IDEA_NOT_FOUND}, STATUS_BAD_REQUEST
+
+
+
 @app.route('/get_ideas/<pagination_id>')
-def ideas_timeline(pagination_id):
-    if not user_is_logged_in(session):
-        return '', STATUS_UNAUTHORIZED
+def get_ideas(pagination_id):
 
     # ideas = idea_DB.get_ideas(pagination_id)     # send ideas in Timeline mode to backend.
     ideas = [
-        'idea1',
-        'idea2',
-        'idea3',
-        'idea4',
+        json.dumps(Idea(0, 1, 'Title 1', 'Text 1', 10, 0, 'pending').__dict__),
+        json.dumps(Idea(1, 5, 'Title 2', 'Text 2', 10, 1, 'accepted').__dict__),
+        json.dumps(Idea(2, 8, 'Title 3', 'Text 3', 10, 2, 'rejected').__dict__),
+        json.dumps(Idea(3, 6, 'Title 4', 'Text 4', 10, 3, 'not_seen').__dict__)
     ]
+
     return ideas, STATUS_OK
 
 
 @app.route('/update_idea', methods=['PATCH'])
+@login_required()
 def update_idea(idea_id):
-    if not user_is_logged_in(session):
-        return '', STATUS_UNAUTHORIZED
 
     permitted = True
-    # permitted = idea_DB.idea_is_for_user(session['personal_id'], idea_id)
+    # permitted = idea_DB.idea_is_for_user(..., idea_id)
     if permitted:
         # message = idea_DB.update(request.json)
 
@@ -209,9 +219,8 @@ def update_idea(idea_id):
 
 
 @app.route('/delete_idea/<int:idea_id>', methods=['DELETE'])
+@login_required()
 def delete_idea(idea_id):
-    if not user_is_logged_in(session):
-        return '', STATUS_UNAUTHORIZED
 
     permitted = True
     # permitted = idea_DB.idea_is_for_user(session['personal_id'], idea_id)
@@ -219,7 +228,6 @@ def delete_idea(idea_id):
         # message = idea_DB.delete(idea_id)
 
         # CHECK MESSAGE FOR ERRORS
-
         return '', STATUS_OK
 
     else:
@@ -227,9 +235,8 @@ def delete_idea(idea_id):
 
 
 @app.route('/like_idea/<int:idea_id>', methods=['POST'])
+@login_required()
 def like_idea(idea_id):
-    if not user_is_logged_in(session):
-        return '', STATUS_UNAUTHORIZED
 
     # message = idea_DB.like_idea(idea_id)
     # example error: idea not found. For whenever request is made and sent directly by user, not web browser.
@@ -238,9 +245,8 @@ def like_idea(idea_id):
 
 
 @app.route('/dislike_idea/<int:idea_id>', methods=['POST'])
+@login_required()
 def dislike_idea(idea_id):
-    if not user_is_logged_in(session):
-        return '', STATUS_UNAUTHORIZED
 
     # message = idea_DB.dislike_idea(idea_id)
     # example error: idea not found. For whenever request is made and sent directly by user, not web browser.
