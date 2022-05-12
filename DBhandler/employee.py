@@ -2,7 +2,10 @@ import json
 import re
 import sys
 
+# windows
 sys.path.insert(0, 'C://Users//asus//Desktop//Uni//SW Eng//Project//project files//venv//IMS//backend//DBhandler')
+# macOs
+sys.path.insert(0, '/Users/mohammad/Documents/Github/IMS-backend/DBhandler')
 from db import *
 
 

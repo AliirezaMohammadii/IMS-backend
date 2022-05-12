@@ -11,8 +11,10 @@ from Requirements import *
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt, get_jwt_identity, unset_jwt_cookies
 from flask_jwt_extended import jwt_required as login_required
 
-
+# windows
 sys.path.insert(0, 'C://Users//asus//Desktop//Uni//SW Eng//Project//project files//venv//IMS//backend')
+# macOs
+sys.path.insert(0, '/Users/mohammad/Documents/Github/IMS-backend')
 
 from DBhandler import db
 from DBhandler import employee as employee_DB
