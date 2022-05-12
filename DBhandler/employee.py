@@ -2,7 +2,7 @@ import json
 import re
 import sys
 
-sys.path.insert(0, 'C://Users//asus//Desktop//Uni//SW Eng//Project//project files//venv//IMS//DBhandler')
+sys.path.insert(0, 'C://Users//asus//Desktop//Uni//SW Eng//Project//project files//venv//IMS//backend//DBhandler')
 from db import *
 
 

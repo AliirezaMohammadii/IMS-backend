@@ -1,12 +1,16 @@
 
-from crypt import methods
 from flask import Flask, make_response, request, session, url_for, redirect
-from markupsafe import escape
-import sys, os
-from Requirements import *
 from flask_cors import CORS
+from markupsafe import escape
+import sys, os, time
+import json
+from datetime import datetime, timedelta, timezone
+from Requirements import *
+from flask_jwt_extended import JWTManager, create_access_token, get_jwt, get_jwt_identity, unset_jwt_cookies
+from flask_jwt_extended import jwt_required as login_required
 
-sys.path.insert(0, 'C://Users//asus//Desktop//Uni//SW Eng//Project//project files//venv//IMS')
+
+sys.path.insert(0, 'C://Users//asus//Desktop//Uni//SW Eng//Project//project files//venv//IMS//backend')
 
 from DBhandler import db
 from DBhandler import employee as employee_DB
@@ -28,7 +32,32 @@ app.config.from_mapping(
     DATABASE=os.path.join(app.instance_path, 'app.sqlite'),
 )
 app.config.from_pyfile('config.py', silent=True)
+jwt = JWTManager(app)
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 db.init_app(app)
+
+
+@app.after_request
+def refresh_expiring_jwts(response):
+    try:
+        response = update_jwt_if_expired(response)
+        return response
+
+    except (RuntimeError, KeyError):
+        # this case is when there is not a valid JWT. Just return the original respone
+        return response
+
+
+@app.route('/test')
+@login_required()
+def test():
+    return {'message': 'user is login'}, STATUS_OK
+
+
+@app.route('/time', methods=['POST'])
+def get_current_time():
+    log(request.headers)
+    return {'time': time.time()}
 
 
 @app.route('/')
@@ -37,43 +66,67 @@ def index():
         return '', STATUS_OK
     return '', STATUS_UNAUTHORIZED
 
+
 # ------ LOGIN/LOGOUT ------
 
-@app.route('/login/', methods=['POST'])
+@app.route('/login', methods=['POST'])
 def login():
-    phone_number = request.json['phone_number']
-    user_exist = employee_DB.user_exist(phone_number)
+    personal_id = request.json['id']
+    # user_exist = employee_DB.user_exist(phone_number)
+    user_exist = True
 
     if user_exist:
-        session['personal_id'] = request.json['personal_id']
+        access_token = create_access_token(identity=personal_id)
         return '', STATUS_OK
 
     else:
-        return '', STATUS_BAD_REQUEST
+        return {}, STATUS_BAD_REQUEST
 
 
-@app.route('/logout/')
+@app.route('/logout')
 def logout():
-    session.pop('personal_id', None)
-    return '', STATUS_OK
+    # session.pop('personal_id', None)
+    return {}, STATUS_OK
 
 
 # ------ EMPLOYEE ------
 
-@app.route('/register/user/', methods=['POST'])
+@app.route('/register/user', methods=['POST'])
 def signup():
-    # app.logger.info('/register/user: %s', request.json)
-    message = employee_DB.create(request.json)
+    log(request.json)
+    # message = employee_DB.create(request.json)
+
+    # CHECK MESSAGE FOR ERRORS
+    personal_id = request.json['id']
+
+    access_token = create_access_token(identity=personal_id)
+    log(access_token)
+    response = {"access_token": access_token}
+    return response
+    # session['personal_id'] = request.json['id']      # login user
+    # resp = make_response('hello', STATUS_CREATED)
+    # resp.headers['Access-Control-Allow-Origin'] = '*'
+    # return resp
+    return {'message': 'created'}, STATUS_CREATED
+
+
+@app.route('/profile', )
+def get_profile():
+    # message = employee_DB.create(request.json)
 
     # CHECK MESSAGE FOR ERRORS
 
-    session['personal_id'] = request.json['personal_id']      # login user
-    return '', STATUS_CREATED
+    # session['personal_id'] = request.json['personal_id']      # login user
+    # resp = make_response('update', 200)
+    # resp.headers['Access-Control-Allow-Origin'] = '*'
+    # return resp
+    return 'ok', STATUS_OK
 
 
 @app.route('/register/check/id/<personal_id>')
 def check_duplicated_user(personal_id):
-    personal_id_already_exists = employee_DB.user_exist(personal_id)
+    # personal_id_already_exists = employee_DB.user_exist(personal_id)
+    personal_id_already_exists = ''
 
     if personal_id_already_exists:
         return '', STATUS_BAD_REQUEST
@@ -81,11 +134,12 @@ def check_duplicated_user(personal_id):
     return '', STATUS_OK
 
 
-@app.route('/get_user_inf/')
+@app.route('/get_user_inf')
 def get_user():
     if user_is_logged_in(session):
         personal_id = session['personal_id']
-        data = employee_DB.get_by_phone_number(personal_id)
+        # data = employee_DB.get_by_phone_number(personal_id)
+        data = ''
 
         # CHECK DATA FOR ERRORS
 
@@ -103,7 +157,7 @@ def get_user():
 
 # ------ IDEA ------
 
-@app.route('/create_idea/', methods=['POST'])
+@app.route('/create_idea', methods=['POST'])
 def create_idea():
     if not user_is_logged_in(session):
         return '', STATUS_UNAUTHORIZED
@@ -121,7 +175,7 @@ def create_idea():
 #     pass
 
 
-@app.route('/get_ideas/<pagination_id>/')
+@app.route('/get_ideas/<pagination_id>')
 def ideas_timeline(pagination_id):
     if not user_is_logged_in(session):
         return '', STATUS_UNAUTHORIZED
@@ -136,7 +190,7 @@ def ideas_timeline(pagination_id):
     return ideas, STATUS_OK
 
 
-@app.route('/update_idea/', methods=['PATCH'])
+@app.route('/update_idea', methods=['PATCH'])
 def update_idea(idea_id):
     if not user_is_logged_in(session):
         return '', STATUS_UNAUTHORIZED
