@@ -69,6 +69,34 @@ def tets2():
     else:
         return {'identity': 'Anonymous'}, STATUS_OK
 
+
+@app.route('/test3')
+def test3():
+    data_dict = {
+        'firstName' : 'Ali',
+        'lastName' : 'Mo',
+        'username' : '1234',
+        'password' : '1111',
+        'mobile' : '09121111111',
+        'email' : 'a@b.com',
+        'committeeMember' : True,
+    }
+
+    data_json = json.dumps(data_dict)
+
+    error = employee_DB.create(data_json)
+
+    return error
+
+
+@app.route('/test4/<id>')
+def test4(id):
+
+    data = employee_DB.get_by_personal_id(id)
+
+    log(data)
+    return data
+
 # ------ LOGIN/LOGOUT ------
 
 @app.route('/login', methods=['POST'])
@@ -194,10 +222,26 @@ def get_ideas(pagination_id):
 
     # ideas = idea_DB.get_ideas(pagination_id)     # send ideas in Timeline mode to backend.
     ideas = [
-        json.dumps(Idea(0, 1, 'Title 1', 'Text 1', 10, 0, 'pending').__dict__),
-        json.dumps(Idea(1, 5, 'Title 2', 'Text 2', 10, 1, 'accepted').__dict__),
-        json.dumps(Idea(2, 8, 'Title 3', 'Text 3', 10, 2, 'rejected').__dict__),
-        json.dumps(Idea(3, 6, 'Title 4', 'Text 4', 10, 3, 'not_seen').__dict__)
+        {
+            'id'            : 0,    
+            'employeeId'    : 1,
+            'categoryId'    : 1,
+            'title'         : 'Title 1',
+            'text'          : 'Text 1',
+            'costReduction' : 10,    
+            'time'          : 0,
+            'status'        : 'pending'
+        },
+        {
+            'id'            : 1,    
+            'employeeId'    : 6,
+            'categoryId'    : 12,
+            'title'         : 'Title 2',
+            'text'          : 'Text 2',
+            'costReduction' : 55,    
+            'time'          : 1,
+            'status'        : 'rejected'
+        },
     ]
 
     return ideas, STATUS_OK

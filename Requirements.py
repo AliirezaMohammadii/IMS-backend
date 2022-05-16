@@ -4,31 +4,9 @@ from flask_jwt_extended import create_access_token, get_jwt, get_jwt_identity
 import json
 
 
-class Employee:
-    def __init__(self, id, firstName, lastName, mobile, email, committeeMember):
-        self.id              = id
-        self.firstName       = firstName
-        self.lastName        = lastName
-        self.mobile          = mobile
-        self.email           = email
-        self.committeeMemb   = committeeMember
-
-
-class Idea:
-    def __init__(self, id, employeeId, title, text, costReduction, time, status):
-        self.id              = id
-        self.employeeId      = employeeId
-        self.title           = title
-        self.text            = text
-        self.costReduction   = costReduction
-        self.time            = time
-        self.status          = status
-
-
 USER_NOT_FOUND = 0
 WRONG_PASSWORD = 1
 IDEA_NOT_FOUND = 2
-
 
 STATUS_OK           = 200
 STATUS_CREATED      = 201

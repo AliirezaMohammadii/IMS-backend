@@ -10,14 +10,44 @@ sys.path.insert(0, '/Users/narges/Documents/GitHub/IMS-backend/DBhandler')
 from db import *
 
 
+def getEmployeeByPersonalId(personal_id, cursor):
+    select_query = 'SELECT * FROM employee WHERE personal_id=?'
+    cursor.execute(select_query, (personal_id,))
+    employees = cursor.fetchone()
+    return employees
+
+
+def getEmployeeByMobile(mobile, cursor):
+    select_query = 'SELECT * FROM employee WHERE mobile=?'
+    cursor.execute(select_query, (mobile,))
+    employees = cursor.fetchone()
+    return employees
+
+
+def getEmployeeByEmail(email, cursor):
+    select_query = 'SELECT * FROM employee WHERE email=?'
+    cursor.execute(select_query, (email,))
+    employees = cursor.fetchone()
+    return employees
+
+
+def get_table_size(cursor):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("select * from employee")
+    results = cursor.fetchall()
+    close_db()
+    return len(results)
+
+
 def create(json):
     db = get_db()
     cursor = db.cursor()
     data = json.loads(json)
     
-    id = get_table_size(cursor)+1;
+    id = get_table_size(cursor)+1
     password = data["password"]
-    username = data["username"]
+    personal_id = data["personal_id"]
     firstName = data["firstName"]
     lastName = data["lastName"]
     mobile = data["mobile"]
@@ -26,21 +56,22 @@ def create(json):
 
    
 
-    insert_query = 'INSERT INTO employee (id,firstName, lastName, username, password, mobile , email , committeeMember) ' \
+    insert_query = 'INSERT INTO employee (id, firstName, lastName, personal_id, password, mobile , email , committeeMember) ' \
                    'VALUES (?, ?, ?, ?, ?, ?, ?)'
-    fields = (firstName, lastName, username, password, mobile , email , committeeMember)
+    fields = (firstName, lastName, personal_id, password, mobile , email , committeeMember)
 
     try:
         #check if employee already exists :
-        if len(getEmployeeByUsername(username, cursor))>0:
-            response = "Employee already exists with this username"
+        if len(getEmployeeByPersonalId(personal_id, cursor))>0:
+            response = "Employee already exists with this personal_id"
             return response
-        if len(getEmployeeByEmail(email,cursor))>0:
+        if len(getEmployeeByEmail(email, cursor))>0:
             response = "Employee already exists with this email"
             return response
-        if len(getEmployeeByMobile(mobile,cursor))>0:
+        if len(getEmployeeByMobile(mobile, cursor))>0:
             response = "Employee already exists with this mobile"
             return response
+
         # insert into db:
         cursor.execute(insert_query, fields)
         db.commit()
@@ -51,10 +82,7 @@ def create(json):
     except sqlite3.Error:  
         close_db()
         response = "SQlite Error - Employee registration Failed"
-        return None
-
-
-
+        return response
 
 
 def update(json):
@@ -63,7 +91,7 @@ def update(json):
 
     data = json.loads(json)
     password = data["password"]
-    username = data["username"]
+    personal_id = data["personal_id"]
     firstName = data["firstName"]
     lastName = data["lastName"]
     mobile = data["mobile"]
@@ -71,14 +99,14 @@ def update(json):
     committeeMember = data["committeeMember"]
 
     update_query = 'UPDATE employee SET firstName =?, lastName =?, password =?, mobile  =? , email  =?, committeeMember =? ' \
-                   'WHERE username=?'
+                   'WHERE personal_id=?'
                    
-    fields = (firstName, lastName, password, mobile , email , committeeMember, username)
+    fields = (firstName, lastName, password, mobile , email , committeeMember, personal_id)
 
     try:
         #check if employee already exists :
-        if  len(getEmployeeByUsername(username, cursor))==0:
-            response = "Employee does not exist with this username"
+        if  len(getEmployeeByPersonalId(personal_id, cursor))==0:
+            response = "Employee does not exist with this personal_id"
             return response
         if len(getEmployeeByEmail(email,cursor))>0:
             response = "Employee already exists with this email"
@@ -86,6 +114,7 @@ def update(json):
         if len(getEmployeeByMobile(mobile,cursor))>0:
             response = "Employee already exists with this mobile"
             return response
+            
         # insert into db:
         cursor.execute(update_query, fields)
         db.commit()
@@ -100,12 +129,12 @@ def update(json):
 
 
 
-def delete(username):
+def delete(personal_id):
     db = get_db()
     cursor = db.cursor()
 
-    query = 'DELETE employee WHERE username=?'
-    fields = (username,)
+    query = 'DELETE employee WHERE personal_id=?'
+    fields = (personal_id,)
 
     try:
 
@@ -122,16 +151,15 @@ def delete(username):
         return None
 
 
-def get_by_username(username):
+def get_by_personal_id(personal_id):
     db = get_db()
     db.row_factory = sqlite3.Row
     cursor = db.cursor()
 
-
     try:
-        employeeRow=  getEmployeeByUsername(username , cursor)
+        employeeRow = getEmployeeByPersonalId(personal_id , cursor)
         if len(employeeRow)==0:
-            response = "Employee does not exist with this username"
+            response = "Employee does not exist with this personal_id"
             return response
         employee_row_dict = dict(employeeRow)
         close_db()
@@ -141,34 +169,3 @@ def get_by_username(username):
         close_db()
         response = "SQlite Error - Failed to retrieve employee"
         return None
-
-
-def getEmployeeByUsername(username):
-    select_query = 'SELECT * FROM employee WHERE username=?'
-    cursor.execute(select_query, (username,))
-    employees = cursor.fetchone()
-    return employees
-
-
-def getEmployeeByMobile(mobile):
-    select_query = 'SELECT * FROM employee WHERE mobile=?'
-    cursor.execute(select_query, (mobile,))
-    employees = cursor.fetchone()
-    return employees
-
-
-def getEmployeeByMobile(email):
-    select_query = 'SELECT * FROM employee WHERE email=?'
-    cursor.execute(select_query, (email,))
-    employees = cursor.fetchone()
-    return employees
-
-
-
-def get_table_size():
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute("select * from employee")
-    results = cursor.fetchall()
-    close_db()
-    return len(results)
