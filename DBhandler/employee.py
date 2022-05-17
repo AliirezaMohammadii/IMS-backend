@@ -40,10 +40,10 @@ def get_table_size(cursor):
     return len(results)
 
 
-def create(json):
+def create(json_data):
     db = get_db()
     cursor = db.cursor()
-    data = json.loads(json)
+    data = json.loads(json_data)
     
     id = get_table_size(cursor)+1
     password = data["password"]
@@ -85,11 +85,11 @@ def create(json):
         return response
 
 
-def update(json):
+def update(json_data):
     db = get_db()
     cursor = db.cursor()
 
-    data = json.loads(json)
+    data = json.loads(json_data)
     password = data["password"]
     personal_id = data["personal_id"]
     firstName = data["firstName"]

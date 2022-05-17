@@ -33,7 +33,7 @@ cors = CORS(app)
 app.secret_key = b'8a47ce117cfb2699cc021fcecd03773660d3ba0c369fd4252e4e6380b6f824b0'    # used for session
 app.config['DEBUG'] = True
 app.config.from_mapping(
-    DATABASE=os.path.join(app.instance_path, 'app.sqlite'),
+    DATABASE=os.path.join(app.root_path + '/db_files', 'app.sqlite'),
 )
 app.config.from_pyfile('config.py', silent=True)
 jwt = JWTManager(app)
@@ -62,7 +62,6 @@ def test():
 @login_required(optional=True)
 def tets2():
     get_identity = get_jwt_identity()
-    log(get_identity)
     if get_identity:
         return {'identity': get_identity}, STATUS_OK
 
@@ -143,10 +142,12 @@ def signup():
     #     elif error == ...:
     #         ...
 
-    
     personal_id = request.json['id']
     access_token = create_access_token(identity=personal_id)
     body = {'access_token': access_token}
+    log(access_token)
+    # log(request)
+    # log(request.json)
     return body, STATUS_CREATED
 
 
