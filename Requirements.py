@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta, timezone
 from flask_jwt_extended import create_access_token, get_jwt, get_jwt_identity
 import json
+from flask_jwt_extended import get_jwt_identity
 
 
 USER_NOT_FOUND = 0
@@ -43,3 +44,7 @@ def update_jwt_if_expired(response):
 def revoke_jwt():
     # create some random access token, and frontend side is not supposed to be informed.
     create_access_token(identity=get_jwt_identity())
+
+
+def check_is_logged_in():
+    return get_jwt_identity()

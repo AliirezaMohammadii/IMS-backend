@@ -162,25 +162,24 @@ def signup():
 #     return '', STATUS_OK
 
 
-# @app.route('/get_user_inf')
-# def get_user():
-#     if user_is_logged_in(session):
-#         personal_id = session['personal_id']
-#         # data = employee_DB.get_by_phone_number(personal_id)
-#         data = ''
+@app.route('/get_user_inf', methods=['GET'])
+@login_required(optional=True)
+def get_user():
+    # TODO
+    # field password be table e employee ezafe shavad
+    is_logged_in = check_is_logged_in()
+    if not is_logged_in:
+        return {}, STATUS_UNAUTHORIZED
 
-#         # CHECK DATA FOR ERRORS
+    profile_data = {'id': 97243073,
+                    'password': 'qhuwerqh',
+                    'firstName': 'محمد',
+                    'lastName': 'هاشمی',
+                    'mobile': '09128108218',
+                    'email': 'sample@gmail.com',
+                    'committeeMember': True}
 
-#         user_inf = {
-#             'personal_id'   : personal_id,
-#             'firstname'     : 'Alireza',
-#             'lastname'      : 'Mohammadi',
-#             # ...
-#         }
-#         return user_inf, STATUS_OK
-
-#     else:
-#         return '', STATUS_UNAUTHORIZED
+    return profile_data, STATUS_OK
 
 
 # ------ IDEA ------
@@ -314,3 +313,7 @@ def dislike_idea(idea_id):
 @app.errorhandler(STATUS_NOT_FOUND)
 def not_found(error):
     return 'PAGE NOT FOUND!', STATUS_NOT_FOUND
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
