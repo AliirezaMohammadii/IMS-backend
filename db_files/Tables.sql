@@ -15,7 +15,7 @@ CREATE TABLE `employee` (
   PRIMARY KEY (`id`),
   UNIQUE INDEX `uq_mobile` (`mobile`),
   UNIQUE INDEX `uq_email` (`email`),
-  UNIQUE INDEX `uq_username` (`username`),
+  UNIQUE INDEX `uq_username` (`username`)
 );
 
 
