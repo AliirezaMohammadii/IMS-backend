@@ -98,7 +98,7 @@ def delete(id):
         response = "SQlite Error - Failed to delete ideaVote"
         return None
 
-def delete(username , ideaId):
+def delete(personal_id , ideaId):
     db = get_db()
     cursor = db.cursor()
 
@@ -106,9 +106,9 @@ def delete(username , ideaId):
             'WHERE  ideaVote.ideaId IN'\
             '(SELECT idea.id from idea WHERE idea.id=?)'\
             'AND ideaVote.employeeId IN'\
-            '(SELECT emplyee.id from employee WHERE employee.username=?)'
+            '(SELECT emplyee.id from employee WHERE employee.personal_id=?)'
             
-    fields = (ideaId,username, )
+    fields = (ideaId,personal_id, )
 
     try:
 

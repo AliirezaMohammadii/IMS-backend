@@ -91,9 +91,9 @@ def delete(id):
 
 
 
-def getAwardByUsername(username):  # Awards received by an employee.
-    select_query = 'SELECT * FROM award INNER JOIN BY employee ON employee.id = award.employeeId WHERE employee.username=?'
-    cursor.execute(select_query, (username,))
+def getAwardByUsername(personal_id):  # Awards received by an employee.
+    select_query = 'SELECT * FROM award INNER JOIN BY employee ON employee.id = award.employeeId WHERE employee.personal_id=?'
+    cursor.execute(select_query, (personal_id,))
     employeeAward = cursor.fetchall()
     return employeeAward
 
