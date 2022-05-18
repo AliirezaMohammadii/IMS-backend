@@ -7,7 +7,7 @@ CREATE TABLE `employee` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `firstName` VARCHAR(100) NOT NULL,
   `lastName` VARCHAR(100) NOT NULL,
-  `username` VARCHAR(100) NOT NULL,
+  `personal_id` VARCHAR(100) NOT NULL,
   `password` VARCHAR(100) NOT NULL,
   `mobile` VARCHAR(15) NULL,
   `email` VARCHAR(50) NULL,
@@ -15,7 +15,7 @@ CREATE TABLE `employee` (
   PRIMARY KEY (`id`),
   UNIQUE INDEX `uq_mobile` (`mobile`),
   UNIQUE INDEX `uq_email` (`email`),
-  UNIQUE INDEX `uq_username` (`username`)
+  UNIQUE INDEX `uq_personal_id` (`personal_id`)
 );
 
 

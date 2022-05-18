@@ -111,12 +111,12 @@ def get_table_size():
     return len(results)
 
 
-def getIdeaByEmployeeUsername(username):
+def getIdeaByEmployeeUsername(personal_id):
     select_query = 'SELECT * FROM idea INNER JOIN BY employee  ' \
                     'ON idea.employeeId = employee.id ' \
-                    'WHERE employee.username=?' \
+                    'WHERE employee.personal_id=?' \
                     'ORDER BY idea.time DESC'
-    cursor.execute(select_query, (username,))
+    cursor.execute(select_query, (personal_id,))
     ideas = cursor.fetchall()
     return ideas
 

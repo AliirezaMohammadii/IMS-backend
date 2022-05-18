@@ -74,7 +74,7 @@ def test3():
     data_dict = {
         'firstName' : 'Ali',
         'lastName' : 'Mo',
-        'username' : '1234',
+        'personal_id' : '1234',
         'password' : '1111',
         'mobile' : '09121111111',
         'email' : 'a@b.com',
