@@ -5,10 +5,16 @@ import json
 from flask_jwt_extended import get_jwt_identity
 
 
-USER_NOT_FOUND = 0
-WRONG_PASSWORD = 1
-IDEA_NOT_FOUND = 2
+### ERROR MESSAGES
+MESSAGE_OK = 0
+DB_ERROR = -1
 
+NOT_FOUND = 1
+WRONG_PASSWORD = 2
+USER_ALREADY_EXISTS = 3
+
+
+### STATUS CODES
 STATUS_OK           = 200
 STATUS_CREATED      = 201
 

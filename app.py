@@ -1,12 +1,11 @@
 
-from flask import Flask, make_response, request, session, url_for, redirect
+from flask import Flask, request, url_for, redirect
 from flask_cors import CORS
 from markupsafe import escape
 import sys, os, time
 import json
 from datetime import datetime, timedelta, timezone
 
-from numpy import identity
 from Requirements import *
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt, get_jwt_identity, unset_jwt_cookies
 from flask_jwt_extended import jwt_required as login_required
@@ -52,148 +51,126 @@ def refresh_expiring_jwts(response):
         return response
 
 
-@app.route('/test')
-@login_required()
-def test():
-    return {'message': 'user is logged in'}, STATUS_OK
-
-
-@app.route('/test2')
-@login_required(optional=True)
-def tets2():
-    get_identity = get_jwt_identity()
-    if get_identity:
-        return {'identity': get_identity}, STATUS_OK
-
-    else:
-        return {'identity': 'Anonymous'}, STATUS_OK
-
-
-@app.route('/test3')
-def test3():
-    data_dict = {
-        'firstName' : 'Ali',
-        'lastName' : 'Mo',
-        'personal_id' : '1234',
-        'password' : '1111',
-        'mobile' : '09121111111',
-        'email' : 'a@b.com',
-        'committeeMember' : True,
-    }
-
-    data_json = json.dumps(data_dict)
-
-    error = employee_DB.create(data_json)
-
-    return error
-
-
-@app.route('/test4/<id>')
-def test4(id):
-
-    data = employee_DB.get_by_personal_id(id)
-
-    log(data)
-    return data
-
 # ------ LOGIN/LOGOUT ------
-
 @app.route('/login', methods=['POST'])
 def login():
     personal_id = request.json['id']
-    # user_exist = employee_DB.user_exist(personal_id)
-    user_exist = True
+    user_exist = employee_DB.user_exist(personal_id)
 
-    if user_exist:
+    if not user_exist:
+        return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
 
-        password = request.json['password']
-        # correct_password = employee_DB.check_password(personal_id, password)
-        correct_password = True
+    password = request.json['password']
+    correct_password = employee_DB.check_password(personal_id, password)
 
-        if correct_password:
-            access_token = create_access_token(identity=personal_id)
-            response = {"access_token": access_token}
-            return response
-
-        else:
-            return {'message', WRONG_PASSWORD}, STATUS_BAD_REQUEST
+    if correct_password:
+        access_token = create_access_token(identity=personal_id)
+        response = {"access_token": access_token}
+        return response, STATUS_OK
 
     else:
-        return {'message', USER_NOT_FOUND}, STATUS_BAD_REQUEST
+        return {'message': WRONG_PASSWORD}, STATUS_BAD_REQUEST
 
 
 @app.route('/logout')
+@login_required()
 def logout():
     revoke_jwt()
     return {}, STATUS_OK
 
 
-# ------ EMPLOYEE ------
-
-@app.route('/register/user', methods=['POST'])
+# ------ EMPLOYEE ENDPOINTS ------
+@app.route('/register', methods=['POST'])
 def signup():
-    
-    error = ''
-    # error = employee_DB.create(request.json)
 
-    # if error != '':
-    #     if error == ...:
-    #         ...
-    #     elif error == ...:
-    #         ...
+    message = employee_DB.create(request.json)
+
+    if message == USER_ALREADY_EXISTS:
+        return {'message': USER_ALREADY_EXISTS}, STATUS_BAD_REQUEST
+
+    elif message == DB_ERROR:
+        return {'message': DB_ERROR}, STATUS_BAD_REQUEST
 
     personal_id = request.json['id']
     access_token = create_access_token(identity=personal_id)
     body = {'access_token': access_token}
-    log(access_token)
-    # log(request)
-    # log(request.json)
     return body, STATUS_CREATED
 
 
-# @app.route('/register/check/id/<personal_id>')
-# def check_duplicated_user(personal_id):
-#     # personal_id_already_exists = employee_DB.user_exist(personal_id)
-#     personal_id_already_exists = ''
+@app.route('/get_user/<personal_id>', methods=['GET'])
+@login_required()
+def get_user(personal_id):
 
-#     if personal_id_already_exists:
-#         return '', STATUS_BAD_REQUEST
-
-#     return '', STATUS_OK
-
-
-@app.route('/get_user_inf', methods=['GET'])
-@login_required(optional=True)
-def get_user():
     # TODO
-    # field password be table e employee ezafe shavad
-    is_logged_in = check_is_logged_in()
-    if not is_logged_in:
-        return {}, STATUS_UNAUTHORIZED
+    # TO CHECK ACCESSIBILITY PERMISSION
+    # CHECK IF THE ONE WHO IS USING THIS ENDPOINT, IS THE CURRENT USER DELETUNG HIS ACCOUNT, OR IS THE ADMIN.
+    # OTHER WISE, DON'T PERMIT.
+    # PREREQ.: ADDING JWT TOKEN TO TABLE.
 
-    profile_data = {'id': 97243073,
-                    'password': 'qhuwerqh',
-                    'firstName': 'محمد',
-                    'lastName': 'هاشمی',
-                    'mobile': '09128108218',
-                    'email': 'sample@gmail.com',
-                    'committeeMember': True}
+    message = employee_DB.get_by_personal_id(personal_id)
+    if type(message) is int:
+        if message == NOT_FOUND:
+            return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
 
-    return profile_data, STATUS_OK
+        elif message == DB_ERROR:
+            return {'message': DB_ERROR}, STATUS_BAD_REQUEST
+
+    data = message
+    return data, STATUS_OK
 
 
-# ------ IDEA ------
+@app.route('/update_user', methods=['PATCH'])
+@login_required()
+def update_user():
 
+    # TODO
+    # TO CHECK ACCESSIBILITY PERMISSION
+    # CHECK IF THE ONE WHO IS USING THIS ENDPOINT, IS THE CURRENT USER DELETUNG HIS ACCOUNT.
+    # OTHER WISE, DON'T PERMIT.
+    # PREREQ.: ADDING JWT TOKEN TO TABLE.
+
+    message = employee_DB.update(request.json)
+
+    if message == NOT_FOUND:
+        return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
+
+    elif message == DB_ERROR:
+        return {'message': DB_ERROR}, STATUS_BAD_REQUEST
+
+    return {}, STATUS_OK
+
+
+@app.route('/delete_user/<personal_id>', methods=['DELETE'])
+@login_required()
+def delete_user(personal_id):
+
+    # TODO
+    # TO CHECK ACCESSIBILITY PERMISSION
+    # CHECK IF THE ONE WHO IS USING THIS ENDPOINT, IS THE CURRENT USER DELETUNG HIS ACCOUNT, OR IS THE ADMIN.
+    # OTHER WISE, DON'T PERMIT.
+    # PREREQ.: ADDING JWT TOKEN TO TABLE.
+
+    message = employee_DB.delete(personal_id)
+
+    if message == NOT_FOUND:
+        return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
+
+    elif message == DB_ERROR:
+        return {'message': DB_ERROR}, STATUS_BAD_REQUEST
+
+    return {}, STATUS_OK
+
+
+# ------ IDEA ENDPOINTS ------
 @app.route('/create_idea', methods=['POST'])
 @login_required()
 def create_idea():
 
-    error = ''
-    # error = idea_DB.create(request.json)
+    error = idea_DB.create(request.json)
 
     # CHECK MESSAGE FOR ERRORS
 
-    return '', STATUS_CREATED
+    return {}, STATUS_CREATED
 
 
 # @app.route('/get_idea/<int:idea_id>')
@@ -213,7 +190,7 @@ def get_idea(idea_id):
         return data
 
     else:   # some error is returned
-        return {'error': IDEA_NOT_FOUND}, STATUS_BAD_REQUEST
+        return {'error': NOT_FOUND}, STATUS_BAD_REQUEST
 
 
 
@@ -305,10 +282,109 @@ def dislike_idea(idea_id):
 # .
 
 
-# ---------------
+# ----------------------------------------------------------
+
+# ------ TEST ENDPOINTS ------
+@app.route('/test')
+def test():
+    return {}
 
 
-# ---------------
+@app.route('/test2')
+@login_required()
+def test2():
+    return {'message': 'user is logged in'}, STATUS_OK
+
+
+@app.route('/test3')
+@login_required(optional=True)
+def tets3():
+    get_identity = get_jwt_identity()
+    if get_identity:
+        return {'identity': get_identity}, STATUS_OK
+
+    else:
+        return {'identity': 'Anonymous'}, STATUS_OK
+
+
+# ------ TESTING DB / EMPLOYEE ------
+@app.route('/test_create')
+def _1():
+    data_dict = {
+        'firstName' : 'Ali',
+        'lastName' : 'Mo',
+        'personal_id' : '1234',
+        'password' : '1111',
+        'mobile' : '09121111111',
+        'email' : 'a@b.com',
+        'committeeMember' : 0,
+    }
+
+    data_json = json.dumps(data_dict)
+    message = employee_DB.create(data_json)
+    return 'message'
+
+
+@app.route('/test_get/<id>')
+def _2(id):
+    data = employee_DB.get_by_personal_id(id)
+    return data
+
+
+@app.route('/test_get_all')
+def _3():
+    data = employee_DB.get_all_employees()
+    return data
+
+
+@app.route('/test_update')
+def _4():
+    data_dict = {
+        'firstName' : 'Alireza',
+        'lastName' : 'Mohammadi',
+        'personal_id' : '9999',
+        'password' : '2222',
+        'mobile' : '09121111111',
+        'email' : 'a@b.com',
+        'committeeMember' : 0,
+    }
+
+    data_json = json.dumps(data_dict)
+    message = employee_DB.update(data_json)
+    return message
+
+
+@app.route('/test_delete/<id>')
+def _5(id):
+    message = employee_DB.delete(id)
+    return message
+
+
+@app.route('/test_clear')
+def _6():
+    message = employee_DB.clear_table()
+    return message
+
+
+# ------ TESTING DB / EMPLOYEE ------
+
+@app.route('/test_create_i')
+def _i1():
+    data_dict = {
+        'employeeId' : 9999,
+        'categoryId' : 12,
+        'title' : 'some title',
+        'text' : 'some text',
+        'costReduction' : 2000,
+        'time' : 0,
+        'status' : None,
+    }
+
+    data_json = json.dumps(data_dict)
+    message = employee_DB.create(data_json)
+    return 'message'
+
+# ----------------------------------------------------------
 
 @app.errorhandler(STATUS_NOT_FOUND)
 def not_found(error):
