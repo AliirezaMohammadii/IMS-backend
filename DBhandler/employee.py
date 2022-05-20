@@ -180,7 +180,8 @@ def check_password(personal_id, input_password):
 
     select_query = 'SELECT password FROM employee WHERE personal_id=?'
     cursor.execute(select_query, (personal_id,))
-    password = cursor.fetchone()
+    data = dict(cursor.fetchone())
+    password = data['password']
 
     if input_password == password:
          return_value = True

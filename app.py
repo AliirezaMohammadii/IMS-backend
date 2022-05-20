@@ -47,14 +47,14 @@ def refresh_expiring_jwts(response):
         return response
 
     except (RuntimeError, KeyError):
-        # this case is when there is not a valid JWT. Just return the original respone
+        # this case is when there is not a valid JWT. Just return the original response
         return response
 
 
 # ------ LOGIN/LOGOUT ------
 @app.route('/login', methods=['POST'])
 def login():
-    personal_id = request.json['id']
+    personal_id = request.json['personal_id']
     user_exist = employee_DB.user_exist(personal_id)
 
     if not user_exist:
@@ -72,7 +72,7 @@ def login():
         return {'message': WRONG_PASSWORD}, STATUS_BAD_REQUEST
 
 
-@app.route('/logout')
+@app.route('/logout', methods=['GET'])
 @login_required()
 def logout():
     revoke_jwt()
@@ -83,7 +83,14 @@ def logout():
 @app.route('/register', methods=['POST'])
 def signup():
 
-    message = employee_DB.create(request.json)
+    request_dict = request.json
+    request_dict['firstName'] = ""
+    request_dict['lastName'] = ""
+    request_dict['mobile'] = ""
+    request_dict['email'] = ""
+    request_dict['committeeMember'] = False
+    json_data = json.dumps(request_dict)
+    message = employee_DB.create(json_data)
 
     if message == USER_ALREADY_EXISTS:
         return {'message': USER_ALREADY_EXISTS}, STATUS_BAD_REQUEST
@@ -91,7 +98,7 @@ def signup():
     elif message == DB_ERROR:
         return {'message': DB_ERROR}, STATUS_BAD_REQUEST
 
-    personal_id = request.json['id']
+    personal_id = request.json['personal_id']
     access_token = create_access_token(identity=personal_id)
     body = {'access_token': access_token}
     return body, STATUS_CREATED
@@ -119,17 +126,18 @@ def get_user(personal_id):
     return data, STATUS_OK
 
 
-@app.route('/update_user', methods=['PATCH'])
+@app.route('/update_user', methods=['POST'])
 @login_required()
 def update_user():
 
     # TODO
     # TO CHECK ACCESSIBILITY PERMISSION
-    # CHECK IF THE ONE WHO IS USING THIS ENDPOINT, IS THE CURRENT USER DELETUNG HIS ACCOUNT.
+    # CHECK IF THE ONE WHO IS USING THIS ENDPOINT, IS THE CURRENT USER DELETING HIS ACCOUNT.
     # OTHER WISE, DON'T PERMIT.
     # PREREQ.: ADDING JWT TOKEN TO TABLE.
 
-    message = employee_DB.update(request.json)
+    json_data = json.dumps(request.json)
+    message = employee_DB.update(json_data)
 
     if message == NOT_FOUND:
         return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
