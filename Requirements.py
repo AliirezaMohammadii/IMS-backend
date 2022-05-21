@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 from flask_jwt_extended import create_access_token, get_jwt, get_jwt_identity
 import json
 from flask_jwt_extended import get_jwt_identity
+from hashlib import sha256
 
 
 ### ERROR MESSAGES
@@ -23,10 +24,22 @@ STATUS_UNAUTHORIZED = 401
 STATUS_FORBIDDEN    = 403
 STATUS_NOT_FOUND    = 404
 
+STATUS_INTERNAL_SERVER_ERROR = 500
+
 
 def log(to_print):
     print('#LOG -> ', end='')
     print(to_print)
+
+
+def hash_password(password):
+    hash_password = sha256(password.encode('utf-8')).hexdigest()
+    return hash_password
+
+
+def convert_to_json(data):
+    data = list(map(lambda x:dict(x), data))
+    return json.dumps(data, separators=(',', ':'))
 
 
 def update_jwt_if_expired(response):

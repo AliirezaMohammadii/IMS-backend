@@ -16,22 +16,24 @@ from Requirements import *
 def getEmployeeByPersonalId(personal_id, cursor):
     select_query = 'SELECT * FROM employee WHERE personal_id=?'
     cursor.execute(select_query, (personal_id,))
-    employees = cursor.fetchone()
-    return employees
+    employee = cursor.fetchone()
+    return employee
 
 
+# no need probably
 def getEmployeeByMobile(mobile, cursor):
     select_query = 'SELECT * FROM employee WHERE mobile=?'
     cursor.execute(select_query, (mobile,))
-    employees = cursor.fetchone()
-    return employees
+    employee = cursor.fetchone()
+    return employee
 
 
+# no need probably
 def getEmployeeByEmail(email, cursor):
     select_query = 'SELECT * FROM employee WHERE email=?'
     cursor.execute(select_query, (email,))
-    employees = cursor.fetchone()
-    return employees
+    employee = cursor.fetchone()
+    return employee
 
 
 def get_table_size(cursor):
@@ -40,24 +42,22 @@ def get_table_size(cursor):
     return len(results)
 
 
-def create(json_data):
+def create(data):
     db = get_db()
     cursor = db.cursor()
 
-    data = json.loads(json_data)
-    
     id = get_table_size(cursor)+1
-    password = data["password"]
-    personal_id = data["personal_id"]
-    firstName = data["firstName"]
-    lastName = data["lastName"]
-    mobile = data["mobile"]
-    email = data["email"]
-    committeeMember = data["committeeMember"]
+    hashed_password = hash_password(data["password"])
+    personal_id     = data["personal_id"]
+    firstName       = ""
+    lastName        = ""
+    mobile          = ""
+    email           = ""
+    committeeMember = False
    
     insert_query = 'INSERT INTO employee (id, firstName, lastName, personal_id, password, mobile , email , committeeMember) ' \
                    'VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-    fields = (id, firstName, lastName, personal_id, password, mobile, email, committeeMember)
+    fields = (id, firstName, lastName, personal_id, hashed_password, mobile, email, committeeMember)
 
     try:
         #check if employee already exists :
@@ -75,23 +75,22 @@ def create(json_data):
         return DB_ERROR
 
 
-def update(json_data):
+def update(data):
     db = get_db()
     cursor = db.cursor()
 
-    data = json.loads(json_data)
-    password = data["password"]
-    personal_id = data["personal_id"]
-    firstName = data["firstName"]
-    lastName = data["lastName"]
-    mobile = data["mobile"]
-    email = data["email"]
+    hashed_password = data["password"]
+    personal_id     = data["personal_id"]
+    firstName       = data["firstName"]
+    lastName        = data["lastName"]
+    mobile          = data["mobile"]
+    email           = data["email"]
     committeeMember = data["committeeMember"]
 
     update_query = 'UPDATE employee SET firstName =?, lastName =?, password =?, mobile  =? , email  =?, committeeMember =? ' \
                    'WHERE personal_id=?'
                    
-    fields = (firstName, lastName, password, mobile, email, committeeMember, personal_id)
+    fields = (firstName, lastName, hashed_password, mobile, email, committeeMember, personal_id)
 
     try:
         if getEmployeeByPersonalId(personal_id, cursor) is None:
@@ -132,7 +131,6 @@ def delete(personal_id):
 
 def get_by_personal_id(personal_id):
     db = get_db()
-    # db.row_factory = sqlite3.Row
     cursor = db.cursor()
 
     try:
@@ -153,12 +151,16 @@ def get_all_employees():
     db = get_db()
     cursor = db.cursor()
     select_query = 'SELECT * FROM employee'
-    cursor.execute(select_query)
-    employees = cursor.fetchall()
-    db.close()
 
-    employees = list(map(lambda x:dict(x), employees))
-    return json.dumps(employees, separators=(',', ':'))
+    try:
+        cursor.execute(select_query)
+        employees = cursor.fetchall()
+        close_db()
+        return convert_to_json(employees)
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
 
 
 def user_exist(personal_id):
@@ -166,11 +168,16 @@ def user_exist(personal_id):
     cursor = db.cursor()
     return_value = False
 
-    if getEmployeeByPersonalId(personal_id, cursor) is not None:
-        return_value = True
+    try:
+        if getEmployeeByPersonalId(personal_id, cursor) is not None:
+            return_value = True
 
-    close_db()
-    return return_value
+        close_db()
+        return return_value
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
 
 
 def check_password(personal_id, input_password):
@@ -179,15 +186,22 @@ def check_password(personal_id, input_password):
     return_value = False
 
     select_query = 'SELECT password FROM employee WHERE personal_id=?'
-    cursor.execute(select_query, (personal_id,))
-    data = dict(cursor.fetchone())
-    password = data['password']
 
-    if input_password == password:
-         return_value = True
+    try:
+        cursor.execute(select_query, (personal_id,))
+        data = dict(cursor.fetchone())
+        hashed_password = data['password']
 
-    close_db()
-    return return_value
+        if hash_password(input_password) == hashed_password:
+            return_value = True
+
+        close_db()
+        return return_value
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
 
 
 def clear_table():
@@ -198,4 +212,4 @@ def clear_table():
     db.commit()
     close_db()
 
-    return 'Has been cleared succesfully.'
+    return 'Employee table Has been cleared succesfully.'

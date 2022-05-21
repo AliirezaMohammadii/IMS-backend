@@ -1,4 +1,5 @@
 
+from email import message
 from flask import Flask, request, url_for, redirect
 from flask_cors import CORS
 from markupsafe import escape
@@ -75,7 +76,7 @@ def login():
 @app.route('/logout', methods=['GET'])
 @login_required()
 def logout():
-    revoke_jwt()
+    # revoke_jwt()
     return {}, STATUS_OK
 
 
@@ -83,20 +84,13 @@ def logout():
 @app.route('/register', methods=['POST'])
 def signup():
 
-    request_dict = request.json
-    request_dict['firstName'] = ""
-    request_dict['lastName'] = ""
-    request_dict['mobile'] = ""
-    request_dict['email'] = ""
-    request_dict['committeeMember'] = False
-    json_data = json.dumps(request_dict)
-    message = employee_DB.create(json_data)
+    message = employee_DB.create(request.json)
 
     if message == USER_ALREADY_EXISTS:
         return {'message': USER_ALREADY_EXISTS}, STATUS_BAD_REQUEST
 
     elif message == DB_ERROR:
-        return {'message': DB_ERROR}, STATUS_BAD_REQUEST
+        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
 
     personal_id = request.json['personal_id']
     access_token = create_access_token(identity=personal_id)
@@ -110,40 +104,40 @@ def get_user(personal_id):
 
     # TODO
     # TO CHECK ACCESSIBILITY PERMISSION
-    # CHECK IF THE ONE WHO IS USING THIS ENDPOINT, IS THE CURRENT USER DELETUNG HIS ACCOUNT, OR IS THE ADMIN.
-    # OTHER WISE, DON'T PERMIT.
+    # CHECK IF THE ONE WHO IS USING THIS ENDPOINT, IS THE CURRENT USER GETTING HIS INFORMATION, OR IS THE ADMIN.
+    # OTHERWISE, DON'T PERMIT.
     # PREREQ.: ADDING JWT TOKEN TO TABLE.
 
     message = employee_DB.get_by_personal_id(personal_id)
+
     if type(message) is int:
         if message == NOT_FOUND:
             return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
 
         elif message == DB_ERROR:
-            return {'message': DB_ERROR}, STATUS_BAD_REQUEST
+            return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
 
     data = message
     return data, STATUS_OK
 
 
-@app.route('/update_user', methods=['POST'])
+@app.route('/update_user', methods=['PATCH'])
 @login_required()
 def update_user():
 
     # TODO
     # TO CHECK ACCESSIBILITY PERMISSION
-    # CHECK IF THE ONE WHO IS USING THIS ENDPOINT, IS THE CURRENT USER DELETING HIS ACCOUNT.
-    # OTHER WISE, DON'T PERMIT.
+    # CHECK IF THE ONE WHO IS USING THIS ENDPOINT, IS THE CURRENT USER UPDATING HIS ACCOUNT.
+    # OTHERWISE, DON'T PERMIT.
     # PREREQ.: ADDING JWT TOKEN TO TABLE.
 
-    json_data = json.dumps(request.json)
-    message = employee_DB.update(json_data)
+    message = employee_DB.update(request.json)
 
     if message == NOT_FOUND:
         return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
 
     elif message == DB_ERROR:
-        return {'message': DB_ERROR}, STATUS_BAD_REQUEST
+        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
 
     return {}, STATUS_OK
 
@@ -155,7 +149,7 @@ def delete_user(personal_id):
     # TODO
     # TO CHECK ACCESSIBILITY PERMISSION
     # CHECK IF THE ONE WHO IS USING THIS ENDPOINT, IS THE CURRENT USER DELETUNG HIS ACCOUNT, OR IS THE ADMIN.
-    # OTHER WISE, DON'T PERMIT.
+    # OTHERWISE, DON'T PERMIT.
     # PREREQ.: ADDING JWT TOKEN TO TABLE.
 
     message = employee_DB.delete(personal_id)
@@ -164,7 +158,7 @@ def delete_user(personal_id):
         return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
 
     elif message == DB_ERROR:
-        return {'message': DB_ERROR}, STATUS_BAD_REQUEST
+        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
 
     return {}, STATUS_OK
 
@@ -173,116 +167,105 @@ def delete_user(personal_id):
 @app.route('/create_idea', methods=['POST'])
 @login_required()
 def create_idea():
+    message = idea_DB.create(request.json)
 
-    error = idea_DB.create(request.json)
-
-    # CHECK MESSAGE FOR ERRORS
+    if message == DB_ERROR:
+        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
 
     return {}, STATUS_CREATED
 
 
-# @app.route('/get_idea/<int:idea_id>')
-# def get_idea(idea_id):
-#     # data = idea_DB.get(idea_id)
-#     pass
-
-
-@app.route('/get_idea/<int:idea_id>')
+@app.route('/get_idea/<idea_id>')
 @login_required()
 def get_idea(idea_id):
+    message = idea_DB.getIdeaByID(idea_id)
 
-    data = ''
-    # data = idea_DB.get_idea(idea_id)
+    if type(message) is int:
+        if message == NOT_FOUND:
+            return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
 
-    if type(data) == dict:
-        return data
+        elif message == DB_ERROR:
+            return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
 
-    else:   # some error is returned
-        return {'error': NOT_FOUND}, STATUS_BAD_REQUEST
+    data = message
+    return data, STATUS_OK
 
 
-
-@app.route('/get_ideas/<pagination_id>')
+@app.route('/get_all_ideas/<pagination_id>')
 def get_ideas(pagination_id):
 
-    # ideas = idea_DB.get_ideas(pagination_id)     # send ideas in Timeline mode to backend.
-    ideas = [
-        {
-            'id'            : 0,    
-            'employeeId'    : 1,
-            'categoryId'    : 1,
-            'title'         : 'Title 1',
-            'text'          : 'Text 1',
-            'costReduction' : 10,    
-            'time'          : 0,
-            'status'        : 'pending'
-        },
-        {
-            'id'            : 1,    
-            'employeeId'    : 6,
-            'categoryId'    : 12,
-            'title'         : 'Title 2',
-            'text'          : 'Text 2',
-            'costReduction' : 55,    
-            'time'          : 1,
-            'status'        : 'rejected'
-        },
-    ]
-
+    ideas = idea_DB.getIdeas(pagination_id)
     return ideas, STATUS_OK
 
 
-@app.route('/update_idea', methods=['PATCH'])
+@app.route('/update_idea/<idea_id>', methods=['PATCH'])
 @login_required()
 def update_idea(idea_id):
 
-    permitted = True
-    # permitted = idea_DB.idea_is_for_user(..., idea_id)
-    if permitted:
-        # message = idea_DB.update(request.json)
+    employeeId = request.json['employeeId']
+    permitted = idea_DB.idea_is_for_user(employeeId, idea_id)
+    if not permitted:
+        return {}, STATUS_FORBIDDEN
 
-        # CHECK MESSAGE FOR ERRORS
+    message = idea_DB.update(request.json, idea_id)
 
-        return '', STATUS_OK
+    if message == NOT_FOUND:
+        return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
 
-    else:
-        return '', STATUS_FORBIDDEN
+    elif message == DB_ERROR:
+        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
+
+    return {}, STATUS_OK
 
 
 @app.route('/delete_idea/<int:idea_id>', methods=['DELETE'])
 @login_required()
 def delete_idea(idea_id):
 
-    permitted = True
-    # permitted = idea_DB.idea_is_for_user(session['personal_id'], idea_id)
-    if permitted:
-        # message = idea_DB.delete(idea_id)
+    employeeId = request.json['employeeId']
+    permitted = idea_DB.idea_is_for_user(employeeId, idea_id)
+    if not permitted:
+        return {}, STATUS_FORBIDDEN
 
-        # CHECK MESSAGE FOR ERRORS
-        return '', STATUS_OK
+    message = idea_DB.delete(idea_id)
 
-    else:
-        return '', STATUS_FORBIDDEN
+    if message == NOT_FOUND:
+        return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
+
+    elif message == DB_ERROR:
+        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
+
+    return {}, STATUS_OK
 
 
-@app.route('/like_idea/<int:idea_id>', methods=['POST'])
+@app.route('/like_idea/<idea_id>', methods=['POST'])
 @login_required()
 def like_idea(idea_id):
 
-    # message = idea_DB.like_idea(idea_id)
-    # example error: idea not found. For whenever request is made and sent directly by user, not web browser.
+    message = idea_DB.like_idea(idea_id)
 
-    return '', STATUS_OK
+    if message == NOT_FOUND:
+        return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
+
+    elif message == DB_ERROR:
+        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
+
+    return {}, STATUS_OK
 
 
-@app.route('/dislike_idea/<int:idea_id>', methods=['POST'])
+@app.route('/dislike_idea/<idea_id>', methods=['POST'])
 @login_required()
 def dislike_idea(idea_id):
 
-    # message = idea_DB.dislike_idea(idea_id)
-    # example error: idea not found. For whenever request is made and sent directly by user, not web browser.
+    message = idea_DB.dislike_idea(idea_id)
 
-    return '', STATUS_OK
+    if message == NOT_FOUND:
+        return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
+
+    elif message == DB_ERROR:
+        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
+
+    return {}, STATUS_OK
 
 
 # .
@@ -328,21 +311,20 @@ def _1():
         'committeeMember' : 0,
     }
 
-    data_json = json.dumps(data_dict)
-    message = employee_DB.create(data_json)
-    return 'message'
+    message = employee_DB.create(data_dict)
+    return str(message)
 
 
 @app.route('/test_get/<id>')
 def _2(id):
     data = employee_DB.get_by_personal_id(id)
-    return data
+    return str(data)
 
 
 @app.route('/test_get_all')
 def _3():
     data = employee_DB.get_all_employees()
-    return data
+    return str(data)
 
 
 @app.route('/test_update')
@@ -357,40 +339,56 @@ def _4():
         'committeeMember' : 0,
     }
 
-    data_json = json.dumps(data_dict)
-    message = employee_DB.update(data_json)
-    return message
+    message = employee_DB.update(data_dict)
+    return str(message)
 
 
 @app.route('/test_delete/<id>')
 def _5(id):
     message = employee_DB.delete(id)
-    return message
+    return str(message)
 
 
 @app.route('/test_clear')
 def _6():
     message = employee_DB.clear_table()
-    return message
+    return str(message)
 
 
 # ------ TESTING DB / EMPLOYEE ------
 
-@app.route('/test_create_i')
+@app.route('/test_create_idea')
 def _i1():
     data_dict = {
-        'employeeId' : 9999,
-        'categoryId' : 12,
-        'title' : 'some title',
-        'text' : 'some text',
-        'costReduction' : 2000,
-        'time' : 0,
-        'status' : None,
+        'employeeId' : 9,
+        'categoryId' : 26,
+        'title' : 'some title 2',
+        'text' : 'some text 2',
     }
 
-    data_json = json.dumps(data_dict)
-    message = employee_DB.create(data_json)
-    return 'message'
+    message = idea_DB.create(data_dict)
+    return str(message)
+
+
+@app.route('/test_get_idea/<id>')
+def _i2(id):
+
+    data = idea_DB.getIdeaByID(id)
+    return str(data)
+
+
+@app.route('/test_clear_idea')
+def _i3():
+
+    data = idea_DB.clear_table()
+    return str(data)
+
+
+@app.route('/test_get_user_ideas/<personal_id>')
+def _i4(personal_id):
+
+    data = idea_DB.getIdeaByEmployeePersonalId(personal_id)
+    return str(data)
 
 # ----------------------------------------------------------
 

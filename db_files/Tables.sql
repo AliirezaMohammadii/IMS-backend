@@ -23,7 +23,7 @@ CREATE TABLE idea (
   text TEXT NOT NULL,
   costReduction FLOAT NULL ,
   time DATETIME NOT NULL,
-  status TEXT CHECK( status IN ('NotChecked','Pending','Accepted' , 'Rejected' , 'Implemented') )  NOT NULL ,
+  status TEXT CHECK( status IN ('NotChecked', 'Pending', 'Accepted', 'Rejected', 'Implemented') )  NOT NULL ,
   PRIMARY KEY (id),
   FOREIGN KEY (categoryId) REFERENCES ideaCategory(id),
   FOREIGN KEY (employeeId) REFERENCES employee(id)

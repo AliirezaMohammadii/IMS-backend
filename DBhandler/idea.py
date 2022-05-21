@@ -1,7 +1,7 @@
 import json
 import re
 import sys
-import datetime
+from datetime import datetime
 
 # windows
 sys.path.insert(0, 'C://Users//asus//Desktop//Uni//SW Eng//Project//project files//venv//IMS//backend//DBhandler')
@@ -21,25 +21,45 @@ def get_table_size(cursor):
     return len(results)
 
 
-def create(json_data):
+def getIdeaByID(id):
     db = get_db()
     cursor = db.cursor()
 
-    data = json.loads(json_data)
-    id = get_table_size(cursor) +1
-    employeeId = data["employeeId"]
-    categoryId = data["categoryId"]
-    title = data["title"]
-    text = data["text"]
-    costReduction = data["costReduction"]
-    time = datetime.datetime.now()
-    status = ideaStatus.NotChecked
-    insert_query = 'INSERT INTO idea (id,employeeId,categoryId, title,text,costReduction,time, status) ' \
+    select_query = 'SELECT * FROM idea WHERE id=?'
+    cursor.execute(select_query, (id,))
+    idea = cursor.fetchone()
+    close_db()
+
+    try:
+        if idea is None:
+            return NOT_FOUND
+
+        idea_row_dict = dict(idea)
+        return json.dumps(idea_row_dict)
+
+    except sqlite3.Error:
+        close_db()
+        return DB_ERROR
+
+
+def create(data):
+    db = get_db()
+    cursor = db.cursor()
+
+    id              = get_table_size(cursor) +1
+    employeeId      = data["employeeId"]
+    categoryId      = data["categoryId"]
+    title           = data["title"]
+    text            = data["text"]
+    costReduction   = 0.0
+    time            = datetime.now()
+    status          = "NotChecked"
+
+    insert_query = 'INSERT INTO idea (id, employeeId, categoryId, title, text, costReduction, time, status) ' \
                    'VALUES (?,?,?,?,?,?,?,?)'
     fields = (id, employeeId, categoryId, title, text, costReduction, time, status)
 
     try:
-        # insert into db:
         cursor.execute(insert_query, fields)
         db.commit()
         close_db()
@@ -50,26 +70,26 @@ def create(json_data):
         return DB_ERROR
 
 
-def update(json_data, id):
+def update(data, id):
     db = get_db()
     cursor = db.cursor()
     
-    data = json.loads(json_data)
-   
-    employeeId = data["employeeId"]
-    categoryId = data["categoryId"]
-    title = data["title"]
-    text = data["text"]
-    costReduction = data["costReduction"]
-    time = data["time"]
-    status = ideaStatus.NotChecked
+    employeeId      = data["employeeId"]
+    categoryId      = data["categoryId"]
+    title           = data["title"]
+    text            = data["text"]
+    costReduction   = data["costReduction"]
+    time            = data["time"]
+    status          = data["status"]
     
     update_query = 'UPDATE idea SET employeeId=?,categoryId=?, title=?,text=?,costReduction=?,time=?, status=?' \
                    'WHERE id=?'
     fields = (employeeId,categoryId, title,text,costReduction,time, status , id)
 
     try:
-        # update db:
+        if getIdeaByID(id) == NOT_FOUND:
+            return NOT_FOUND
+
         cursor.execute(update_query, fields)
         db.commit()
         close_db()
@@ -79,6 +99,7 @@ def update(json_data, id):
         close_db()
         return DB_ERROR
 
+
 def delete(id):
     db = get_db()
     cursor = db.cursor()
@@ -87,6 +108,10 @@ def delete(id):
     fields = (id,)
 
     try:
+
+        if getIdeaByID(id) == NOT_FOUND:
+            return NOT_FOUND
+
         cursor.execute(query, fields)
         db.commit()
         close_db()
@@ -97,49 +122,107 @@ def delete(id):
         return DB_ERROR
 
 
-def getIdeaByID(id, cursor):
-    select_query = 'SELECT * FROM idea WHERE id=?'
-    cursor.execute(select_query, (id,))
-    idea = cursor.fetchall()
-    return idea
+def getIdeaByEmployeePersonalId(personal_id):
+    db = get_db()
+    cursor = db.cursor()
 
-
-def getIdeaByEmployeeUsername(personal_id, cursor):
-    select_query = 'SELECT * FROM idea INNER JOIN BY employee  ' \
+    select_query = 'SELECT * FROM idea INNER JOIN employee  ' \
                     'ON idea.employeeId = employee.id ' \
                     'WHERE employee.personal_id=?' \
                     'ORDER BY idea.time DESC'
 
-    cursor.execute(select_query, (personal_id,))
-    ideas = cursor.fetchall()
-    return ideas
+    try:
+        cursor.execute(select_query, (personal_id,))
+        ideas = cursor.fetchall()
+        close_db()
+        return convert_to_json(ideas)
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
 
 
-def getIdeas(cursor):
+# TODO
+# pagination_id must be handled
+def getIdeas(pagination_id):
+    db = get_db()
+    cursor = db.cursor()
+
     select_query = 'SELECT idea.* , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes'\
         'FROM idea'\
         'ORDER BY idea.time DESC'
-    cursor.execute(select_query)
-    ideasWithVotes = cursor.fetchall()
-    return ideasWithVotes
+
+    try:
+        cursor.execute(select_query)
+        ideasWithVotes = cursor.fetchall()
+        close_db()
+        return convert_to_json(ideasWithVotes)
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
 
 
-def getIdeaVotes(id, cursor):
+def getIdeaVotes(id):
+    db = get_db()
+    cursor = db.cursor()
+
     select_query = 'SELECT idea.* , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes'\
         'FROM idea'\
             'WHERE idea.id=?'
-    cursor.execute(select_query, (id,))
-    ideaWithVotes = cursor.fetchall()
-    return ideaWithVotes
+
+    try:
+        cursor.execute(select_query, (id,))
+        ideaWithVotes = cursor.fetchall()
+        close_db()
+        return convert_to_json(ideaWithVotes)
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
 
 
-def getIdeasByIdeaCategoryID(id, cursor):
+def getIdeasByIdeaCategoryID(id):
+    db = get_db()
+    cursor = db.cursor()
+    
     select_query = 'SELECT idea.* , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes'\
         'FROM idea WHERE idea.categoryId =?'\
         'ORDER BY idea.time DESC'
-    cursor.execute(select_query, (id,))
-    ideasWithVotesByCategory = cursor.fetchall()
-    return ideasWithVotesByCategory
+
+    try:
+        cursor.execute(select_query, (id,))
+        ideasWithVotesByCategory = cursor.fetchall()
+        close_db()
+        return convert_to_json(ideasWithVotesByCategory)
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
+
+# TODO
+def idea_is_for_user(employeeId, idea_id):
+    return True
+
+# TODO
+def like_idea(id):
+    return MESSAGE_OK
+
+# TODO
+def dislike_idea(id):
+    return MESSAGE_OK
+
+
+def clear_table():
+    db = get_db()
+    cursor = db.cursor()
+    query = 'DELETE FROM idea'
+    cursor.execute(query)
+    db.commit()
+    close_db()
+
+    return 'Idea table Has been cleared succesfully.'
 
 
 # to do : search by title
