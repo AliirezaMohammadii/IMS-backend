@@ -9,6 +9,8 @@ sys.path.insert(0, 'C://Users//asus//Desktop//Uni//SW Eng//Project//project file
 # macOs
 sys.path.insert(0, '/Users/mohammad/Documents/Github/IMS-backend/DBhandler')
 sys.path.insert(0, '/Users/narges/Documents/GitHub/IMS-backend/DBhandler')
+sys.path.insert(0, '/Users/mohammad/Documents/Github/IMS-backend')
+sys.path.insert(0, '/Users/narges/Documents/GitHub/IMS-backend')
 
 from db import *
 from Requirements import *
@@ -46,7 +48,7 @@ def create(data):
     db = get_db()
     cursor = db.cursor()
 
-    id              = get_table_size(cursor) +1
+    id              = get_table_size(cursor) + 1
     employeeId      = data["employeeId"]
     categoryId      = data["categoryId"]
     title           = data["title"]
@@ -212,6 +214,22 @@ def like_idea(id):
 # TODO
 def dislike_idea(id):
     return MESSAGE_OK
+
+
+def get_all_ideas():
+    db = get_db()
+    cursor = db.cursor()
+    select_query = 'SELECT * FROM idea'
+
+    try:
+        cursor.execute(select_query)
+        ideas = cursor.fetchall()
+        close_db()
+        return convert_to_json(ideas)
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
 
 
 def clear_table():

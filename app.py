@@ -20,6 +20,7 @@ from DBhandler import db
 from DBhandler import employee as employee_DB
 from DBhandler import idea as idea_DB
 from DBhandler import ideaVote as ideaVote_DB
+from DBhandler import ideaCategory as ideaCategory_DB
 from DBhandler import comment as comment_DB
 from DBhandler import commentVote as commentVote_DB
 from DBhandler import committeeScoreHeader as committeeScoreHeader_DB
@@ -191,6 +192,12 @@ def get_idea(idea_id):
     return data, STATUS_OK
 
 
+@app.route('/get_user_ideas/<personal_id>')
+def get_user_ideas(personal_id):
+    data = idea_DB.getIdeaByEmployeePersonalId(personal_id)
+    return str(data)
+
+
 @app.route('/get_all_ideas/<pagination_id>')
 def get_ideas(pagination_id):
 
@@ -268,6 +275,24 @@ def dislike_idea(idea_id):
     return {}, STATUS_OK
 
 
+# ------ IDEA_CATEGORY ENDPOINTS ------
+
+@app.route('/create_idea_cat', methods=['POST'])
+def create_idea_cat():
+    message = ideaCategory_DB.create(request.json)
+
+    if message == DB_ERROR:
+        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
+
+    return {}, STATUS_CREATED
+
+
+@app.route('/get_idea_cats')
+def get_idea_cats():
+    idea_categories = ideaCategory_DB.get_all_categories()
+    return idea_categories
+
+
 # .
 # .
 # .
@@ -302,22 +327,17 @@ def tets3():
 @app.route('/test_create')
 def _1():
     data_dict = {
-        'firstName' : 'Ali',
-        'lastName' : 'Mo',
         'personal_id' : '1234',
         'password' : '1111',
-        'mobile' : '09121111111',
-        'email' : 'a@b.com',
-        'committeeMember' : 0,
     }
 
     message = employee_DB.create(data_dict)
     return str(message)
 
 
-@app.route('/test_get/<id>')
-def _2(id):
-    data = employee_DB.get_by_personal_id(id)
+@app.route('/test_get/<personal_id>')
+def _2(personal_id):
+    data = employee_DB.get_by_personal_id(personal_id)
     return str(data)
 
 
@@ -355,15 +375,15 @@ def _6():
     return str(message)
 
 
-# ------ TESTING DB / EMPLOYEE ------
+# ------ TESTING DB / IDEA ------
 
 @app.route('/test_create_idea')
 def _i1():
     data_dict = {
-        'employeeId' : 9,
-        'categoryId' : 26,
-        'title' : 'some title 2',
-        'text' : 'some text 2',
+        'employeeId' : 2,
+        'categoryId' : 3,
+        'title' : 'some title 3',
+        'text' : 'some text 3',
     }
 
     message = idea_DB.create(data_dict)
@@ -389,6 +409,35 @@ def _i4(personal_id):
 
     data = idea_DB.getIdeaByEmployeePersonalId(personal_id)
     return str(data)
+
+
+@app.route('/test_get_all_ideas')
+def _i5():
+
+    data = idea_DB.get_all_ideas()
+    return str(data)
+
+
+# ------ TESTING DB / IDEA CATEGORY ------
+@app.route('/test_create_idea_cats')
+def _ic1():
+    idea_cat1 = {'title': '---'}
+    idea_cat2 = {'title': 'آموزشی'}
+    idea_cat3 = {'title': 'خدمات رفاهی'}
+    idea_cat4 = {'title': 'خدمات انسانی'}
+
+    ideaCategory_DB.create(idea_cat1)
+    ideaCategory_DB.create(idea_cat2)
+    ideaCategory_DB.create(idea_cat3)
+    ideaCategory_DB.create(idea_cat4)
+    return str(STATUS_CREATED)
+
+
+@app.route('/test_clear_idea_cat_table')
+def _ic3():
+    message = ideaCategory_DB.clear_table()
+    return message
+
 
 # ----------------------------------------------------------
 

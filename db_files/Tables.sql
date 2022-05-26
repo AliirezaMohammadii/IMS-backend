@@ -9,9 +9,7 @@ CREATE TABLE employee (
   mobile VARCHAR(15) NULL,
   email VARCHAR(50) NULL,
   committeeMember INTEGER NOT NULL
-  
 );
-
 
 
 DROP TABLE IF EXISTS idea;
@@ -41,7 +39,6 @@ CREATE TABLE ideaVote (
   FOREIGN KEY (employeeId) REFERENCES employee(id),
   FOREIGN KEY (ideaId) REFERENCES idea(id)
 );
-
 
 
 
@@ -97,7 +94,6 @@ CREATE TABLE committeeScoreHeader (
 );
 
 
-
 DROP TABLE IF EXISTS evaluationCriteria;
 CREATE TABLE evaluationCriteria (
   id INTEGER NOT NULL PRIMARY KEY,
@@ -105,13 +101,13 @@ CREATE TABLE evaluationCriteria (
   weight FLOAT NOT NULL 
 );
 
+
 DROP TABLE IF EXISTS ideaCategory;
 CREATE TABLE ideaCategory (
   id INTEGER NOT NULL PRIMARY KEY ,
   title TEXT NOT NULL
   
 );
-
 
 
 DROP TABLE IF EXISTS committeeScoreDetail;
