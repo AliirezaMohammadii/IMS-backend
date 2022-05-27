@@ -122,7 +122,7 @@ def get_user(personal_id):
     return data, STATUS_OK
 
 
-@app.route('/update_user', methods=['PATCH'])
+@app.route('/update_user', methods=['POST'])
 @login_required()
 def update_user():
 
@@ -288,6 +288,7 @@ def create_idea_cat():
 
 
 @app.route('/get_idea_cats')
+@login_required()
 def get_idea_cats():
     idea_categories = ideaCategory_DB.get_all_categories()
     return idea_categories
@@ -412,6 +413,7 @@ def _i4(personal_id):
 
 
 @app.route('/test_get_all_ideas')
+@login_required()
 def _i5():
 
     data = idea_DB.get_all_ideas()
