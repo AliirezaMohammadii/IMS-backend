@@ -219,7 +219,9 @@ def dislike_idea(id):
 def get_all_ideas():
     db = get_db()
     cursor = db.cursor()
-    select_query = 'SELECT * FROM idea'
+    select_query = 'SELECT * FROM idea INNER JOIN employee  ' \
+                    'ON idea.employeeId = employee.id ' \
+                    'ORDER BY idea.time DESC'
 
     try:
         cursor.execute(select_query)

@@ -328,7 +328,7 @@ def tets3():
 @app.route('/test_create')
 def _1():
     data_dict = {
-        'personal_id' : '1234',
+        'personal_id' : '12345',
         'password' : '1111',
     }
 
@@ -381,10 +381,10 @@ def _6():
 @app.route('/test_create_idea')
 def _i1():
     data_dict = {
-        'employeeId' : 2,
-        'categoryId' : 3,
-        'title' : 'some title 3',
-        'text' : 'some text 3',
+        'employeeId' : 1,
+        'categoryId' : 5,
+        'title' : 'some title 5',
+        'text' : 'some text 5',
     }
 
     message = idea_DB.create(data_dict)
