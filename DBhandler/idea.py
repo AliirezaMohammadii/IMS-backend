@@ -15,7 +15,7 @@ sys.path.insert(0, '/Users/narges/Documents/GitHub/IMS-backend')
 from db import *
 from Requirements import *
 from ideaStatus import *
-
+from DBhandler import employee as employee_DB
 
 def get_table_size(cursor):
     cursor.execute("select * from idea")
@@ -45,11 +45,11 @@ def getIdeaByID(id):
 
 
 def create(data):
+    employeeId = json.loads(employee_DB.get_by_personal_id(personal_id=data["personal_id"]))["id"]
     db = get_db()
     cursor = db.cursor()
 
     id              = get_table_size(cursor) + 1
-    employeeId      = data["employeeId"]
     categoryId      = data["categoryId"]
     title           = data["title"]
     text            = data["text"]
@@ -67,7 +67,7 @@ def create(data):
         close_db()
         return MESSAGE_OK
 
-    except sqlite3.Error:  
+    except sqlite3.Error:
         close_db()
         return DB_ERROR
 
