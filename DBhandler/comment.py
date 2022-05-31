@@ -12,11 +12,10 @@ sys.path.insert(0, '/Users/narges/Documents/GitHub/IMS-backend/DBhandler')
 from db import *
 
 
-def create(json):
+def create(data):
     db = get_db()
     cursor = db.cursor()
 
-    data = json.loads(json)
     id = get_table_size(cursor) +1
     employeeId = data["employeeId"]
     ideaId = data["ideaId"]
@@ -42,12 +41,10 @@ def create(json):
 
 
 
-def update(json,id):
+def update(data):
     db = get_db()
     cursor = db.cursor()
     
-    data = json.loads(json)
-
 
     employeeId = data["employeeId"]
     ideaId = data["ideaId"]
@@ -63,13 +60,11 @@ def update(json,id):
         cursor.execute(update_query, fields)
         db.commit()
         close_db()
-        response = "comment update successfully."
-        return response
+        return MESSAGE_OK
 
     except sqlite3.Error:  
         close_db()
-        response = "SQlite Error - comment update Failed"
-        return None
+        return DB_ERROR
 
 
 def delete(id):
@@ -85,13 +80,11 @@ def delete(id):
         db.commit()
         close_db()
 
-        response = "comment deleted successfully"
-        return response
+        return MESSAGE_OK
 
     except sqlite3.Error:
         close_db()
-        response = "SQlite Error - Failed to comment idea"
-        return None
+        return DB_ERROR
 
 
 def getCommentByID(id):
@@ -113,9 +106,9 @@ def get_table_size():
 
 def getCommentsByIdeaID(id):  # Get an idea comments with votes for each comment and information about the employee who submitted the comment
     select_query = 'SELECT *,(SELECT COUNT(*) FROM commentVote where comment.id=commentVote.commentId and commentVote.type=1) as upVotes, (SELECT COUNT(*) FROM commentVote where comment.id=commentVote.commentId and commentVote.type=0) as downVotes '\
-                    'FROM idea INNER JOIN BY comment  ' \
+                    'FROM idea INNER JOIN  comment  ' \
                     'ON idea.id = comment.ideaId  ' \
-                    'INNER JOIN BY employee  ' \
+                    'INNER JOIN employee  ' \
                     'ON employee.id = comment.employeeId  ' \
                     'WHERE idea.id=? ' \
                     'ORDER BY comment.time DESC'

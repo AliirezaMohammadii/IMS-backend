@@ -2,19 +2,25 @@ import json
 import re
 import sys
 import datetime
+
 # windows
 sys.path.insert(0, 'C://Users//asus//Desktop//Uni//SW Eng//Project//project files//venv//IMS//backend//DBhandler')
+sys.path.insert(0, 'C://Users//asus//Desktop//Uni//SW Eng//Project//project files//venv//IMS//backend')
 # macOs
 sys.path.insert(0, '/Users/mohammad/Documents/Github/IMS-backend/DBhandler')
 sys.path.insert(0, '/Users/narges/Documents/GitHub/IMS-backend/DBhandler')
+sys.path.insert(0, '/Users/mohammad/Documents/Github/IMS-backend')
+sys.path.insert(0, '/Users/narges/Documents/GitHub/IMS-backend')
+
+
+
 from db import *
 
 
-def create(json):
+def create(data):
     db = get_db()
     cursor = db.cursor()
 
-    data = json.loads(json)
     id = get_table_size(cursor) +1
     employeeId = data["employeeId"]
     commentId = data["commentId"]
@@ -30,21 +36,17 @@ def create(json):
         cursor.execute(insert_query, fields)
         db.commit()
         close_db()
-        response = "commentVote insert successfully."
-        return response
+        return MESSAGE_OK
 
     except sqlite3.Error:  
         close_db()
-        response = "SQlite Error - commentVote insert Failed"
-        return None
+        return DB_ERROR
 
 
 
-def update(json,id, changeVote= False): 
+def update(data, id): 
     db = get_db()
     cursor = db.cursor()
-    
-    data = json.loads(json)
 
 
     employeeId = data["employeeId"]
@@ -57,25 +59,21 @@ def update(json,id, changeVote= False):
     fields = (employeeId, commentId,type,time , id)
     try:
         res = getCommentVoteByEmployeeComment(employeeId, commentId)
-        if len(res)==0:
-            response = "commentVote does not exist with this (employeeId, commentId)"
-            return response
-        if changeVote  and type ==res['type'] : # double upvotes ==> No vote  # double downvotes ==> No vote 
+        if res in None :
+            return NOT_FOUND
+        if   type ==res['type'] : # double upvotes ==> No vote  # double downvotes ==> No vote 
             delete(id)
-            response = "commentVote deleted"
-            return response
+            return MESSAGE_OK
             
         # update db:
         cursor.execute(update_query, fields)
         db.commit()
         close_db()
-        response = "commentVote update successfully."
-        return response
+        return MESSAGE_OK
 
     except sqlite3.Error:  
         close_db()
-        response = "SQlite Error - commentVote update Failed"
-        return None
+        return DB_ERROR
 
 def delete(id):
     db = get_db()
@@ -83,20 +81,19 @@ def delete(id):
 
     query = 'DELETE commentVote WHERE id=?'
     fields = (id,)
-
+    if getCommentVoteByID(id) is None:
+            return NOT_FOUND
     try:
 
         cursor.execute(query, fields)
         db.commit()
         close_db()
 
-        response = "commentVote deleted successfully"
-        return response
+        return MESSAGE_OK
 
     except sqlite3.Error:
         close_db()
-        response = "SQlite Error - Failed to delete commentVote"
-        return None
+        return DB_ERROR
 
 def delete(personal_id , commentId):
     db = get_db()
@@ -109,20 +106,20 @@ def delete(personal_id , commentId):
             '(SELECT emplyee.id from employee WHERE employee.personal_id=?)'
             
     fields = (commentId,personal_id, )
-
+    if getCommentVoteByEmployeePersonalIDCommentID(personal_id, commentID) is None:
+        return NOT_FOUND
     try:
 
         cursor.execute(query, fields)
         db.commit()
         close_db()
 
-        response = "commentVote deleted successfully"
-        return response
+        return MESSAGE_OK
 
     except sqlite3.Error:
         close_db()
         response = "SQlite Error - Failed to delete commentVote"
-        return None
+        return DB_ERROR
 
 
 def getCommentVoteByID(id):
@@ -135,7 +132,7 @@ def getCommentVoteByEmployeeComment(employeeID , commentID):
     db = get_db()
     cursor = db.cursor()
 
-    select_query = 'SELECT * commentVote INNER JOIN BY comment '\
+    select_query = 'SELECT * commentVote INNER JOIN comment '\
             'ON  commentVote.commentId= comment.id INNER JOIN employee '\
             'ON commentVote.employeeId = employee.id'\
             'WHERE commentVote.employeeId=? AND commentVote.commentId=?'
@@ -144,7 +141,20 @@ def getCommentVoteByEmployeeComment(employeeID , commentID):
     cursor.execute(select_query, fields)
     commentVote = cursor.fetchone()
     return commentVote
+def getCommentVoteByEmployeePersonalIDCommentID(personalID , commentID):
+    db = get_db()
+    cursor = db.cursor()
 
+    select_query = 'SELECT * commentVote INNER JOIN comment '\
+            'ON  commentVote.commentId= comment.id INNER JOIN employee '\
+            'ON commentVote.employeeId = employee.id'\
+            'WHERE employee.personal_id=? AND commentVote.commentId=?'
+            
+    fields = (personalID,commentID, )
+    cursor.execute(select_query, fields)
+    commentVote = cursor.fetchone()
+    return commentVote
+    
 def get_table_size():
     db = get_db()
     cursor = db.cursor()

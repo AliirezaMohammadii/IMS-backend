@@ -33,6 +33,8 @@ def create(data):
     fields = (id, title)
 
     try:
+        if getIdeaCategoryByTitle(title, cursor) is not None:
+            return CATEGORY_ALREADY_EXISTS
         cursor.execute(insert_query, fields)
         db.commit()
         close_db()
@@ -55,6 +57,8 @@ def update(data, id):
     fields = (title , id)
 
     try:
+        if getIdeaCategoryByID(id , cursor ) is NONE:
+            return NOT_FOUND
         cursor.execute(update_query, fields)
         db.commit()
         close_db()
@@ -82,12 +86,17 @@ def get_all_categories():
         return DB_ERROR
 
 
-def getIdeaCategoryByID(cursor, id):
+def getIdeaCategoryByID(id,cursor):
     select_query = 'SELECT * FROM ideaCategory WHERE id=?'
     cursor.execute(select_query, (id,))
     ideaCategory = cursor.fetchall()
     return ideaCategory
 
+def getIdeaCategoryByTitle(title, cursor):
+    select_query = 'SELECT * FROM ideaCategory WHERE title=?'
+    cursor.execute(select_query, (title,))
+    ideaCategory = cursor.fetchall()
+    return ideaCategory
 
 def clear_table():
     db = get_db()

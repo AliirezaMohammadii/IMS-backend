@@ -10,11 +10,10 @@ sys.path.insert(0, '/Users/narges/Documents/GitHub/IMS-backend/DBhandler')
 from db import *
 
 
-def create(json):
+def create(data):
     db = get_db()
     cursor = db.cursor()
 
-    data = json.loads(json)
     id = get_table_size(cursor) +1
     title = data["title"]
     weight = data["weight"]
@@ -37,11 +36,11 @@ def create(json):
 
 
 
-def update(json,id):
+def update(data):
     db = get_db()
     cursor = db.cursor()
     
-    data = json.loads(json)
+
     title = data["title"]
     weight = data["weight"]
     update_query = 'UPDATE evaluationCriteria SET title =?, weight =?' \
@@ -53,13 +52,11 @@ def update(json,id):
         cursor.execute(update_query, fields)
         db.commit()
         close_db()
-        response = "evaluationCriteria insert successfully."
-        return response
+        return MESSAGE_OK
 
     except sqlite3.Error:  
         close_db()
-        response = "SQlite Error - evaluationCriteria insert Failed"
-        return None
+        return DB_ERROR
 
 
 

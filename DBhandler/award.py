@@ -9,11 +9,10 @@ sys.path.insert(0, '/Users/narges/Documents/GitHub/IMS-backend/DBhandler')
 from db import *
 
 
-def create(json):
+def create(data):
     db = get_db()
     cursor = db.cursor()
 
-    data = json.loads(json)
     id = get_table_size(cursor) +1
     employeeId = data["employeeId"]
     ideaId = data["ideaId"]
@@ -40,12 +39,10 @@ def create(json):
 
 
 
-def update(json,id):
+def update(data):
     db = get_db()
     cursor = db.cursor()
-    
-    data = json.loads(json)
-    
+        
     employeeId = data["employeeId"]
     ideaId = data["ideaId"]
     type = data["type"]
@@ -81,24 +78,22 @@ def delete(id):
         db.commit()
         close_db()
 
-        response = "award deleted successfully"
-        return response
+        return MESSAGE_OK
 
     except sqlite3.Error:
         close_db()
-        response = "SQlite Error - Failed to delete award"
-        return None
+        return DB_ERROR
 
 
 
 def getAwardByUsername(personal_id):  # Awards received by an employee.
-    select_query = 'SELECT * FROM award INNER JOIN BY employee ON employee.id = award.employeeId WHERE employee.personal_id=?'
+    select_query = 'SELECT * FROM award INNER JOIN employee ON employee.id = award.employeeId WHERE employee.personal_id=?'
     cursor.execute(select_query, (personal_id,))
     employeeAward = cursor.fetchall()
     return employeeAward
 
 def getAwards():    # All awards given so far.
-    select_query = 'SELECT * FROM award INNER JOIN BY employee ON employee.id = award.employeeId'
+    select_query = 'SELECT * FROM award INNER JOIN employee ON employee.id = award.employeeId'
     cursor.execute(select_query)
     awards = cursor.fetchall()
     return awards

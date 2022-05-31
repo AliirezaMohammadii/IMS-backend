@@ -123,15 +123,17 @@ def delete(id):
         close_db()
         return DB_ERROR
 
-
+# get an employee's ideas + corresponding up/down votes + employee info
 def getIdeaByEmployeePersonalId(personal_id):
     db = get_db()
     cursor = db.cursor()
 
-    select_query = 'SELECT * FROM idea INNER JOIN employee  ' \
+    select_query = 'SELECT * , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes'\
+                    'FROM idea INNER JOIN employee  ' \
                     'ON idea.employeeId = employee.id ' \
                     'WHERE employee.personal_id=?' \
                     'ORDER BY idea.time DESC'
+
 
     try:
         cursor.execute(select_query, (personal_id,))
@@ -145,15 +147,17 @@ def getIdeaByEmployeePersonalId(personal_id):
 
 
 # TODO
-# pagination_id must be handled
+# pagination_id must be handled ??
+
+#get all ideas with their votes
 def getIdeas(pagination_id):
     db = get_db()
     cursor = db.cursor()
-
-    select_query = 'SELECT idea.* , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes'\
-        'FROM idea'\
-        'ORDER BY idea.time DESC'
-
+    # ideas + upvotes + down_votes + employees info
+    select_query = 'SELECT * , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes'\
+                    'FROM idea INNER JOIN employee  ' \
+                    'ON idea.employeeId = employee.id ' \
+                    'ORDER BY idea.time DESC'
     try:
         cursor.execute(select_query)
         ideasWithVotes = cursor.fetchall()
@@ -164,11 +168,11 @@ def getIdeas(pagination_id):
         close_db()
         return DB_ERROR
 
-
+#get an idea with its votes by ideaID
 def getIdeaVotes(id):
     db = get_db()
     cursor = db.cursor()
-
+    
     select_query = 'SELECT idea.* , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes'\
         'FROM idea'\
             'WHERE idea.id=?'
@@ -187,10 +191,13 @@ def getIdeaVotes(id):
 def getIdeasByIdeaCategoryID(id):
     db = get_db()
     cursor = db.cursor()
-    
-    select_query = 'SELECT idea.* , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes'\
-        'FROM idea WHERE idea.categoryId =?'\
-        'ORDER BY idea.time DESC'
+    select_query = 'SELECT * , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes'\
+                    'FROM idea INNER JOIN employee  ' \
+                    'ON idea.employeeId = employee.id  INNER JOIN ideaCategory ON ideaCategory.id = idea.categoryId' \
+                    'WHERE idea.categoryId =?'\
+                    'ORDER BY idea.time DESC'
+                    
+
 
     try:
         cursor.execute(select_query, (id,))
@@ -205,7 +212,25 @@ def getIdeasByIdeaCategoryID(id):
 
 # TODO
 def idea_is_for_user(employeeId, idea_id):
-    return True
+    select_query = 'SELECT employeeId '\
+                    'FROM idea ' \
+                    'WHERE idea.id =?'
+                    
+
+
+    try:
+        cursor.execute(select_query, (idea_id,))
+        data = dict(cursor.fetchone())
+        employeeID = data['employeeId']
+        close_db()
+
+        return (employeeId == employeeID)
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
+    return False
 
 # TODO
 def like_idea(id):
@@ -219,7 +244,8 @@ def dislike_idea(id):
 def get_all_ideas():
     db = get_db()
     cursor = db.cursor()
-    select_query = 'SELECT * FROM idea INNER JOIN employee  ' \
+    select_query = 'SELECT * , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes'\
+                    'FROM idea INNER JOIN employee  ' \
                     'ON idea.employeeId = employee.id ' \
                     'ORDER BY idea.time DESC'
 
@@ -245,4 +271,3 @@ def clear_table():
     return 'Idea table Has been cleared succesfully.'
 
 
-# to do : search by title

@@ -4,17 +4,21 @@ import sys
 import datetime
 # windows
 sys.path.insert(0, 'C://Users//asus//Desktop//Uni//SW Eng//Project//project files//venv//IMS//backend//DBhandler')
+sys.path.insert(0, 'C://Users//asus//Desktop//Uni//SW Eng//Project//project files//venv//IMS//backend')
 # macOs
 sys.path.insert(0, '/Users/mohammad/Documents/Github/IMS-backend/DBhandler')
 sys.path.insert(0, '/Users/narges/Documents/GitHub/IMS-backend/DBhandler')
+sys.path.insert(0, '/Users/mohammad/Documents/Github/IMS-backend')
+sys.path.insert(0, '/Users/narges/Documents/GitHub/IMS-backend')
+
+
 from db import *
 
 
-def create(json):
+def create(data):
     db = get_db()
     cursor = db.cursor()
 
-    data = json.loads(json)
     id = get_table_size(cursor) +1
     employeeId = data["employeeId"]
     ideatId = data["commentId"]
@@ -25,26 +29,23 @@ def create(json):
                    'VALUES (?,?, ?,?,?)'
     fields = (id,employeeId, ideaId ,type,time)
     try:
-        
+        if  getIdeaVoteByEmployeeIdea(employeeID , ideaID) is not None:
+            return IDEAVOTE_ALREADY_EXISTS
         # insert into db:
         cursor.execute(insert_query, fields)
         db.commit()
         close_db()
-        response = "commentVote insert successfully."
-        return response
+        return MESSAGE_OK
 
     except sqlite3.Error:  
         close_db()
-        response = "SQlite Error - commentVote insert Failed"
-        return None
+        return DB_ERROR
 
 
 
-def update(json,id, changeVote= False): 
+def update(data,id): 
     db = get_db()
     cursor = db.cursor()
-    
-    data = json.loads(json)
 
 
     employeeId = data["employeeId"]
@@ -57,25 +58,21 @@ def update(json,id, changeVote= False):
     fields = (employeeId, ideaId,type,time , id)
     try:
         res = getIdeaVoteByEmployeeIdea(employeeId, ideaId)
-        if len(res)==0:
-            response = "ideaVote does not exist with this (employeeId, ideaId)"
-            return response
-        if changeVote  and type ==res['type'] : # double upvotes ==> No vote  # double downvotes ==> No vote 
-            delete(id)
-            response = "ideaVote deleted"
-            return response
+        if res in None:
+            return NOT_FOUND
+        if type ==res['type'] : # double upvotes ==> No vote  # double downvotes ==> No vote 
+            delete(ideaId ,  employeeId )
+            return MESSAGE_OK
             
         # update db:
         cursor.execute(update_query, fields)
         db.commit()
         close_db()
-        response = "ideaVote update successfully."
-        return response
+        return MESSAGE_OK
 
     except sqlite3.Error:  
         close_db()
-        response = "SQlite Error - ideaVote update Failed"
-        return None
+        return DB_ERROR
 
 def delete(id):
     db = get_db()
@@ -83,20 +80,18 @@ def delete(id):
 
     query = 'DELETE ideaVote WHERE id=?'
     fields = (id,)
-
+    if getIdeaVoteByID(id) is None:
+            return NOT_FOUND
     try:
-
+        
         cursor.execute(query, fields)
         db.commit()
         close_db()
-
-        response = "ideaVote deleted successfully"
-        return response
+        return MESSAGE_OK
 
     except sqlite3.Error:
         close_db()
-        response = "SQlite Error - Failed to delete ideaVote"
-        return None
+        return DB_ERROR
 
 def delete(personal_id , ideaId):
     db = get_db()
@@ -109,20 +104,17 @@ def delete(personal_id , ideaId):
             '(SELECT emplyee.id from employee WHERE employee.personal_id=?)'
             
     fields = (ideaId,personal_id, )
-
+    if getIdeaVoteByEmployeeIdea(employeeId, ideaId) is None:
+            return NOT_FOUND
     try:
-
         cursor.execute(query, fields)
         db.commit()
         close_db()
-
-        response = "ideaVote deleted successfully"
-        return response
+        return MESSAGE_OK
 
     except sqlite3.Error:
         close_db()
-        response = "SQlite Error - Failed to delete ideaVote"
-        return None
+        return DB_ERROR
 
 
 def getIdeaVoteByID(id):
@@ -131,11 +123,28 @@ def getIdeaVoteByID(id):
     ideaVote = cursor.fetchall()
     return ideaVote
 
-def getIdeaVoteByEmployeeIdea(employeeID , ideaID):
+def getIdeaVoteTypeByID(id):
     db = get_db()
     cursor = db.cursor()
 
-    select_query = 'SELECT * ideaVote INNER JOIN BY idea '\
+    try:
+        IdeaVoteRow = getIdeaVoteByID(personal_id, cursor)
+        if IdeaVoteRow is None:
+            return NOT_FOUND
+
+        IdeaVoteRow_row_dict = dict(IdeaVoteRow)
+        idea_vote_type = IdeaVoteRow_row_dict['type']
+        close_db()
+        return idea_vote_type
+
+    except sqlite3.Error:
+        close_db()
+        return DB_ERROR
+
+
+
+def getIdeaVoteByEmployeeIdea(employeeID , ideaID):
+    select_query = 'SELECT * ideaVote INNER JOIN idea '\
             'ON  ideaVote.ideaId= idea.id INNER JOIN employee '\
             'ON ideaVote.employeeId = employee.id'\
             'WHERE ideaVote.employeeId=? AND ideaVote.ideaId=?'
@@ -146,14 +155,20 @@ def getIdeaVoteByEmployeeIdea(employeeID , ideaID):
     return ideaVote
 
 def get_table_size():
-    db = get_db()
-    cursor = db.cursor()
     cursor.execute("select * from ideaVote")
     results = cursor.fetchall()
-    close_db()
     return len(results)
 
 
 
 
 
+def clear_table():
+    db = get_db()
+    cursor = db.cursor()
+    query = 'DELETE FROM ideaVote'
+    cursor.execute(query)
+    db.commit()
+    close_db()
+
+    return 'ideaVote table Has been cleared succesfully.'
