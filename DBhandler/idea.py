@@ -27,7 +27,7 @@ def getIdeaByID(id):
     db = get_db()
     cursor = db.cursor()
 
-    select_query = 'SELECT * FROM idea WHERE id=?'
+    select_query = 'SELECT *  FROM idea INNER JOIN employee ON idea.employeeId = employee.id WHERE idea.id=?'
     cursor.execute(select_query, (id,))
     idea = cursor.fetchone()
     close_db()
