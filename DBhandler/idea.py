@@ -128,7 +128,7 @@ def getIdeaByEmployeePersonalId(personal_id):
     db = get_db()
     cursor = db.cursor()
 
-    select_query = 'SELECT * , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes'\
+    select_query = 'SELECT * , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes , (SELECT COUNT(*) FROM comment where idea.id=comment.ideaId) as commentsCount'\
                     'FROM idea INNER JOIN employee  ' \
                     'ON idea.employeeId = employee.id ' \
                     'WHERE employee.personal_id=?' \
@@ -154,7 +154,7 @@ def getIdeas(pagination_id):
     db = get_db()
     cursor = db.cursor()
     # ideas + upvotes + down_votes + employees info
-    select_query = 'SELECT * , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes'\
+    select_query = 'SELECT * , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes , (SELECT COUNT(*) FROM comment where idea.id=comment.ideaId) as commentsCount'\
                     'FROM idea INNER JOIN employee  ' \
                     'ON idea.employeeId = employee.id ' \
                     'ORDER BY idea.time DESC'
@@ -173,7 +173,7 @@ def getIdeaVotes(id):
     db = get_db()
     cursor = db.cursor()
     
-    select_query = 'SELECT idea.* , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes'\
+    select_query = 'SELECT idea.* , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes , (SELECT COUNT(*) FROM comment where idea.id=comment.ideaId) as commentsCount'\
         'FROM idea'\
             'WHERE idea.id=?'
 
@@ -191,7 +191,7 @@ def getIdeaVotes(id):
 def getIdeasByIdeaCategoryID(id):
     db = get_db()
     cursor = db.cursor()
-    select_query = 'SELECT * , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes'\
+    select_query = 'SELECT * , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes , (SELECT COUNT(*) FROM comment where idea.id=comment.ideaId) as commentsCount'\
                     'FROM idea INNER JOIN employee  ' \
                     'ON idea.employeeId = employee.id  INNER JOIN ideaCategory ON ideaCategory.id = idea.categoryId' \
                     'WHERE idea.categoryId =?'\
@@ -244,7 +244,7 @@ def dislike_idea(id):
 def get_all_ideas():
     db = get_db()
     cursor = db.cursor()
-    select_query = 'SELECT * , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes'\
+    select_query = 'SELECT * , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes , (SELECT COUNT(*) FROM comment where idea.id=comment.ideaId) as commentsCount'\
                     'FROM idea INNER JOIN employee  ' \
                     'ON idea.employeeId = employee.id ' \
                     'ORDER BY idea.time DESC'
