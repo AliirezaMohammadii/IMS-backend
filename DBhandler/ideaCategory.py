@@ -18,6 +18,8 @@ from Requirements import *
 def get_table_size(cursor):
     cursor.execute("select max(ifnull(id,0)) from ideaCategory")
     results = cursor.fetchone()[0]
+    if results is None:
+        return 0
     return (results)
 
 
@@ -33,8 +35,6 @@ def create(data):
     fields = (id, title)
 
     try:
-        if getIdeaCategoryByTitle(title, cursor) is not None:
-            return CATEGORY_ALREADY_EXISTS
         cursor.execute(insert_query, fields)
         db.commit()
         close_db()

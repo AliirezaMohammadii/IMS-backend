@@ -16,6 +16,7 @@ from db import *
 from Requirements import *
 from ideaStatus import *
 from DBhandler import employee as employee_DB
+from DBhandler import ideaVote as ideaVote_DB
 
 def get_table_size(cursor):
     cursor.execute("select max(ifnull(id,0)) from idea")
@@ -253,13 +254,34 @@ def idea_is_for_user(employeeId, idea_id):
 
     return False
 
-# TODO
-def like_idea(id):
-    return MESSAGE_OK
+
+def like_idea(ideaId, employeeId):
+    data_dict = {
+        'employeeId': employeeId,
+        'ideaId': ideaId,
+        'type': 1,
+    }
+    message = ideaVote_DB.create(data_dict)
+    if message == IDEAVOTE_ALREADY_EXISTS:
+        message = ideaVote_DB.update(data_dict)
+
+    return message
+
 
 # TODO
-def dislike_idea(id):
-    return MESSAGE_OK
+def dislike_idea(ideaId, employeeId):
+    data_dict = {
+        'employeeId': employeeId,
+        'ideaId': ideaId,
+        'type': 2,
+    }
+
+    message = ideaVote_DB.create(data_dict)
+    if message == IDEAVOTE_ALREADY_EXISTS:
+        message = ideaVote_DB.update(data_dict)
+
+    return message
+
 
 def get_all_ideas():
     db = get_db()

@@ -80,6 +80,11 @@ def logout():
     # revoke_jwt()
     return {}, STATUS_OK
 
+@app.route('/is_logged_in', methods=['GET'])
+@login_required()
+def is_logged_in():
+    return {}, STATUS_OK
+
 
 # ------ EMPLOYEE ENDPOINTS ------
 @app.route('/register', methods=['POST'])
@@ -248,8 +253,12 @@ def delete_idea(idea_id):
 @app.route('/like_idea/<idea_id>', methods=['POST'])
 @login_required()
 def like_idea(idea_id):
+    # print(request.json)
+    data = employee_DB.get_by_personal_id(request.json['personal_id'])
+    data = json.loads(data)
+    employeeId = int(data['id'])
 
-    message = idea_DB.like_idea(idea_id)
+    message = idea_DB.like_idea(idea_id, employeeId)
 
     if message == NOT_FOUND:
         return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
@@ -263,8 +272,11 @@ def like_idea(idea_id):
 @app.route('/dislike_idea/<idea_id>', methods=['POST'])
 @login_required()
 def dislike_idea(idea_id):
+    data = employee_DB.get_by_personal_id(request.json['personal_id'])
+    data = json.loads(data)
+    employeeId = int(data['id'])
 
-    message = idea_DB.dislike_idea(idea_id)
+    message = idea_DB.dislike_idea(idea_id, employeeId)
 
     if message == NOT_FOUND:
         return {'message': NOT_FOUND}, STATUS_BAD_REQUEST

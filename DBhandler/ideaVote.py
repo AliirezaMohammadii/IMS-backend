@@ -161,6 +161,9 @@ def getIdeaVoteByEmployeeIdea(employeeID , ideaID,cursor):
 def get_table_size(cursor):
     cursor.execute("select max(ifnull(id,0)) from ideaVote")
     results = cursor.fetchone()[0]
+    if results is None:
+        return 0
+
     return (results)
 
 
