@@ -328,8 +328,8 @@ def tets3():
 @app.route('/test_create')
 def _1():
     data_dict = {
-        'personal_id' : '12345',
-        'password' : '1111',
+        'personal_id' : '67890',
+        'password' : '3333',
     }
 
     message = employee_DB.create(data_dict)
@@ -351,12 +351,12 @@ def _3():
 @app.route('/test_update')
 def _4():
     data_dict = {
-        'firstName' : 'Alireza',
-        'lastName' : 'Mohammadi',
-        'personal_id' : '9999',
-        'password' : '2222',
-        'mobile' : '09121111111',
-        'email' : 'a@b.com',
+        'firstName' : 'Narges',
+        'lastName' : 'Ghasemi',
+        'personal_id' : '67890',
+        'password' : '3333',
+        'mobile' : '09999999999',
+        'email' : 'b@a.com',
         'committeeMember' : 0,
     }
 
@@ -381,10 +381,10 @@ def _6():
 @app.route('/test_create_idea')
 def _i1():
     data_dict = {
-        'employeeId' : 1,
-        'categoryId' : 5,
-        'title' : 'some title 5',
-        'text' : 'some text 5',
+        'personal_id' : 67890,
+        'categoryId' : 3,
+        'title' : 'some title 3',
+        'text' : 'some text 3',
     }
 
     message = idea_DB.create(data_dict)
@@ -405,6 +405,7 @@ def _i3():
     return str(data)
 
 
+
 @app.route('/test_get_user_ideas/<personal_id>')
 def _i4(personal_id):
 
@@ -419,6 +420,41 @@ def _i5():
     data = idea_DB.get_all_ideas()
     return str(data)
 
+@app.route('/test_clear_idea_ID/<id>')
+def _i6(id):
+
+    data = idea_DB.delete(id)
+    return str(data)
+
+
+@app.route('/test_clear_idea_ID/<employeeId>/<idea_id>')
+def _i7(employeeId,idea_id):
+
+    data = idea_DB.idea_is_for_user(employeeId,idea_id)
+    return str(data)
+# ------ TESTING DB / IDEA VOTE------
+
+@app.route('/test_create_upvote/')
+def _iv1():
+    data_dict = {
+        'employeeId' : 67890,
+        'ideaId' : 1,
+        'type' : 1,
+    }
+
+    message = ideaVote_DB.create(data_dict)
+    return str(message)
+
+@app.route('/test_update_upvote/')
+def _iv2():
+    data_dict = {
+        'employeeId' : 67890,
+        'ideaId' : 1,
+        'type' : 1,
+    }
+
+    message = ideaVote_DB.update(data_dict)
+    return str(message)
 
 # ------ TESTING DB / IDEA CATEGORY ------
 @app.route('/test_create_idea_cats')
@@ -427,7 +463,7 @@ def _ic1():
     idea_cat2 = {'title': 'آموزشی'}
     idea_cat3 = {'title': 'خدمات رفاهی'}
     idea_cat4 = {'title': 'خدمات انسانی'}
-
+    
     ideaCategory_DB.create(idea_cat1)
     ideaCategory_DB.create(idea_cat2)
     ideaCategory_DB.create(idea_cat3)

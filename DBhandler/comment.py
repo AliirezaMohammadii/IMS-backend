@@ -95,14 +95,10 @@ def getCommentByID(id):
 
 
 
-def get_table_size():
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute("select * from comment")
-    results = cursor.fetchall()
-    close_db()
-    return len(results)
-
+def get_table_size(cursor):
+    cursor.execute("select max(ifnull(id,0)) from comment")
+    results = cursor.fetchone()[0]
+    return (results)
 
 def getCommentsByIdeaID(id):  # Get an idea comments with votes for each comment and information about the employee who submitted the comment
     select_query = 'SELECT *,(SELECT COUNT(*) FROM commentVote where comment.id=commentVote.commentId and commentVote.type=1) as upVotes, (SELECT COUNT(*) FROM commentVote where comment.id=commentVote.commentId and commentVote.type=0) as downVotes '\

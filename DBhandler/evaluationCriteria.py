@@ -68,10 +68,7 @@ def getEvaluationCriteriaByID(id):
 
 
 
-def get_table_size():
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute("select * from evaluationCriteria")
-    results = cursor.fetchall()
-    close_db()
-    return len(results)
+def get_table_size(cursor):
+    cursor.execute("select max(ifnull(id,0)) from evaluationCriteria")
+    results = cursor.fetchone()[0]
+    return (results)

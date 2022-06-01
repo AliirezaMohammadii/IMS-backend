@@ -155,14 +155,10 @@ def getCommentVoteByEmployeePersonalIDCommentID(personalID , commentID):
     commentVote = cursor.fetchone()
     return commentVote
     
-def get_table_size():
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute("select * from commentVote")
-    results = cursor.fetchall()
-    close_db()
-    return len(results)
-
+def get_table_size(cursor):
+    cursor.execute("select max(ifnull(id,0)) from commentVote")
+    results = cursor.fetchone()[0]
+    return (results)
 
 
 

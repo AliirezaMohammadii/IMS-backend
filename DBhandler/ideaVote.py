@@ -14,6 +14,10 @@ sys.path.insert(0, '/Users/narges/Documents/GitHub/IMS-backend')
 
 from db import *
 
+from db import *
+from Requirements import *
+from ideaStatus import *
+
 
 def create(data):
     db = get_db()
@@ -21,15 +25,15 @@ def create(data):
 
     id = get_table_size(cursor) +1
     employeeId = data["employeeId"]
-    ideatId = data["commentId"]
+    ideaId = data["ideaId"]
     type = data["type"]
-    time = datetime.datetime.now()
+    time =  datetime.now()
 
     insert_query = 'INSERT INTO ideaVote (id,employeeId, ideaId,type,time) ' \
                    'VALUES (?,?, ?,?,?)'
     fields = (id,employeeId, ideaId ,type,time)
     try:
-        if  getIdeaVoteByEmployeeIdea(employeeID , ideaID) is not None:
+        if  getIdeaVoteByEmployeeIdea(employeeId , ideaId, cursor) is not None:
             return IDEAVOTE_ALREADY_EXISTS
         # insert into db:
         cursor.execute(insert_query, fields)
@@ -43,7 +47,7 @@ def create(data):
 
 
 
-def update(data,id): 
+def update(data): 
     db = get_db()
     cursor = db.cursor()
 
@@ -51,17 +55,20 @@ def update(data,id):
     employeeId = data["employeeId"]
     ideaId = data["ideaId"]
     type = data["type"]
-    time = data["time"]
+    time = datetime.now()
 
-    update_query = 'UPDATE ideaVote SET employeeId=?, ideaId=?,type=?,time=?' \
-                   'WHERE id=?'
-    fields = (employeeId, ideaId,type,time , id)
+    update_query = 'UPDATE ideaVote SET type=?,time=? ' \
+                   'WHERE employeeId=? and ideaId=? '
+    fields = (type,time ,employeeId, ideaId)
     try:
-        res = getIdeaVoteByEmployeeIdea(employeeId, ideaId)
-        if res in None:
+        res = (getIdeaVoteByEmployeeIdea(employeeId, ideaId,cursor))
+        
+        if res is None:
             return NOT_FOUND
-        if type ==res['type'] : # double upvotes ==> No vote  # double downvotes ==> No vote 
+        res = dict(res)
+        if type == res['type'] : # double upvotes ==> No vote  # double downvotes ==> No vote 
             delete(ideaId ,  employeeId )
+            print("here")
             return MESSAGE_OK
             
         # update db:
@@ -78,7 +85,7 @@ def delete(id):
     db = get_db()
     cursor = db.cursor()
 
-    query = 'DELETE ideaVote WHERE id=?'
+    query = 'DELETE FROM ideaVote WHERE id=?'
     fields = (id,)
     if getIdeaVoteByID(id) is None:
             return NOT_FOUND
@@ -93,18 +100,16 @@ def delete(id):
         close_db()
         return DB_ERROR
 
-def delete(personal_id , ideaId):
+def delete(ideaId,employeeId ):
     db = get_db()
     cursor = db.cursor()
 
-    query = 'DELETE ideaVote '\
-            'WHERE  ideaVote.ideaId IN'\
-            '(SELECT idea.id from idea WHERE idea.id=?)'\
-            'AND ideaVote.employeeId IN'\
-            '(SELECT emplyee.id from employee WHERE employee.personal_id=?)'
+    query = 'DELETE FROM ideaVote '\
+            'WHERE  ideaVote.ideaId = ? and  '\
+            ' ideaVote.employeeId=?  '
             
-    fields = (ideaId,personal_id, )
-    if getIdeaVoteByEmployeeIdea(employeeId, ideaId) is None:
+    fields = (ideaId,employeeId, )
+    if getIdeaVoteByEmployeeIdea(employeeId, ideaId , cursor) is None:
             return NOT_FOUND
     try:
         cursor.execute(query, fields)
@@ -143,21 +148,21 @@ def getIdeaVoteTypeByID(id):
 
 
 
-def getIdeaVoteByEmployeeIdea(employeeID , ideaID):
-    select_query = 'SELECT * ideaVote INNER JOIN idea '\
-            'ON  ideaVote.ideaId= idea.id INNER JOIN employee '\
-            'ON ideaVote.employeeId = employee.id'\
-            'WHERE ideaVote.employeeId=? AND ideaVote.ideaId=?'
+def getIdeaVoteByEmployeeIdea(employeeID , ideaID,cursor):
+    select_query = 'SELECT * FROM ideaVote '\
+            'WHERE ideaVote.employeeId=? AND ideaVote.ideaId=? '
             
     fields = (employeeID,ideaID, )
     cursor.execute(select_query, fields)
     ideaVote = cursor.fetchone()
+
     return ideaVote
 
-def get_table_size():
-    cursor.execute("select * from ideaVote")
-    results = cursor.fetchall()
-    return len(results)
+def get_table_size(cursor):
+    cursor.execute("select max(ifnull(id,0)) from ideaVote")
+    results = cursor.fetchone()[0]
+    return (results)
+
 
 
 

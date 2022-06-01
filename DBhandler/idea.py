@@ -18,16 +18,22 @@ from ideaStatus import *
 from DBhandler import employee as employee_DB
 
 def get_table_size(cursor):
-    cursor.execute("select * from idea")
-    results = cursor.fetchall()
-    return len(results)
+    cursor.execute("select max(ifnull(id,0)) from idea")
+    results = cursor.fetchone()[0]
+    return (results)
 
 
 def getIdeaByID(id):
     db = get_db()
     cursor = db.cursor()
 
-    select_query = 'SELECT *  FROM idea INNER JOIN employee ON idea.employeeId = employee.id WHERE idea.id=?'
+    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount '\
+                    'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id WHERE idea.id=? Order BY idea.time DESC'\
+
+
     cursor.execute(select_query, (id,))
     idea = cursor.fetchone()
     close_db()
@@ -45,10 +51,10 @@ def getIdeaByID(id):
 
 
 def create(data):
-    employeeId = json.loads(employee_DB.get_by_personal_id(personal_id=data["personal_id"]))["id"]
+    employeeId = json.loads(employee_DB.get_by_personal_id(data['personal_id']))["id"]
     db = get_db()
     cursor = db.cursor()
-
+    
     id              = get_table_size(cursor) + 1
     categoryId      = data["categoryId"]
     title           = data["title"]
@@ -56,7 +62,7 @@ def create(data):
     costReduction   = 0.0
     time            = datetime.now()
     status          = "NotChecked"
-
+    
     insert_query = 'INSERT INTO idea (id, employeeId, categoryId, title, text, costReduction, time, status) ' \
                    'VALUES (?,?,?,?,?,?,?,?)'
     fields = (id, employeeId, categoryId, title, text, costReduction, time, status)
@@ -111,7 +117,7 @@ def delete(id):
 
     try:
 
-        if getIdeaByID(id) == NOT_FOUND:
+        if getIdeaByID(id) is None:
             return NOT_FOUND
 
         cursor.execute(query, fields)
@@ -128,15 +134,20 @@ def getIdeaByEmployeePersonalId(personal_id):
     db = get_db()
     cursor = db.cursor()
 
-    select_query = 'SELECT * , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes , (SELECT COUNT(*) FROM comment where idea.id=comment.ideaId) as commentsCount'\
-                    'FROM idea INNER JOIN employee  ' \
-                    'ON idea.employeeId = employee.id ' \
-                    'WHERE employee.personal_id=?' \
-                    'ORDER BY idea.time DESC'
+    #select_query = 'SELECT Count(*) FROM idea INNER JOIN ideaVote ON idea.id=ideaVote.ideaId Where ideaVote.type is NOT NULL and ideaVote.type=1 '
+    #, (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes , (SELECT COUNT(*) FROM comment where idea.id=comment.ideaId) as commentsCount
+    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount '\
+                    'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id WHERE employee.personal_id=? Order BY idea.time DESC'\
+
+                    
+
 
 
     try:
-        cursor.execute(select_query, (personal_id,))
+        cursor.execute(select_query,(personal_id,))
         ideas = cursor.fetchall()
         close_db()
         return convert_to_json(ideas)
@@ -154,10 +165,12 @@ def getIdeas(pagination_id):
     db = get_db()
     cursor = db.cursor()
     # ideas + upvotes + down_votes + employees info
-    select_query = 'SELECT * , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes , (SELECT COUNT(*) FROM comment where idea.id=comment.ideaId) as commentsCount'\
-                    'FROM idea INNER JOIN employee  ' \
-                    'ON idea.employeeId = employee.id ' \
-                    'ORDER BY idea.time DESC'
+    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount '\
+                    'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  Order BY idea.time DESC'\
+
     try:
         cursor.execute(select_query)
         ideasWithVotes = cursor.fetchall()
@@ -173,9 +186,12 @@ def getIdeaVotes(id):
     db = get_db()
     cursor = db.cursor()
     
-    select_query = 'SELECT idea.* , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes , (SELECT COUNT(*) FROM comment where idea.id=comment.ideaId) as commentsCount'\
-        'FROM idea'\
-            'WHERE idea.id=?'
+    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount '\
+                    'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id WHERE idea.id=? Order BY idea.time DESC'\
+
 
     try:
         cursor.execute(select_query, (id,))
@@ -191,11 +207,13 @@ def getIdeaVotes(id):
 def getIdeasByIdeaCategoryID(id):
     db = get_db()
     cursor = db.cursor()
-    select_query = 'SELECT * , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes , (SELECT COUNT(*) FROM comment where idea.id=comment.ideaId) as commentsCount'\
-                    'FROM idea INNER JOIN employee  ' \
-                    'ON idea.employeeId = employee.id  INNER JOIN ideaCategory ON ideaCategory.id = idea.categoryId' \
-                    'WHERE idea.categoryId =?'\
-                    'ORDER BY idea.time DESC'
+    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount '\
+                    'FROM idea INNER JOIN employee ON idea.employeeId =employee.id  INNER JOIN ideaCategory ON ideaCategory.id = idea.categoryId'\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id WHERE idea.categoryId=? Order BY idea.time DESC'\
+
+    
                     
 
 
@@ -212,19 +230,22 @@ def getIdeasByIdeaCategoryID(id):
 
 # TODO
 def idea_is_for_user(employeeId, idea_id):
+    db = get_db()
+    cursor = db.cursor()
     select_query = 'SELECT employeeId '\
                     'FROM idea ' \
                     'WHERE idea.id =?'
-                    
-
 
     try:
         cursor.execute(select_query, (idea_id,))
         data = dict(cursor.fetchone())
-        employeeID = data['employeeId']
+        employee_ID = data['employeeId']
         close_db()
 
-        return (employeeId == employeeID)
+        if (int(employeeId) -int(employee_ID)) ==0 :
+            return True
+        else:
+            return False
 
     except sqlite3.Error:  
         close_db()
@@ -240,14 +261,21 @@ def like_idea(id):
 def dislike_idea(id):
     return MESSAGE_OK
 
-
 def get_all_ideas():
     db = get_db()
     cursor = db.cursor()
-    select_query = 'SELECT * , (SELECT COUNT(*) FROM ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=1) as upVotes , (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes , (SELECT COUNT(*) FROM comment where idea.id=comment.ideaId) as commentsCount'\
-                    'FROM idea INNER JOIN employee  ' \
-                    'ON idea.employeeId = employee.id ' \
-                    'ORDER BY idea.time DESC'
+
+    #select_query = 'SELECT Count(*) FROM idea INNER JOIN ideaVote ON idea.id=ideaVote.ideaId Where ideaVote.type is NOT NULL and ideaVote.type=1 '
+    #, (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes , (SELECT COUNT(*) FROM comment where idea.id=comment.ideaId) as commentsCount
+    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount '\
+                    'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  Order BY idea.time DESC'\
+
+                    
+
+
 
     try:
         cursor.execute(select_query)
@@ -258,6 +286,9 @@ def get_all_ideas():
     except sqlite3.Error:  
         close_db()
         return DB_ERROR
+
+
+
 
 
 def clear_table():

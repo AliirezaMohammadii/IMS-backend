@@ -16,9 +16,9 @@ from Requirements import *
 
 
 def get_table_size(cursor):
-    cursor.execute("select * from ideaCategory")
-    results = cursor.fetchall()
-    return len(results)
+    cursor.execute("select max(ifnull(id,0)) from ideaCategory")
+    results = cursor.fetchone()[0]
+    return (results)
 
 
 def create(data):

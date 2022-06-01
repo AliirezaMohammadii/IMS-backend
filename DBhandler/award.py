@@ -98,10 +98,7 @@ def getAwards():    # All awards given so far.
     awards = cursor.fetchall()
     return awards
 
-def get_table_size():
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute("select * from award")
-    results = cursor.fetchall()
-    close_db()
-    return len(results)
+def get_table_size(cursor):
+    cursor.execute("select max(ifnull(id,0)) from award")
+    results = cursor.fetchone()[0]
+    return (results)
