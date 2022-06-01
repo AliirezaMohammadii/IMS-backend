@@ -488,7 +488,26 @@ def _ic3():
     message = ideaCategory_DB.clear_table()
     return message
 
+# ------ TESTING DB / COMMENT ------
 
+@app.route('/test_create_comment')
+def _ico1():
+    data_dict = {
+        'personal_id' : 67890,
+        'ideaId' : 1,
+        'title' : 'nazar',
+        'text' : 'some text nazar',
+    }
+
+    message = comment_DB.create(data_dict)
+    return str(message)
+
+
+@app.route('/test_get_idea_comments/<id>')
+def _ico2(id):
+
+    data = comment_DB.getCommentsByIdeaID(id)
+    return str(data)
 # ----------------------------------------------------------
 
 @app.errorhandler(STATUS_NOT_FOUND)

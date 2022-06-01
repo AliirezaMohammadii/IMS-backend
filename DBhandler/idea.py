@@ -21,6 +21,8 @@ from DBhandler import ideaVote as ideaVote_DB
 def get_table_size(cursor):
     cursor.execute("select max(ifnull(id,0)) from idea")
     results = cursor.fetchone()[0]
+    if results is None :
+        return 0
     return (results)
 
 
@@ -52,10 +54,10 @@ def getIdeaByID(id):
 
 
 def create(data):
-    employeeId = json.loads(employee_DB.get_by_personal_id(data['personal_id']))["id"]
     db = get_db()
     cursor = db.cursor()
-    
+    employeeId = json.loads(employee_DB.get_by_personal_id(data['personal_id']))["id"]
+
     id              = get_table_size(cursor) + 1
     categoryId      = data["categoryId"]
     title           = data["title"]
