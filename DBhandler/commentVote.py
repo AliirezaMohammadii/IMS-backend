@@ -45,13 +45,9 @@ def create(data):
     return MESSAGE_OK
 
 
-
-
-
 def update(data, id): 
     db = get_db()
     cursor = db.cursor()
-
 
     employeeId = data["employeeId"]
     commentId = data["commentId"]
@@ -79,6 +75,7 @@ def update(data, id):
         close_db()
         return DB_ERROR
 
+
 def delete(id):
     db = get_db()
     cursor = db.cursor()
@@ -99,7 +96,8 @@ def delete(id):
         close_db()
         return DB_ERROR
 
-def delete(commentId , employeeId):
+
+def delete(commentId, employeeId):
     db = get_db()
     cursor = db.cursor()
 
@@ -173,7 +171,7 @@ def like_comment(commentId, employeeId):
     return message
 
 
-def like_comment(commentId, employeeId):
+def dislike_comment(commentId, employeeId):
     data_dict = {
         'employeeId': employeeId,
         'commentId': commentId,

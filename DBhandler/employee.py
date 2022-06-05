@@ -141,18 +141,14 @@ def get_by_personal_id(personal_id):
     try:
         employeeRow = getEmployeeByPersonalId(personal_id, cursor)
         if employeeRow is None:
-            print("1111111")
             return NOT_FOUND
 
         employee_row_dict = dict(employeeRow)
         close_db()
-        print("222222222")
-        print(employee_row_dict)
         return json.dumps(employee_row_dict)
 
     except sqlite3.Error:
         close_db()
-        print("33333333")
         return DB_ERROR
 
 
@@ -207,10 +203,26 @@ def check_password(personal_id, input_password):
         close_db()
         return return_value
 
-    except sqlite3.Error:  
+    except sqlite3.Error:
         close_db()
         return DB_ERROR
 
+
+def get_user_id(personal_id):
+    db = get_db()
+    cursor = db.cursor()
+    query = 'SELECT id FROM employee WHERE personal_id=?'
+
+    try:
+        cursor.execute(query, (personal_id,))
+        data = dict(cursor.fetchone())
+        id = int(data['id'])
+        close_db()
+        return id
+    
+    except:
+        close_db()
+        return DB_ERROR
 
 
 def clear_table():

@@ -16,7 +16,8 @@ from db import *
 from Requirements import *
 from ideaStatus import *
 from DBhandler import employee as employee_DB
-from DBhandler import ideaVote as ideaVote_DB
+from DBhandler import commentVote as commentVote_DB
+
 
 def create(data):
     db = get_db()
@@ -104,7 +105,7 @@ def getCommentByID(id):
     cursor.execute(select_query, (id,))
     comment = cursor.fetchall()
     try:
-        if commet is None:
+        if comment is None:
             return NOT_FOUND
         comment_row_dict = dict(comment)
         return json.dumps(comment_row_dict)
@@ -121,7 +122,8 @@ def get_table_size(cursor):
         return 0
     return (results)
 
-def getCommentsByIdeaID(id):  # Get an idea comments with votes for each comment and information about the employee who submitted the comment
+
+def getCommentsWithVotesByIdeaID(id):  # Get an idea comments with votes for each comment and information about the employee who submitted the comment
 
     db = get_db()
     cursor = db.cursor()
@@ -132,12 +134,15 @@ def getCommentsByIdeaID(id):  # Get an idea comments with votes for each comment
                     'LEFT JOIN ( SELECT commentVote.commentId , commentVote.type ,count(commentVote.type) as cntDOWN FROM commentVote Where commentVote.type is not null and commentVote.type =2 Group BY (commentVote.commentId) ) D ON D.commentId = comment.id '\
                     'Where idea.id=? Order BY comment.time DESC'\
 
+    try:
+        cursor.execute(select_query, (id,))
+        commentsWithVotes = cursor.fetchall()
+        close_db()
+        return convert_to_json(commentsWithVotes)
 
-                    
-
-    cursor.execute(select_query, (id,))
-    commentsWithVotes = cursor.fetchall()
-    return commentsWithVotes
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
 
 
 
@@ -152,8 +157,6 @@ def getCommentsByIdeaID(id):  # Get an idea comments with votes for each comment
                     'LEFT JOIN ( SELECT commentVote.commentId , commentVote.type ,count(commentVote.type) as cntDOWN FROM commentVote Where commentVote.type is not null and commentVote.type =2 Group BY (commentVote.commentId) ) D ON D.commentId = comment.id '\
                     'Where comment.ideaId=? Order BY comment.time DESC'\
 
-                    
-
     try:
         cursor.execute(select_query, (id,))
         comments = cursor.fetchall()
@@ -163,3 +166,31 @@ def getCommentsByIdeaID(id):  # Get an idea comments with votes for each comment
     except sqlite3.Error:  
         close_db()
         return DB_ERROR
+
+
+def like_comment(comment_id, employeeId):
+    data_dict = {
+        'personal_id' : employeeId,
+        'commentId' : comment_id,
+        'type' : 1,
+    }
+
+    message = commentVote_DB.create(data_dict)
+    if message == COMMENTVOTE_ALREADY_EXISTS:
+        message = commentVote_DB.update(data_dict)
+
+    return message
+
+
+def dislike_comment(comment_id, employeeId):
+    data_dict = {
+        'personal_id' : employeeId,
+        'commentId' : comment_id,
+        'type' : 2,
+    }
+
+    message = commentVote_DB.create(data_dict)
+    if message == COMMENTVOTE_ALREADY_EXISTS:
+        message = commentVote_DB.update(data_dict)
+
+    return message

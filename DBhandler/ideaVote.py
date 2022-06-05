@@ -13,14 +13,12 @@ sys.path.insert(0, '/Users/narges/Documents/GitHub/IMS-backend')
 
 
 from db import *
-
-from db import *
 from Requirements import *
 from ideaStatus import *
 from DBhandler import employee as employee_DB
 
-def create(data):
-    
+
+def create(data):    
     employeeId = json.loads(employee_DB.get_by_personal_id(data['personal_id']))["id"]
     db = get_db()
     cursor = db.cursor()
@@ -33,7 +31,7 @@ def create(data):
                    'VALUES (?,?, ?,?,?)'
     fields = (id,employeeId, ideaId ,type,time)
     try:
-        if  getIdeaVoteByEmployeeIdea(employeeId , ideaId, cursor) is not None:
+        if getIdeaVoteByEmployeeIdea(employeeId , ideaId, cursor) is not None:
             return IDEAVOTE_ALREADY_EXISTS
         # insert into db:
         cursor.execute(insert_query, fields)
@@ -50,7 +48,6 @@ def create(data):
 def update(data): 
     db = get_db()
     cursor = db.cursor()
-
 
     employeeId = data["employeeId"]
     ideaId = data["ideaId"]
@@ -147,7 +144,6 @@ def getIdeaVoteTypeByID(id):
         return DB_ERROR
 
 
-
 def getIdeaVoteByEmployeeIdea(employeeID , ideaID,cursor):
     select_query = 'SELECT * FROM ideaVote '\
             'WHERE ideaVote.employeeId=? AND ideaVote.ideaId=? '
@@ -165,10 +161,6 @@ def get_table_size(cursor):
         return 0
 
     return (results)
-
-
-
-
 
 
 def clear_table():

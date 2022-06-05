@@ -18,6 +18,7 @@ from ideaStatus import *
 from DBhandler import employee as employee_DB
 from DBhandler import ideaVote as ideaVote_DB
 
+
 def get_table_size(cursor):
     cursor.execute("select max(ifnull(id,0)) from idea")
     results = cursor.fetchone()[0]
@@ -132,6 +133,7 @@ def delete(id):
         close_db()
         return DB_ERROR
 
+
 # get an employee's ideas + corresponding up/down votes + employee info
 def getIdeaByEmployeePersonalId(personal_id):
     db = get_db()
@@ -144,10 +146,6 @@ def getIdeaByEmployeePersonalId(personal_id):
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id WHERE employee.personal_id=? Order BY idea.time DESC'\
-
-                    
-
-
 
     try:
         cursor.execute(select_query,(personal_id,))
@@ -195,7 +193,6 @@ def getIdeaVotes(id):
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id WHERE idea.id=? Order BY idea.time DESC'\
 
-
     try:
         cursor.execute(select_query, (id,))
         ideaWithVotes = cursor.fetchall()
@@ -216,10 +213,6 @@ def getIdeasByIdeaCategoryID(id):
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id WHERE idea.categoryId=? Order BY idea.time DESC'\
 
-    
-                    
-
-
     try:
         cursor.execute(select_query, (id,))
         ideasWithVotesByCategory = cursor.fetchall()
@@ -231,7 +224,6 @@ def getIdeasByIdeaCategoryID(id):
         return DB_ERROR
 
 
-# TODO
 def idea_is_for_user(employeeId, idea_id):
     db = get_db()
     cursor = db.cursor()
@@ -245,7 +237,7 @@ def idea_is_for_user(employeeId, idea_id):
         employee_ID = data['employeeId']
         close_db()
 
-        if (int(employeeId) -int(employee_ID)) ==0 :
+        if (int(employeeId) - int(employee_ID)) == 0:
             return True
         else:
             return False
@@ -254,8 +246,6 @@ def idea_is_for_user(employeeId, idea_id):
         close_db()
         return DB_ERROR
 
-    return False
-
 
 def like_idea(ideaId, employeeId):
     data_dict = {
@@ -263,6 +253,7 @@ def like_idea(ideaId, employeeId):
         'ideaId': ideaId,
         'type': 1,
     }
+
     message = ideaVote_DB.create(data_dict)
     if message == IDEAVOTE_ALREADY_EXISTS:
         message = ideaVote_DB.update(data_dict)
@@ -270,7 +261,6 @@ def like_idea(ideaId, employeeId):
     return message
 
 
-# TODO
 def dislike_idea(ideaId, employeeId):
     data_dict = {
         'employeeId': employeeId,
@@ -297,10 +287,6 @@ def get_all_ideas():
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  Order BY idea.time DESC'\
 
-                    
-
-
-
     try:
         cursor.execute(select_query)
         ideas = cursor.fetchall()
@@ -312,9 +298,6 @@ def get_all_ideas():
         return DB_ERROR
 
 
-
-
-
 def clear_table():
     db = get_db()
     cursor = db.cursor()
@@ -324,5 +307,3 @@ def clear_table():
     close_db()
 
     return 'Idea table Has been cleared succesfully.'
-
-

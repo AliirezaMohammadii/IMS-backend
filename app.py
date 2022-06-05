@@ -1,4 +1,5 @@
 
+from crypt import methods
 from email import message
 from flask import Flask, request, url_for, redirect
 from flask_cors import CORS
@@ -80,6 +81,7 @@ def logout():
     # revoke_jwt()
     return {}, STATUS_OK
 
+
 @app.route('/is_logged_in', methods=['GET'])
 @login_required()
 def is_logged_in():
@@ -112,7 +114,6 @@ def get_user(personal_id):
     # TO CHECK ACCESSIBILITY PERMISSION
     # CHECK IF THE ONE WHO IS USING THIS ENDPOINT, IS THE CURRENT USER GETTING HIS INFORMATION, OR IS THE ADMIN.
     # OTHERWISE, DON'T PERMIT.
-    # PREREQ.: ADDING JWT TOKEN TO TABLE.
 
     message = employee_DB.get_by_personal_id(personal_id)
 
@@ -135,8 +136,7 @@ def update_user():
     # TO CHECK ACCESSIBILITY PERMISSION
     # CHECK IF THE ONE WHO IS USING THIS ENDPOINT, IS THE CURRENT USER UPDATING HIS ACCOUNT.
     # OTHERWISE, DON'T PERMIT.
-    # PREREQ.: ADDING JWT TOKEN TO TABLE.
-
+    
     message = employee_DB.update(request.json)
 
     if message == NOT_FOUND:
@@ -156,7 +156,6 @@ def delete_user(personal_id):
     # TO CHECK ACCESSIBILITY PERMISSION
     # CHECK IF THE ONE WHO IS USING THIS ENDPOINT, IS THE CURRENT USER DELETUNG HIS ACCOUNT, OR IS THE ADMIN.
     # OTHERWISE, DON'T PERMIT.
-    # PREREQ.: ADDING JWT TOKEN TO TABLE.
 
     message = employee_DB.delete(personal_id)
 
@@ -205,7 +204,6 @@ def get_user_ideas(personal_id):
 
 @app.route('/get_all_ideas/<pagination_id>')
 def get_ideas(pagination_id):
-
     ideas = idea_DB.getIdeas(pagination_id)
     return ideas, STATUS_OK
 
@@ -213,7 +211,6 @@ def get_ideas(pagination_id):
 @app.route('/update_idea/<idea_id>', methods=['PATCH'])
 @login_required()
 def update_idea(idea_id):
-
     employeeId = request.json['employeeId']
     permitted = idea_DB.idea_is_for_user(employeeId, idea_id)
     if not permitted:
@@ -233,7 +230,6 @@ def update_idea(idea_id):
 @app.route('/delete_idea/<int:idea_id>', methods=['DELETE'])
 @login_required()
 def delete_idea(idea_id):
-
     employeeId = request.json['employeeId']
     permitted = idea_DB.idea_is_for_user(employeeId, idea_id)
     if not permitted:
@@ -253,17 +249,10 @@ def delete_idea(idea_id):
 @app.route('/like_idea/<idea_id>', methods=['POST'])
 @login_required()
 def like_idea(idea_id):
-    # print(request.json)
-    data = employee_DB.get_by_personal_id(request.json['personal_id'])
-    data = json.loads(data)
-    employeeId = int(data['id'])
-
+    employeeId = employee_DB.get_user_id(request.json['personal_id'])
     message = idea_DB.like_idea(idea_id, employeeId)
 
-    if message == NOT_FOUND:
-        return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
-
-    elif message == DB_ERROR:
+    if message == DB_ERROR:
         return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
 
     return {}, STATUS_OK
@@ -272,23 +261,16 @@ def like_idea(idea_id):
 @app.route('/dislike_idea/<idea_id>', methods=['POST'])
 @login_required()
 def dislike_idea(idea_id):
-    data = employee_DB.get_by_personal_id(request.json['personal_id'])
-    data = json.loads(data)
-    employeeId = int(data['id'])
-
+    employeeId = employee_DB.get_user_id(request.json['personal_id'])
     message = idea_DB.dislike_idea(idea_id, employeeId)
 
-    if message == NOT_FOUND:
-        return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
-
-    elif message == DB_ERROR:
+    if message == DB_ERROR:
         return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
 
     return {}, STATUS_OK
 
 
 # ------ IDEA_CATEGORY ENDPOINTS ------
-
 @app.route('/create_idea_cat', methods=['POST'])
 def create_idea_cat():
     message = ideaCategory_DB.create(request.json)
@@ -306,12 +288,80 @@ def get_idea_cats():
     return idea_categories
 
 
+# ------ COMMENT ENDPOINTS ------
+@app.route('/create_comment', methods=['POST'])
+def create_comment():
+
+    message = comment_DB.create(request.json)
+
+    if message == DB_ERROR:
+        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
+
+    return {}, STATUS_CREATED
+
+
+@app.route('/get_idea_comments/<idea_id>')
+def get_idea_comments(idea_id):
+
+    message = comment_DB.getCommentsByIdeaID(idea_id)
+
+    if type(message) is int:
+        if message == NOT_FOUND:
+            return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
+
+        elif message == DB_ERROR:
+            return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
+
+    data = message
+    return data, STATUS_OK
+
+
+# ------ TESTING DB / COMMENT_VOTE ------
+@app.route('/like_comment/<comment_id>', methods=['POST'])
+@login_required()
+def like_comment(comment_id):
+    employeeId = employee_DB.get_user_id(request.json['personal_id'])
+    message = comment_DB.like_comment(comment_id, employeeId)
+
+    if message == DB_ERROR:
+        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
+
+    return {}, STATUS_OK
+
+
+@app.route('/dislike_comment/<comment_id>', methods=['POST'])
+@login_required()
+def dislike_comment(comment_id):
+    employeeId = employee_DB.get_user_id(request.json['personal_id'])
+    message = comment_DB.dislike_comment(comment_id, employeeId)
+
+    if message == DB_ERROR:
+        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
+
+    return {}, STATUS_OK
+
+
 # .
 # .
 # .
 
 
 # ----------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # ------ TEST ENDPOINTS ------
 @app.route('/test')
