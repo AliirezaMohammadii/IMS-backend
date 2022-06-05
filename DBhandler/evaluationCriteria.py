@@ -71,4 +71,6 @@ def getEvaluationCriteriaByID(id):
 def get_table_size(cursor):
     cursor.execute("select max(ifnull(id,0)) from evaluationCriteria")
     results = cursor.fetchone()[0]
+    if results is None:
+        return 0
     return (results)

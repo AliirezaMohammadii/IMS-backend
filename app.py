@@ -340,8 +340,8 @@ def tets3():
 @app.route('/test_create')
 def _1():
     data_dict = {
-        'personal_id' : '67890',
-        'password' : '3333',
+        'personal_id' : '918273',
+        'password' : '222222',
     }
 
     message = employee_DB.create(data_dict)
@@ -363,12 +363,12 @@ def _3():
 @app.route('/test_update')
 def _4():
     data_dict = {
-        'firstName' : 'Narges',
-        'lastName' : 'Ghasemi',
-        'personal_id' : '67890',
-        'password' : '3333',
-        'mobile' : '09999999999',
-        'email' : 'b@a.com',
+        'firstName' : 'Mohammad',
+        'lastName' : 'Hashemi',
+        'personal_id' : '918273',
+        'password' : '222222',
+        'mobile' : '09876512342222',
+        'email' : 'm2@a.com',
         'committeeMember' : 0,
     }
 
@@ -426,7 +426,7 @@ def _i4(personal_id):
 
 
 @app.route('/test_get_all_ideas')
-@login_required()
+#@login_required()
 def _i5():
 
     data = idea_DB.get_all_ideas()
@@ -449,7 +449,7 @@ def _i7(employeeId,idea_id):
 @app.route('/test_create_upvote/')
 def _iv1():
     data_dict = {
-        'employeeId' : 67890,
+        'personal_id' : 67890,
         'ideaId' : 1,
         'type' : 1,
     }
@@ -460,7 +460,7 @@ def _iv1():
 @app.route('/test_update_upvote/')
 def _iv2():
     data_dict = {
-        'employeeId' : 67890,
+        'personal_id' : 67890,
         'ideaId' : 1,
         'type' : 1,
     }
@@ -508,6 +508,32 @@ def _ico2(id):
 
     data = comment_DB.getCommentsByIdeaID(id)
     return str(data)
+
+# ------ TESTING DB / COMMENT_VOTE ------
+
+@app.route('/test_create_commentVote_up')
+def _icov1():
+    data_dict = {
+        'personal_id' : 918273,
+        'commentId' : 1,
+        'type' : 1,
+    }
+
+    message = commentVote_DB.create(data_dict)
+    return str(message)
+@app.route('/test_create_commentVote_down')
+def _icov2():
+    data_dict = {
+        'personal_id' : 918273,
+        'commentId' : 1,
+        'type' : 2,
+    }
+
+    message = commentVote_DB.create(data_dict)
+    return str(message)
+
+
+
 # ----------------------------------------------------------
 
 @app.errorhandler(STATUS_NOT_FOUND)

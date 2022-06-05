@@ -46,7 +46,7 @@ def create(data):
 
 
 
-def update(data):
+def update(data,id):
     db = get_db()
     cursor = db.cursor()
     
@@ -60,7 +60,8 @@ def update(data):
                    'WHERE id=?'
     fields = (employeeId, ideaId,text,time , id)
     try:
-        
+        if getCommentByID(id) == NOT_FOUND:
+            return NOT_FOUND
         # update db:
         cursor.execute(update_query, fields)
         db.commit()
@@ -80,6 +81,8 @@ def delete(id):
     fields = (id,)
 
     try:
+        if getCommentByID(id) == NOT_FOUND:
+            return NOT_FOUND
 
         cursor.execute(query, fields)
         db.commit()
@@ -92,12 +95,23 @@ def delete(id):
         return DB_ERROR
 
 
+            
 def getCommentByID(id):
+    db = get_db()
+    cursor = db.cursor()
+
     select_query = 'SELECT * FROM comment WHERE id=?'
     cursor.execute(select_query, (id,))
     comment = cursor.fetchall()
-    return comment
+    try:
+        if commet is None:
+            return NOT_FOUND
+        comment_row_dict = dict(comment)
+        return json.dumps(comment_row_dict)
 
+    except sqlite3.Error:
+        close_db()
+        return DB_ERROR
 
 
 def get_table_size(cursor):
@@ -117,6 +131,7 @@ def getCommentsByIdeaID(id):  # Get an idea comments with votes for each comment
                     'LEFT JOIN ( SELECT commentVote.commentId , commentVote.type ,count(commentVote.type) as cntUP FROM commentVote Where commentVote.type is not null and commentVote.type =1 Group BY (commentVote.commentId) ) C ON C.commentId = comment.id '\
                     'LEFT JOIN ( SELECT commentVote.commentId , commentVote.type ,count(commentVote.type) as cntDOWN FROM commentVote Where commentVote.type is not null and commentVote.type =2 Group BY (commentVote.commentId) ) D ON D.commentId = comment.id '\
                     'Where idea.id=? Order BY comment.time DESC'\
+
 
                     
 

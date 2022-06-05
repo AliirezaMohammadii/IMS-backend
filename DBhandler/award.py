@@ -101,4 +101,6 @@ def getAwards():    # All awards given so far.
 def get_table_size(cursor):
     cursor.execute("select max(ifnull(id,0)) from award")
     results = cursor.fetchone()[0]
+    if results is None:
+        return 0
     return (results)

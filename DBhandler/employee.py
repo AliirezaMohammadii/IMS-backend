@@ -16,6 +16,7 @@ from Requirements import *
 
 
 def getEmployeeByPersonalId(personal_id, cursor):
+    print(personal_id)
     select_query = 'SELECT * FROM employee WHERE personal_id=?'
     cursor.execute(select_query, (personal_id,))
     employee = cursor.fetchone()
@@ -39,9 +40,11 @@ def getEmployeeByEmail(email, cursor):
 
 
 def get_table_size(cursor):
-    cursor.execute("select * from employee")
-    results = cursor.fetchall()
-    return len(results)
+    cursor.execute("select max(ifnull(id,0)) from employee")
+    results = cursor.fetchone()[0]
+    if results is None:
+        return 0
+    return (results)
 
 
 def create(data):
@@ -138,14 +141,18 @@ def get_by_personal_id(personal_id):
     try:
         employeeRow = getEmployeeByPersonalId(personal_id, cursor)
         if employeeRow is None:
+            print("1111111")
             return NOT_FOUND
 
         employee_row_dict = dict(employeeRow)
         close_db()
+        print("222222222")
+        print(employee_row_dict)
         return json.dumps(employee_row_dict)
 
     except sqlite3.Error:
         close_db()
+        print("33333333")
         return DB_ERROR
 
 

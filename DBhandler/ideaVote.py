@@ -17,14 +17,14 @@ from db import *
 from db import *
 from Requirements import *
 from ideaStatus import *
-
+from DBhandler import employee as employee_DB
 
 def create(data):
+    
+    employeeId = json.loads(employee_DB.get_by_personal_id(data['personal_id']))["id"]
     db = get_db()
     cursor = db.cursor()
-
     id = get_table_size(cursor) +1
-    employeeId = data["employeeId"]
     ideaId = data["ideaId"]
     type = data["type"]
     time =  datetime.now()
