@@ -453,12 +453,17 @@ def _i1():
     return str(message)
 
 
+@app.route('/test_get_idea_login/<id>')
+def _i2(id,personal_id = 918273):
+    
+    data = idea_DB.getIdeaByID_PersonalID(id,personal_id)
+    return str(data)
+
 @app.route('/test_get_idea/<id>')
-def _i2(id):
+def _i8(id):
 
     data = idea_DB.getIdeaByID(id)
     return str(data)
-
 
 @app.route('/test_clear_idea')
 def _i3():
