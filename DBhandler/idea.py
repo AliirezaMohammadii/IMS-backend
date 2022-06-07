@@ -54,7 +54,6 @@ def getIdeaByID(id):
         return DB_ERROR
 
 
-
 def getIdeaByID_PersonalID(id,personal_id):
     
     db = get_db()

@@ -14,6 +14,7 @@ sys.path.insert(0, 'C://Users//asus//Desktop//Uni//SW Eng//Project//project file
 # macOs
 sys.path.insert(0, '/Users/mohammad/Documents/Github/IMS-backend')
 
+
 from DBhandler import db
 from DBhandler import employee as employee_DB
 from DBhandler import idea as idea_DB
