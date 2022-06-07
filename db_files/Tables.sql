@@ -31,7 +31,7 @@ CREATE TABLE idea (
   title VARCHAR(200) NOT NULL,
   text TEXT NOT NULL,
   costReduction FLOAT NULL ,
-  time DATETIME NOT NULL,
+  time VARCHAR(50) NOT NULL,
   status TEXT CHECK( status IN ('NotChecked', 'Pending', 'Accepted', 'Rejected', 'Implemented') )  NOT NULL ,
   PRIMARY KEY (id),
   FOREIGN KEY (categoryId) REFERENCES ideaCategory(id),
@@ -48,7 +48,7 @@ CREATE TABLE ideaVote (
   employeeId INTEGER NOT NULL,
   ideaId INTEGER NOT NULL,
   type INT NOT NULL,
-  time DATETIME NOT NULL,
+  time VARCHAR(50) NOT NULL,
   PRIMARY KEY (id),
   FOREIGN KEY (employeeId) REFERENCES employee(id),
   FOREIGN KEY (ideaId) REFERENCES idea(id)
@@ -65,7 +65,7 @@ CREATE TABLE comment (
   employeeId INTEGER NOT NULL,
   ideaId INTEGER NOT NULL,
   text TEXT NOT NULL,
-  time DATETIME NOT NULL,
+  time VARCHAR(50) NOT NULL,
   PRIMARY KEY (id),
   FOREIGN KEY (employeeId) REFERENCES employee(id),
   FOREIGN KEY (ideaId) REFERENCES idea(id)
@@ -82,7 +82,7 @@ CREATE TABLE commentVote (
   employeeId INTEGER  NOT NULL,
   commentId  INTEGER  NOT NULL,
   type INT NOT NULL,
-  time DATETIME NOT NULL,
+  time VARCHAR(50) NOT NULL,
   PRIMARY KEY (id),
   FOREIGN KEY (employeeId) REFERENCES employee(id),
   FOREIGN KEY (commentId) REFERENCES comment(id)
@@ -98,7 +98,7 @@ CREATE TABLE award (
   employeeId INTEGER NOT NULL,
   ideaId INTEGER NOT NULL,
   value FLOAT NOT NULL ,
-  time DATETIME NOT NULL,
+  time VARCHAR(50) NOT NULL,
   type TEXT CHECK( type IN ('committee','lottery') )NOT NULL ,
   PRIMARY KEY (id),
   FOREIGN KEY (employeeId) REFERENCES employee(id),
@@ -114,7 +114,7 @@ CREATE TABLE committeeScoreHeader (
   id INTEGER NOT NULL ,
   employeeId INTEGER NOT NULL,
   ideaId INTEGER NOT NULL,
-  time DATETIME NOT NULL,
+  time VARCHAR(50) NOT NULL,
   PRIMARY KEY (id),
   FOREIGN KEY (employeeId) REFERENCES employee(id),
   FOREIGN KEY (ideaId) REFERENCES idea(id)

@@ -194,6 +194,23 @@ def get_idea(idea_id):
     return data, STATUS_OK
 
 
+@app.route('/get_idea_loggedIn/<idea_id>')
+@login_required()
+def get_idea_loggedIn(idea_id):
+    personal_id = request.json['personal_id']
+    message = idea_DB.getIdeaByID_loggedIn(idea_id, personal_id)
+
+    if type(message) is int:
+        if message == NOT_FOUND:
+            return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
+
+        elif message == DB_ERROR:
+            return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
+
+    data = message
+    return data, STATUS_OK
+
+
 @app.route('/get_user_ideas/<personal_id>')
 def get_user_ideas(personal_id):
     data = idea_DB.getIdeaByEmployeePersonalId(personal_id)
@@ -553,7 +570,7 @@ def _i6(id):
     return str(data)
 
 
-@app.route('/test_clear_idea_ID/<employeeId>/<idea_id>')
+@app.route('/test_clear_idea/<employeeId>/<idea_id>')
 def _i7(employeeId,idea_id):
 
     data = idea_DB.idea_is_for_user(employeeId,idea_id)

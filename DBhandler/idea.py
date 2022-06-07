@@ -54,7 +54,7 @@ def getIdeaByID(id):
         return DB_ERROR
 
 
-def getIdeaByID_PersonalID(id,personal_id):
+def getIdeaByID_loggedIn(id, personal_id):
     
     db = get_db()
     cursor = db.cursor()
