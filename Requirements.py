@@ -4,6 +4,8 @@ from flask_jwt_extended import create_access_token, get_jwt, get_jwt_identity
 import json
 from flask_jwt_extended import get_jwt_identity
 from hashlib import sha256
+# from khayyam import JalaliDateTime as JDateTime
+import khayyam
 
 
 ### ERROR MESSAGES
@@ -68,3 +70,7 @@ def revoke_jwt():
 
 def check_is_logged_in():
     return get_jwt_identity()
+
+
+def solar_date_now():
+    return str(khayyam.JalaliDatetime.now())[:-10]

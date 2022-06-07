@@ -22,28 +22,26 @@ from DBhandler import commentVote as commentVote_DB
 def create(data):
     db = get_db()
     cursor = db.cursor()
-    employeeId = json.loads(employee_DB.get_by_personal_id(data['personal_id']))["id"]
-    db = get_db()
-    cursor = db.cursor()
-    id = get_table_size(cursor) +1
-    ideaId = data["ideaId"]
-    text = data["text"]
-    time = datetime.now()
+
+    id          = get_table_size(cursor) + 1
+    employeeId  = data["employeeId"]
+    ideaId      = data["ideaId"]
+    text        = data["text"]
+    time        = solar_date_now()
 
     insert_query = 'INSERT INTO comment (id,employeeId, ideaId,text,time) ' \
                    'VALUES (?,?, ?,?,?)'
-    fields = (id,employeeId, ideaId,text,time)
-    try:
-        
-        # insert into db:
-        cursor.execute(insert_query, fields)
-        db.commit()
-        close_db()
-        return MESSAGE_OK
+    fields = (id,employeeId, ideaId, text,time)
 
-    except sqlite3.Error:  
-        close_db()
-        return DB_ERROR
+    # try:    
+    cursor.execute(insert_query, fields)
+    db.commit()
+    close_db()
+    return MESSAGE_OK
+
+    # except sqlite3.Error:  
+    #     close_db()
+    #     return DB_ERROR
 
 
 
@@ -52,14 +50,14 @@ def update(data,id):
     cursor = db.cursor()
     
 
-    employeeId = data["employeeId"]
-    ideaId = data["ideaId"]
-    text = data["text"]
-    time = data["time"]
+    employeeId  = data["employeeId"]
+    ideaId      = data["ideaId"]
+    text        = data["text"]
+    time        = data["time"]
 
-    update_query = 'UPDATE comment SET employeeId=?, ideaId=?,text=?,time=?' \
+    update_query = 'UPDATE comment SET employeeId=?, ideaId=?, text=?,time=?' \
                    'WHERE id=?'
-    fields = (employeeId, ideaId,text,time , id)
+    fields = (employeeId, ideaId, text,time , id)
     try:
         if getCommentByID(id) == NOT_FOUND:
             return NOT_FOUND
@@ -128,7 +126,7 @@ def getCommentsWithVotesByIdeaID(id):  # Get an idea comments with votes for eac
     db = get_db()
     cursor = db.cursor()
 
-    select_query = 'SELECT  idea.id , comment.id , comment.employeeId , comment.text, comment.time , employee.personal_id , employee.firstName , employee.lastName ,ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  '\
+    select_query = 'SELECT  idea.id , comment.id , comment.employeeId, comment.text, comment.time , employee.personal_id , employee.firstName , employee.lastName ,ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  '\
                     'FROM idea INNER JOIN comment ON idea.id = comment.ideaId INNER JOIN employee ON comment.employeeId=employee.id '\
                     'LEFT JOIN ( SELECT commentVote.commentId , commentVote.type ,count(commentVote.type) as cntUP FROM commentVote Where commentVote.type is not null and commentVote.type =1 Group BY (commentVote.commentId) ) C ON C.commentId = comment.id '\
                     'LEFT JOIN ( SELECT commentVote.commentId , commentVote.type ,count(commentVote.type) as cntDOWN FROM commentVote Where commentVote.type is not null and commentVote.type =2 Group BY (commentVote.commentId) ) D ON D.commentId = comment.id '\
@@ -151,7 +149,7 @@ def getCommentsByIdeaID(id):  # Get an idea comments with votes for each comment
     db = get_db()
     cursor = db.cursor()
 
-    select_query = 'SELECT  comment.id , comment.employeeId , comment.text, comment.time , employee.personal_id , employee.firstName , employee.lastName ,ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  '\
+    select_query = 'SELECT  comment.id , comment.employeeId, comment.text, comment.time , employee.personal_id , employee.firstName , employee.lastName ,ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  '\
                     'FROM comment INNER JOIN employee ON comment.employeeId=employee.id '\
                     'LEFT JOIN ( SELECT commentVote.commentId , commentVote.type ,count(commentVote.type) as cntUP FROM commentVote Where commentVote.type is not null and commentVote.type =1 Group BY (commentVote.commentId) ) C ON C.commentId = comment.id '\
                     'LEFT JOIN ( SELECT commentVote.commentId , commentVote.type ,count(commentVote.type) as cntDOWN FROM commentVote Where commentVote.type is not null and commentVote.type =2 Group BY (commentVote.commentId) ) D ON D.commentId = comment.id '\
@@ -194,3 +192,37 @@ def dislike_comment(comment_id, employeeId):
         message = commentVote_DB.update(data_dict)
 
     return message
+
+
+def comment_is_for_user(employeeId, comment_id):
+    db = get_db()
+    cursor = db.cursor()
+    select_query = 'SELECT employeeId '\
+                    'FROM comment ' \
+                    'WHERE comment.id=?'
+
+    try:
+        cursor.execute(select_query, (comment_id,))
+        data = dict(cursor.fetchone())
+        employee_ID = data['employeeId']
+        close_db()
+
+        if (int(employeeId) - int(employee_ID)) == 0:
+            return True
+        else:
+            return False
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
+
+def clear_table():
+    db = get_db()
+    cursor = db.cursor()
+    query = 'DELETE FROM comment'
+    cursor.execute(query)
+    db.commit()
+    close_db()
+
+    return 'Comment table Has been cleared succesfully.'

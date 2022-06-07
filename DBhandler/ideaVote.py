@@ -19,14 +19,14 @@ from DBhandler import employee as employee_DB
 
 
 def create(data):    
-    # employeeId = json.loads(employee_DB.get_by_personal_id(data['personal_id']))["id"]
+
     employeeId = data["employeeId"]
     db = get_db()
     cursor = db.cursor()
     id = get_table_size(cursor) +1
     ideaId = data["ideaId"]
     type = data["type"]
-    time =  datetime.now()
+    time = solar_date_now()
 
     insert_query = 'INSERT INTO ideaVote (id,employeeId, ideaId,type,time) ' \
                    'VALUES (?,?, ?,?,?)'

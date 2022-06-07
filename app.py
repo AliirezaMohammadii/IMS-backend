@@ -1,9 +1,6 @@
 
-from crypt import methods
-from email import message
 from flask import Flask, request, url_for, redirect
 from flask_cors import CORS
-from markupsafe import escape
 import sys, os, time
 import json
 from datetime import datetime, timedelta, timezone
@@ -181,7 +178,7 @@ def create_idea():
 
 
 @app.route('/get_idea/<idea_id>')
-# @login_required()
+@login_required()
 def get_idea(idea_id):
     message = idea_DB.getIdeaByID(idea_id)
 
@@ -246,6 +243,7 @@ def delete_idea(idea_id):
     return {}, STATUS_OK
 
 
+# ------ LIKE/DISLIKE IDEA ENDPOINTS ------
 @app.route('/like_idea/<idea_id>', methods=['POST'])
 @login_required()
 def like_idea(idea_id):
@@ -272,6 +270,7 @@ def dislike_idea(idea_id):
 
 # ------ IDEA_CATEGORY ENDPOINTS ------
 @app.route('/create_idea_cat', methods=['POST'])
+@login_required()
 def create_idea_cat():
     message = ideaCategory_DB.create(request.json)
 
@@ -288,8 +287,54 @@ def get_idea_cats():
     return idea_categories
 
 
+@app.route('/update_idea_cat/<int:idea_cat_id>', methods=['PATCH'])
+@login_required()
+def update_ideaCat(idea_cat_id):
+
+    message = ideaCategory_DB.update(request.json, idea_cat_id)
+
+    if message == NOT_FOUND:
+        return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
+
+    elif message == DB_ERROR:
+        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
+
+    return {}, STATUS_OK
+
+
+@app.route('/delete_idea_cat_byId/<int:idea_cat_id>', methods=['DELETE'])
+@login_required()
+def delete_ideaCat_byId(idea_cat_id):
+
+    message = ideaCategory_DB.delete_by_id(idea_cat_id)
+
+    if message == NOT_FOUND:
+        return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
+
+    elif message == DB_ERROR:
+        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
+
+    return {}, STATUS_OK
+
+
+@app.route('/delete_idea_cat_byTitle/<title>', methods=['DELETE'])
+@login_required()
+def delete_ideaCat_byTitle(title):
+
+    message = ideaCategory_DB.delete_by_title(title)
+
+    if message == NOT_FOUND:
+        return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
+
+    elif message == DB_ERROR:
+        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
+
+    return {}, STATUS_OK
+
+
 # ------ COMMENT ENDPOINTS ------
 @app.route('/create_comment', methods=['POST'])
+@login_required()
 def create_comment():
 
     message = comment_DB.create(request.json)
@@ -316,7 +361,27 @@ def get_idea_comments(idea_id):
     return data, STATUS_OK
 
 
-# ------ TESTING DB / COMMENT_VOTE ------
+@app.route('/delete_comment/<int:comment_id>', methods=['DELETE'])
+@login_required()
+def delete_comment(comment_id):
+
+    employeeId = request.json['employeeId']
+    permitted = comment_DB.comment_is_for_user(employeeId, comment_id)
+    if not permitted:
+        return {}, STATUS_FORBIDDEN
+
+    message = comment_DB.delete(comment_id)
+
+    if message == NOT_FOUND:
+        return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
+
+    elif message == DB_ERROR:
+        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
+
+    return {}, STATUS_OK
+
+
+# ------ COMMENT_VOTE ENDPOINTS ------
 @app.route('/like_comment/<comment_id>', methods=['POST'])
 @login_required()
 def like_comment(comment_id):
@@ -339,11 +404,6 @@ def dislike_comment(comment_id):
         return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
 
     return {}, STATUS_OK
-
-
-# .
-# .
-# .
 
 
 # ----------------------------------------------------------
@@ -390,8 +450,8 @@ def tets3():
 @app.route('/test_create')
 def _1():
     data_dict = {
-        'personal_id' : '918273',
-        'password' : '222222',
+        'personal_id' : '2222',
+        'password' : '2222',
     }
 
     message = employee_DB.create(data_dict)
@@ -413,12 +473,12 @@ def _3():
 @app.route('/test_update')
 def _4():
     data_dict = {
-        'firstName' : 'Mohammad',
-        'lastName' : 'Hashemi',
-        'personal_id' : '918273',
-        'password' : '222222',
-        'mobile' : '09876512342222',
-        'email' : 'm2@a.com',
+        'firstName' : 'Alireza',
+        'lastName' : 'Mohammadi',
+        'personal_id' : '2222',
+        'password' : '2222',
+        'mobile' : '09129293929',
+        'email' : 'm6@a.com',
         'committeeMember' : 0,
     }
 
@@ -439,14 +499,14 @@ def _6():
 
 
 # ------ TESTING DB / IDEA ------
-
 @app.route('/test_create_idea')
 def _i1():
+
     data_dict = {
-        'personal_id' : 67890,
+        'employeeId' : 1,
         'categoryId' : 3,
-        'title' : 'some title 3',
-        'text' : 'some text 3',
+        'title' : 'some title 1',
+        'text' : 'some text 1',
     }
 
     message = idea_DB.create(data_dict)
@@ -467,7 +527,6 @@ def _i3():
     return str(data)
 
 
-
 @app.route('/test_get_user_ideas/<personal_id>')
 def _i4(personal_id):
 
@@ -476,7 +535,6 @@ def _i4(personal_id):
 
 
 @app.route('/test_get_all_ideas')
-#@login_required()
 def _i5():
 
     data = idea_DB.get_all_ideas()
@@ -494,12 +552,12 @@ def _i7(employeeId,idea_id):
 
     data = idea_DB.idea_is_for_user(employeeId,idea_id)
     return str(data)
-# ------ TESTING DB / IDEA VOTE------
 
+# ------ TESTING DB / IDEA VOTE------
 @app.route('/test_create_upvote/')
 def _iv1():
     data_dict = {
-        'personal_id' : 67890,
+        'employeeId' : 2,
         'ideaId' : 1,
         'type' : 1,
     }
@@ -510,9 +568,32 @@ def _iv1():
 @app.route('/test_update_upvote/')
 def _iv2():
     data_dict = {
-        'personal_id' : 67890,
+        'employeeId' : 2,
         'ideaId' : 1,
         'type' : 1,
+    }
+
+    message = ideaVote_DB.update(data_dict)
+    return str(message)
+
+
+@app.route('/test_create_downvote/')
+def _iv3():
+    data_dict = {
+        'employeeId' : 2,
+        'ideaId' : 1,
+        'type' : 2,
+    }
+
+    message = ideaVote_DB.create(data_dict)
+    return str(message)
+
+@app.route('/test_update_downvote/')
+def _iv4():
+    data_dict = {
+        'employeeId' : 2,
+        'ideaId' : 1,
+        'type' : 2,
     }
 
     message = ideaVote_DB.update(data_dict)
@@ -534,7 +615,7 @@ def _ic1():
 
 
 @app.route('/test_clear_idea_cat_table')
-def _ic3():
+def _ic2():
     message = ideaCategory_DB.clear_table()
     return message
 
@@ -543,10 +624,9 @@ def _ic3():
 @app.route('/test_create_comment')
 def _ico1():
     data_dict = {
-        'personal_id' : 67890,
+        'employeeId' : 2,
         'ideaId' : 1,
-        'title' : 'nazar',
-        'text' : 'some text nazar',
+        'text' : 'some text nazar 2',
     }
 
     message = comment_DB.create(data_dict)
@@ -555,26 +635,31 @@ def _ico1():
 
 @app.route('/test_get_idea_comments/<id>')
 def _ico2(id):
-
     data = comment_DB.getCommentsByIdeaID(id)
     return str(data)
 
-# ------ TESTING DB / COMMENT_VOTE ------
+@app.route('/test_clear_comment_table')
+def _ico3():
+    message = comment_DB.clear_table()
+    return message
 
+# ------ TESTING DB / COMMENT_VOTE ------
 @app.route('/test_create_commentVote_up')
 def _icov1():
     data_dict = {
-        'personal_id' : 918273,
+        'employeeId' : 1,
         'commentId' : 1,
         'type' : 1,
     }
 
     message = commentVote_DB.create(data_dict)
     return str(message)
+
+
 @app.route('/test_create_commentVote_down')
 def _icov2():
     data_dict = {
-        'personal_id' : 918273,
+        'employeeId' : 1,
         'commentId' : 1,
         'type' : 2,
     }
@@ -582,7 +667,10 @@ def _icov2():
     message = commentVote_DB.create(data_dict)
     return str(message)
 
-
+@app.route('/test_clear_commentVote_table')
+def _icov3():
+    message = commentVote_DB.clear_table()
+    return message
 
 # ----------------------------------------------------------
 

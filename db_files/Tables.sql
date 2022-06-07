@@ -13,11 +13,11 @@ CREATE TABLE employee (
 );
 
 
-CREATE UNIQUE INDEX uq_mobile
-ON employee(mobile);
+-- CREATE UNIQUE INDEX uq_mobile
+-- ON employee(mobile);
 
-CREATE UNIQUE INDEX uq_email
-ON employee(email);
+-- CREATE UNIQUE INDEX uq_email
+-- ON employee(email);
 
 CREATE UNIQUE INDEX uq_personal_id
 ON employee(personal_id);

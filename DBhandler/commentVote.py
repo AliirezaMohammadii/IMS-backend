@@ -22,27 +22,28 @@ def create(data):
     db = get_db()
     cursor = db.cursor()
 
-    id = get_table_size(cursor) +1
-    employeeId = json.loads(employee_DB.get_by_personal_id(data['personal_id']))["id"]
-    db = get_db()
-    cursor = db.cursor()
-    commentId = data["commentId"]
-    type = data["type"]
-    time = datetime.now()
-    print(employeeId)
-    insert_query = 'INSERT INTO commentVote (id,employeeId, commentId,type,time) ' \
-                   'VALUES (?,?, ?,?,?)'
-    fields = (id,employeeId, commentId ,type,time,)
+    id          = get_table_size(cursor) +1
+    employeeId  = data["employeeId"]
+    commentId   = data["commentId"]
+    type        = data["type"]
+    time        = solar_date_now()
 
-    if  getCommentVoteByEmployeeComment(employeeId , commentId, cursor) is not None:
-        print("exists")
-        return COMMENTVOTE_ALREADY_EXISTS
-    # insert into db:
-    cursor.execute(insert_query, fields)
-    db.commit()
-    close_db()
-    print("done")
-    return MESSAGE_OK
+    insert_query = 'INSERT INTO commentVote (id,employeeId, commentId,type,time) ' \
+                   'VALUES (?,?,?,?,?)'
+    fields = (id, employeeId, commentId, type, time,)
+
+    try:
+        if getCommentVoteByEmployeeComment(employeeId , commentId, cursor) is not None:
+            return COMMENTVOTE_ALREADY_EXISTS
+
+        cursor.execute(insert_query, fields)
+        db.commit()
+        close_db()
+        return MESSAGE_OK
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
 
 
 def update(data, id): 
@@ -184,3 +185,12 @@ def dislike_comment(commentId, employeeId):
     return message
 
 
+def clear_table():
+    db = get_db()
+    cursor = db.cursor()
+    query = 'DELETE FROM commentVote'
+    cursor.execute(query)
+    db.commit()
+    close_db()
+
+    return 'CommentVote table Has been cleared succesfully.'

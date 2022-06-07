@@ -18,7 +18,7 @@ def create(data):
     ideaId = data["ideaId"]
     type = data["type"]
     value = data["value"]
-    time = datetime.datetime.now()
+    time = solar_date_now()
 
     insert_query = 'INSERT INTO award (id, employeeId,ideaId , type ,value, time) ' \
                    'VALUES (?,?,?,?,?,?)'

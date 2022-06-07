@@ -49,22 +49,66 @@ def create(data):
 def update(data, id):
     db = get_db()
     cursor = db.cursor()
-    
+
     title = data["title"]
 
     update_query = 'UPDATE ideaCategory SET title =?' \
                    'WHERE id=?'
-    fields = (title , id)
+
+    fields = (title, id)
 
     try:
-        if getIdeaCategoryByID(id , cursor ) is NONE:
+        if getIdeaCategoryByID(id, cursor) is None:
             return NOT_FOUND
+
         cursor.execute(update_query, fields)
         db.commit()
         close_db()
         return MESSAGE_OK
 
     except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
+
+def delete_by_id(id):
+    db = get_db()
+    cursor = db.cursor()
+
+    query = 'DELETE FROM ideaCategory WHERE id=?'
+    fields = (id,)
+
+    try:
+        if getIdeaCategoryByID(id, cursor) is None:
+            return NOT_FOUND
+
+        cursor.execute(query, fields)
+        db.commit()
+        close_db()
+        return MESSAGE_OK
+
+    except sqlite3.Error:
+        close_db()
+        return DB_ERROR
+
+
+def delete_by_title(title):
+    db = get_db()
+    cursor = db.cursor()
+
+    query = 'DELETE FROM ideaCategory WHERE title=?'
+    fields = (title,)
+
+    try:
+        if getIdeaCategoryByTitle(title, cursor) is None:
+            return NOT_FOUND
+
+        cursor.execute(query, fields)
+        db.commit()
+        close_db()
+        return MESSAGE_OK
+
+    except sqlite3.Error:
         close_db()
         return DB_ERROR
 
@@ -92,11 +136,13 @@ def getIdeaCategoryByID(id,cursor):
     ideaCategory = cursor.fetchall()
     return ideaCategory
 
+
 def getIdeaCategoryByTitle(title, cursor):
     select_query = 'SELECT * FROM ideaCategory WHERE title=?'
     cursor.execute(select_query, (title,))
     ideaCategory = cursor.fetchall()
     return ideaCategory
+
 
 def clear_table():
     db = get_db()

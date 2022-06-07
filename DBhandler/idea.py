@@ -57,14 +57,14 @@ def getIdeaByID(id):
 def create(data):
     db = get_db()
     cursor = db.cursor()
-    employeeId = json.loads(employee_DB.get_by_personal_id(data['personal_id']))["id"]
 
     id              = get_table_size(cursor) + 1
+    employeeId      = data["employeeId"]
     categoryId      = data["categoryId"]
     title           = data["title"]
     text            = data["text"]
     costReduction   = 0.0
-    time            = datetime.now()
+    time            = solar_date_now()
     status          = "NotChecked"
     
     insert_query = 'INSERT INTO idea (id, employeeId, categoryId, title, text, costReduction, time, status) ' \
@@ -120,7 +120,6 @@ def delete(id):
     fields = (id,)
 
     try:
-
         if getIdeaByID(id) is None:
             return NOT_FOUND
 
@@ -181,6 +180,7 @@ def getIdeas(pagination_id):
     except sqlite3.Error:  
         close_db()
         return DB_ERROR
+
 
 #get an idea with its votes by ideaID
 def getIdeaVotes(id):
