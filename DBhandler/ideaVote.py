@@ -19,7 +19,8 @@ from DBhandler import employee as employee_DB
 
 
 def create(data):    
-    employeeId = json.loads(employee_DB.get_by_personal_id(data['personal_id']))["id"]
+    # employeeId = json.loads(employee_DB.get_by_personal_id(data['personal_id']))["id"]
+    employeeId = data["employeeId"]
     db = get_db()
     cursor = db.cursor()
     id = get_table_size(cursor) +1
