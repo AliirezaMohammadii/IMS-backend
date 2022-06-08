@@ -56,7 +56,7 @@ def fix_time_diff(time):
     hour = int(time.split()[-1][-5:-3])
     diff = int(solar_date_now()[-5:-3]) - hour
     if diff > 0:
-        diff_str = 'ساعت قبل ' + str(diff)
+        diff_str = str(diff) + ' ساعت قبل'
 
     else:
         minute = int(time.split()[-1][-2:])
@@ -66,7 +66,7 @@ def fix_time_diff(time):
         if diff == 0:
             diff_str == 'چند لحظه قبل'
         else:
-            diff_str = 'دقیقه قبل ' + str(diff)
+            diff_str = str(diff) + ' دقیقه قبل'
 
     return diff_str
 
