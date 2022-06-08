@@ -445,7 +445,7 @@ def dislike_comment(comment_id):
 # ------ TEST ENDPOINTS ------
 @app.route('/test')
 def test():
-    return {}
+    return {'id': employee_DB.get_user_id('2222')}, 200
 
 
 @app.route('/test2')
