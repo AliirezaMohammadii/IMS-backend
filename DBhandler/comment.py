@@ -159,7 +159,8 @@ def getCommentsByIdeaID(id):  # Get an idea comments with votes for each comment
         cursor.execute(select_query, (id,))
         comments = cursor.fetchall()
         close_db()
-        return convert_to_json(comments)
+        return convert_to_json_editTime(comments)
+        # return convert_to_json(comments)
 
     except sqlite3.Error:  
         close_db()

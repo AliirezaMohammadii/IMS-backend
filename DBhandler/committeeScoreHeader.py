@@ -20,7 +20,7 @@ def create(json):
     employeeId = data["employeeId"]
     ideaId = data["ideaId"]
 
-    time = datetime.datetime.now()
+    time = solar_date_now()
 
     insert_query = 'INSERT INTO committeeScoreHeader (id,employeeId, ideaId,time) ' \
                    'VALUES (?,?, ?,?)'

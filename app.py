@@ -445,7 +445,8 @@ def dislike_comment(comment_id):
 # ------ TEST ENDPOINTS ------
 @app.route('/test')
 def test():
-    return {'id': employee_DB.get_user_id('2222')}, 200
+    time = convert_to_json_editTime('222 22:22')
+    return {'time': time}, 200
 
 
 @app.route('/test2')
@@ -522,7 +523,7 @@ def _6():
 def _i1():
 
     data_dict = {
-        'employeeId' : 1,
+        'personal_id' : 2222,
         'categoryId' : 3,
         'title' : 'some title 1',
         'text' : 'some text 1',
@@ -648,7 +649,7 @@ def _ic2():
 @app.route('/test_create_comment')
 def _ico1():
     data_dict = {
-        'employeeId' : 2,
+        'personal_id' : 2222,
         'ideaId' : 1,
         'text' : 'some text nazar 2',
     }
