@@ -88,7 +88,7 @@ def create(data):
     cursor = db.cursor()
 
     id              = get_table_size(cursor) + 1
-    employeeId      = data["employeeId"]
+    employeeId      = employee_DB.get_user_id(data["personal_id"])
     categoryId      = data["categoryId"]
     title           = data["title"]
     text            = data["text"]
@@ -115,7 +115,7 @@ def update(data, id):
     db = get_db()
     cursor = db.cursor()
     
-    employeeId      = data["employeeId"]
+    employeeId      = employee_DB.get_user_id(data["personal_id"])
     categoryId      = data["categoryId"]
     title           = data["title"]
     text            = data["text"]

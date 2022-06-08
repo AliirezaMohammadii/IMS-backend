@@ -24,7 +24,7 @@ def create(data):
     cursor = db.cursor()
 
     id          = get_table_size(cursor) + 1
-    employeeId  = data["employeeId"]
+    employeeId  = employee_DB.get_user_id(data["personal_id"])
     ideaId      = data["ideaId"]
     text        = data["text"]
     time        = solar_date_now()
@@ -50,7 +50,7 @@ def update(data,id):
     cursor = db.cursor()
     
 
-    employeeId  = data["employeeId"]
+    employeeId  = employee_DB.get_user_id(data["personal_id"])
     ideaId      = data["ideaId"]
     text        = data["text"]
     time        = data["time"]

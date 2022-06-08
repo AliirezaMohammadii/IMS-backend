@@ -20,7 +20,7 @@ from DBhandler import employee as employee_DB
 
 def create(data):    
 
-    employeeId = data["employeeId"]
+    employeeId = employee_DB.get_user_id(data["personal_id"])
     db = get_db()
     cursor = db.cursor()
     id = get_table_size(cursor) +1
@@ -50,7 +50,7 @@ def update(data):
     db = get_db()
     cursor = db.cursor()
 
-    employeeId = data["employeeId"]
+    employeeId = employee_DB.get_user_id(data["personal_id"])
     ideaId = data["ideaId"]
     type = data["type"]
     time = datetime.now()

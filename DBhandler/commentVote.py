@@ -12,18 +12,17 @@ sys.path.insert(0, '/Users/narges/Documents/GitHub/IMS-backend/DBhandler')
 sys.path.insert(0, '/Users/mohammad/Documents/Github/IMS-backend')
 sys.path.insert(0, '/Users/narges/Documents/GitHub/IMS-backend')
 
-
-
 from db import *
 from Requirements import *
 from DBhandler import employee as employee_DB
+
 
 def create(data):
     db = get_db()
     cursor = db.cursor()
 
     id          = get_table_size(cursor) +1
-    employeeId  = data["employeeId"]
+    employeeId  = employee_DB.get_user_id(data["personal_id"])
     commentId   = data["commentId"]
     type        = data["type"]
     time        = solar_date_now()
@@ -50,7 +49,7 @@ def update(data, id):
     db = get_db()
     cursor = db.cursor()
 
-    employeeId = data["employeeId"]
+    employeeId = employee_DB.get_user_id(data["personal_id"])
     commentId = data["commentId"]
     type = data["type"]
     time = data["time"]
