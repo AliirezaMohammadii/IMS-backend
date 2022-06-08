@@ -217,7 +217,7 @@ def get_user_id(personal_id):
         cursor.execute(query, (personal_id,))
         data = dict(cursor.fetchone())
         id = int(data['id'])
-        close_db()
+        # close_db()
         return id
     
     except:

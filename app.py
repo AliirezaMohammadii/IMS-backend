@@ -179,7 +179,7 @@ def create_idea():
 
 
 @app.route('/get_idea/<idea_id>')
-@login_required()
+# @login_required()
 def get_idea(idea_id):
     message = idea_DB.getIdeaByID(idea_id)
 
@@ -194,7 +194,7 @@ def get_idea(idea_id):
     return data, STATUS_OK
 
 
-@app.route('/get_idea_loggedIn/<idea_id>')
+@app.route('/get_idea_loggedIn/<idea_id>', methods=['POST'])
 @login_required()
 def get_idea_loggedIn(idea_id):
     personal_id = request.json['personal_id']
@@ -265,6 +265,7 @@ def delete_idea(idea_id):
 @app.route('/like_idea/<idea_id>', methods=['POST'])
 @login_required()
 def like_idea(idea_id):
+    print(request.json)
     employeeId = employee_DB.get_user_id(request.json['personal_id'])
     message = idea_DB.like_idea(idea_id, employeeId)
 
