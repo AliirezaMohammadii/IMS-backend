@@ -40,8 +40,9 @@ def solar_date_now():
 
 
 def hash_password(password):
-    hash_password = sha256(password.encode('utf-8')).hexdigest()
-    return hash_password
+    # hash_password = sha256(password.encode('utf-8')).hexdigest()
+    # return hash_password
+    return password
 
 
 def convert_to_json(data):
