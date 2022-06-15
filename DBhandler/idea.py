@@ -1,3 +1,4 @@
+
 import json
 import re
 import sys
@@ -17,12 +18,13 @@ from Requirements import *
 from ideaStatus import *
 from DBhandler import employee as employee_DB
 from DBhandler import ideaVote as ideaVote_DB
+from DBhandler import ideaStatus
 
 
 def get_table_size(cursor):
     cursor.execute("select max(ifnull(id,0)) from idea")
     results = cursor.fetchone()[0]
-    if results is None :
+    if results is None:
         return 0
     return (results)
 
@@ -94,7 +96,7 @@ def create(data):
     text            = data["text"]
     costReduction   = 0.0
     time            = solar_date_now()
-    status          = "NotChecked"
+    status          = ideaStatus.NotChecked
     
     insert_query = 'INSERT INTO idea (id, employeeId, categoryId, title, text, costReduction, time, status) ' \
                    'VALUES (?,?,?,?,?,?,?,?)'

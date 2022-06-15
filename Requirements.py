@@ -1,11 +1,18 @@
 
 from datetime import datetime, timedelta, timezone
-from flask_jwt_extended import create_access_token, get_jwt, get_jwt_identity
+from flask_jwt_extended import get_jwt_identity, create_access_token, get_jwt, get_jwt_identity
 import json
-from flask_jwt_extended import get_jwt_identity
 from hashlib import sha256
 # from khayyam import JalaliDateTime as JDateTime
 import khayyam
+import sys
+
+# windows
+sys.path.insert(0, 'C://Users//asus//Desktop//Uni//SW Eng//Project//project files//venv//IMS//backend')
+# macOs
+sys.path.insert(0, '/Users/mohammad/Documents/Github/IMS-backend')
+
+from DBhandler import employee as employee_DB
 
 
 ### ERROR MESSAGES
@@ -18,6 +25,7 @@ USER_ALREADY_EXISTS = 3
 IDEAVOTE_ALREADY_EXISTS = 4
 CATEGORY_ALREADY_EXISTS = 5
 COMMENTVOTE_ALREADY_EXISTS = 6
+
 ### STATUS CODES
 STATUS_OK           = 200
 STATUS_CREATED      = 201
@@ -28,6 +36,30 @@ STATUS_FORBIDDEN    = 403
 STATUS_NOT_FOUND    = 404
 
 STATUS_INTERNAL_SERVER_ERROR = 500
+
+
+ADMIN_personal_id = '11111111'
+
+
+# Token to PersonalId
+tpi = {}
+
+
+def is_admin(personal_id):
+    return personal_id == ADMIN_personal_id
+
+
+def current_user(request):
+    jwt_token = request.headers['Authorization'].split()[1]
+    personal_id = tpi[jwt_token]
+    user = employee_DB.get_by_personal_id(personal_id)
+    return user
+
+
+def get_personal_id(request):
+    jwt_token = request.headers['Authorization'].split()[1]
+    personal_id = tpi[jwt_token]
+    return personal_id
 
 
 def log(to_print):
