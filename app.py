@@ -26,6 +26,7 @@ from DBhandler import committeeScoreHeader as committeeScoreHeader_DB
 from DBhandler import committeeScoreDetail as committeeScoreDetail_DB
 from DBhandler import evaluationCriteria as evaluationCriteria_DB
 from DBhandler import award as award_DB
+from DBhandler import tpi as tpi_DB
 
 
 app = Flask(__name__)
@@ -41,9 +42,15 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 db.init_app(app)
 
 
+def get_personal_id(request):
+    jwt_token = request.headers['Authorization'].split()[1]
+    personal_id = tpi_DB.get(jwt_token)
+    return personal_id
+
+
 def current_user(request):
     jwt_token = request.headers['Authorization'].split()[1]
-    personal_id = tpi[jwt_token]
+    personal_id = tpi_DB.get(jwt_token)
     user = employee_DB.get_by_personal_id(personal_id)
     return user
 
@@ -73,9 +80,16 @@ def login():
 
     if correct_password:
         access_token = create_access_token(identity=personal_id)
-        if not access_token in tpi:
-            tpi[access_token] = personal_id
-            print('in login', tpi)
+
+        print('LOGINNNNNNNNNNNNNNNNNNNNNNN')
+
+        data = {
+            'jwt_token': access_token,
+            'personal_id': personal_id,
+        }
+
+        tpi_DB.create(data)
+
         response = {"access_token": access_token}
         return response, STATUS_OK
 
@@ -110,8 +124,6 @@ def signup():
 
     personal_id = request.json['personal_id']
     access_token = create_access_token(identity=personal_id)
-    tpi[access_token] = personal_id
-    print('in register', tpi)
     body = {'access_token': access_token}
     return body, STATUS_CREATED
 
@@ -122,6 +134,9 @@ def get_user(personal_id_):
 
     personal_id = get_personal_id(request)
     permitted = personal_id == personal_id_ or is_admin(personal_id)
+
+    print(personal_id)
+    print(personal_id_)
 
     if not permitted:
         return {}, STATUS_FORBIDDEN
@@ -142,8 +157,6 @@ def get_user(personal_id_):
 @app.route('/update_user', methods=['POST'])
 @login_required()
 def update_user():
-
-    print('in update', tpi)
 
     personal_id = get_personal_id(request)
     permitted = personal_id
@@ -331,8 +344,10 @@ def change_idea_status(idea_id):
 @login_required()
 def like_idea(idea_id):
     personal_id = get_personal_id(request)
+
+    idea = dict(json.loads(idea_DB.getIdeaByID(idea_id)))
     
-    not_permitted = idea_DB.getIdeaByID(idea_id)['personal_id'] == personal_id
+    not_permitted = idea['personal_id'] == personal_id
     if not_permitted:
         return {}, STATUS_FORBIDDEN
 
@@ -350,7 +365,9 @@ def like_idea(idea_id):
 def dislike_idea(idea_id):
     personal_id = get_personal_id(request)
 
-    not_permitted = idea_DB.getIdeaByID(idea_id)['personal_id'] == personal_id
+    idea = dict(json.loads(idea_DB.getIdeaByID(idea_id)))
+
+    not_permitted = idea['personal_id'] == personal_id
     if not_permitted:
         return {}, STATUS_FORBIDDEN
 

@@ -39,18 +39,8 @@ STATUS_INTERNAL_SERVER_ERROR = 500
 ADMIN_personal_id = '11111111'
 
 
-# Token to PersonalId
-tpi = {}
-
-
 def is_admin(personal_id):
     return personal_id == ADMIN_personal_id
-
-
-def get_personal_id(request):
-    jwt_token = request.headers['Authorization'].split()[1]
-    personal_id = tpi[jwt_token]
-    return personal_id
 
 
 def log(to_print):

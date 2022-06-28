@@ -71,9 +71,16 @@ CREATE TABLE comment (
   FOREIGN KEY (ideaId) REFERENCES idea(id)
 );
 
-
 CREATE INDEX idx_comment_idea
 ON comment(ideaId);
+
+
+DROP TABLE IF EXISTS tpi;
+CREATE TABLE tpi (
+  id INTEGER NOT NULL ,
+  jwt_token VARCHAR(200) NOT NULL,
+  personal_id VARCHAR(100) NOT NULL
+);
 
 
 DROP TABLE IF EXISTS commentVote;
