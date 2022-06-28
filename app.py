@@ -81,8 +81,6 @@ def login():
     if correct_password:
         access_token = create_access_token(identity=personal_id)
 
-        print('LOGINNNNNNNNNNNNNNNNNNNNNNN')
-
         data = {
             'jwt_token': access_token,
             'personal_id': personal_id,
@@ -552,10 +550,14 @@ def dislike_comment(comment_id):
 
     return {}, STATUS_OK
 
-
 # ----------------------------------------------------------
 
-
+# ------- evaluationCriteria ENDPOINTS -------
+@app.route('/get_ev_crits')
+# @login_required()
+def get_ev_crits():
+    ev_crits = evaluationCriteria_DB.get_all_ev_crits()
+    return ev_crits
 
 
 
@@ -845,6 +847,40 @@ def _icov2():
 def _icov3():
     message = commentVote_DB.clear_table()
     return message
+
+
+# ------ TESTING DB /  ------ Evaluation Criteria ------
+@app.route('/test_create_ev_crit')
+def _ec1():
+    ev_crit0 = {
+                'title': '---',
+                'weight': 0
+                }
+    ev_crit1 = {
+                'title': 'ev crit 1',
+                'weight': 0.2
+                }
+    ev_crit2 = {
+                'title': 'ev crit 2',
+                'weight': 0.4,
+                }
+    ev_crit3 = {
+                'title': 'ev crit 3',
+                'weight': 0.4
+                }
+    
+    evaluationCriteria_DB.create(ev_crit0)
+    evaluationCriteria_DB.create(ev_crit1)
+    evaluationCriteria_DB.create(ev_crit2)
+    evaluationCriteria_DB.create(ev_crit3)
+    return str(STATUS_CREATED)
+
+
+# @app.route('/test_clear_idea_cat_table')
+# def _ec2():
+#     message = ideaCategory_DB.clear_table()
+#     return message
+
 
 # ----------------------------------------------------------
 

@@ -144,7 +144,6 @@ CREATE TABLE ideaCategory (
 );
 
 
-
 DROP TABLE IF EXISTS committeeScoreDetail;
 CREATE TABLE committeeScoreDetail (
   id INTEGER NOT NULL PRIMARY KEY  ,
