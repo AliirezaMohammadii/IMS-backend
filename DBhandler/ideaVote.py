@@ -30,11 +30,12 @@ def create(data):
 
     insert_query = 'INSERT INTO ideaVote (id,employeeId, ideaId,type,time) ' \
                    'VALUES (?,?, ?,?,?)'
-    fields = (id,employeeId, ideaId ,type,time)
+    fields = (id, employeeId, ideaId, type, time)
+
     try:
         if getIdeaVoteByEmployeeIdea(employeeId , ideaId, cursor) is not None:
             return IDEAVOTE_ALREADY_EXISTS
-        # insert into db:
+
         cursor.execute(insert_query, fields)
         db.commit()
         close_db()
