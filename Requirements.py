@@ -77,7 +77,7 @@ def fix_time_diff(time):
         diff = 60 + diff if diff < 0 else diff
 
         if diff == 0:
-            diff_str == 'چند لحظه قبل'
+            diff_str = 'چند لحظه قبل'
         else:
             diff_str = str(diff) + ' دقیقه قبل'
 
