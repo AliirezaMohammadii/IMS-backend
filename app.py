@@ -41,6 +41,13 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 db.init_app(app)
 
 
+def current_user(request):
+    jwt_token = request.headers['Authorization'].split()[1]
+    personal_id = tpi[jwt_token]
+    user = employee_DB.get_by_personal_id(personal_id)
+    return user
+
+
 @app.after_request
 def refresh_expiring_jwts(response):
     try:
@@ -66,6 +73,9 @@ def login():
 
     if correct_password:
         access_token = create_access_token(identity=personal_id)
+        if not access_token in tpi:
+            tpi[access_token] = personal_id
+            print('in login', tpi)
         response = {"access_token": access_token}
         return response, STATUS_OK
 
@@ -100,6 +110,8 @@ def signup():
 
     personal_id = request.json['personal_id']
     access_token = create_access_token(identity=personal_id)
+    tpi[access_token] = personal_id
+    print('in register', tpi)
     body = {'access_token': access_token}
     return body, STATUS_CREATED
 
@@ -131,8 +143,10 @@ def get_user(personal_id_):
 @login_required()
 def update_user():
 
+    print('in update', tpi)
+
     personal_id = get_personal_id(request)
-    permitted = personal_id == request['personal_id']
+    permitted = personal_id
 
     #TODO
     # if not permitted:

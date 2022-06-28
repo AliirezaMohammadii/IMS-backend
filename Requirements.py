@@ -12,8 +12,6 @@ sys.path.insert(0, 'C://Users//asus//Desktop//Uni//SW Eng//Project//project file
 # macOs
 sys.path.insert(0, '/Users/mohammad/Documents/Github/IMS-backend')
 
-from DBhandler import employee as employee_DB
-
 
 ### ERROR MESSAGES
 MESSAGE_OK = 0
@@ -47,13 +45,6 @@ tpi = {}
 
 def is_admin(personal_id):
     return personal_id == ADMIN_personal_id
-
-
-def current_user(request):
-    jwt_token = request.headers['Authorization'].split()[1]
-    personal_id = tpi[jwt_token]
-    user = employee_DB.get_by_personal_id(personal_id)
-    return user
 
 
 def get_personal_id(request):
