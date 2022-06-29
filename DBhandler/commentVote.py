@@ -136,7 +136,7 @@ def getCommentVoteByEmployeeComment(employeeID , commentID,cursor):
     commentVote = cursor.fetchone()
     return commentVote
 
-def getCommentVoteByEmployeePersonalIDCommentID(personalID , commentID):
+def getCommentVoteByEmployeePersonalIDCommentID(personalID, commentID):
     db = get_db()
     cursor = db.cursor()
 

@@ -632,7 +632,7 @@ def delete_ev_crit_byTitle(title):
     if not permitted:
         return {}, STATUS_FORBIDDEN
 
-    message = ideaCategory_DB.delete_by_title(title)
+    message = evaluationCriteria_DB.delete_by_title(title)
 
     if message == NOT_FOUND:
         return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
@@ -693,9 +693,9 @@ def test2():
 @app.route('/test3/<access_token>')
 # @login_required(optional=True)
 def tets3(access_token):
-    personal_id = tpi[access_token]
-    print(personal_id)
-    user = employee_DB.get_by_personal_id(personal_id)
+    # personal_id = tpi[access_token]
+    # print(personal_id)
+    # user = employee_DB.get_by_personal_id(personal_id)
     return {'user': user}, 200
 
 
@@ -770,9 +770,9 @@ def _i1():
 
 @app.route('/test_get_idea_login/<id>')
 def _i2(id,personal_id = 918273):
-    
-    data = idea_DB.getIdeaByID_PersonalID(id,personal_id)
-    return str(data)
+    # data = idea_DB.getIdeaByID_PersonalID(id,personal_id)
+    # return str(data)
+    pass
 
 @app.route('/test_get_idea/<id>')
 def _i8(id):

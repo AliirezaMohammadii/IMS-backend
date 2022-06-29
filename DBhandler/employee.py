@@ -2,8 +2,6 @@ import json
 import re
 import sys
 
-from attr import field
-
 # windows
 sys.path.insert(0, 'C://Users//asus//Desktop//Uni//SW Eng//Project//project files//venv//IMS//backend//DBhandler')
 sys.path.insert(0, 'C://Users//asus//Desktop//Uni//SW Eng//Project//project files//venv//IMS//backend')
@@ -250,8 +248,8 @@ def set_as_ordinaryMember(personal_id):
     db = get_db()
     cursor = db.cursor()
 
-    update_query = 'UPDATE employee SET committeeMember = ?'
-    fields = (False,)
+    update_query = 'UPDATE employee SET committeeMember = ? WHERE personal_id=?'
+    fields = (False, personal_id)
                    
     try:
         if getEmployeeByPersonalId(personal_id, cursor) is None:
