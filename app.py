@@ -711,6 +711,7 @@ def _1():
         'personal_id' : '2222',
         'password' : '2222',
         'committeeMember' : 0,
+        'isAdmin' : 0,
     }
 
     message = employee_DB.create(data_dict)
