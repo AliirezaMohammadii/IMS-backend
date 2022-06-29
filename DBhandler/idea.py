@@ -61,12 +61,12 @@ def getIdeaByID_loggedIn(id, personal_id):
     db = get_db()
     cursor = db.cursor()
 
-    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(userVote,0) vote '\
+    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(userVote,0) vote , ifnull(totalScore.meanScore,0) meanScore '\
                     'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id '\
-                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type as userVote from ideaVote inner join employee on employee.id = ideaVote.employeeId Where employee.personal_id =? ) S ON S.ideaId = idea.id  WHERE idea.id=? Order BY idea.time DESC'
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type as userVote from ideaVote inner join employee on employee.id = ideaVote.employeeId Where employee.personal_id =? ) S ON S.ideaId = idea.id LEFT JOIN totalScore ON totalScore.ideaId =idea.id  WHERE idea.id=? Order BY idea.time DESC'
 
     
     cursor.execute(select_query, (personal_id,id , ))
@@ -226,8 +226,8 @@ def getIdeaVotes(id):
                     'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
-                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id WHERE idea.id=? '\
-                        'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
+                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
+                        'LEFT JOIN totalScore ON totalScore.ideaId =idea.id WHERE idea.id=? '\
                         'Order BY idea.time DESC'\
 
     try:
@@ -248,8 +248,8 @@ def getIdeasByIdeaCategoryID(id):
                     'FROM idea INNER JOIN employee ON idea.employeeId =employee.id  INNER JOIN ideaCategory ON ideaCategory.id = idea.categoryId'\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
-                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id WHERE idea.categoryId=? '\
-                        'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
+                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
+                        'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  WHERE idea.categoryId=? '\
                         'Order BY idea.time DESC'\
 
     try:
