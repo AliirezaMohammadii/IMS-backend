@@ -61,9 +61,9 @@ def create(data):
     committeeMember = True if data["committeeMember"] == 1 else False
     isAdmin = True if data["isAdmin"] == 1 else False
     
-    insert_query = 'INSERT INTO employee (id, firstName, lastName, personal_id, password, mobile , email , committeeMember , isAdmin) ' \
-                   'VALUES (?, ?, ?, ?, ?, ?, ?, ? , ?)'
-    fields = (id, firstName, lastName, personal_id, hashed_password, mobile, email, committeeMember,isAdmin)
+    insert_query = 'INSERT INTO employee (id, firstName, lastName, personal_id, password, mobile , email , committeeMember) ' \
+                   'VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+    fields = (id, firstName, lastName, personal_id, hashed_password, mobile, email, committeeMember)
 
     try:
         #check if employee already exists :
