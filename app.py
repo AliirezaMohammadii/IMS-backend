@@ -55,6 +55,10 @@ def current_user(request):
     return user
 
 
+def is_admin(request):
+    return current_user(request)['isAdmin'] == 1
+
+
 @app.after_request
 def refresh_expiring_jwts(response):
     try:
@@ -131,7 +135,7 @@ def signup():
 def get_user(personal_id_):
 
     personal_id = get_personal_id(request)
-    permitted = personal_id == personal_id_ or is_admin(personal_id)
+    permitted = personal_id == personal_id_ or is_admin(request)
 
     print(personal_id)
     print(personal_id_)
@@ -178,7 +182,7 @@ def update_user():
 def delete_user(personal_id_):
 
     personal_id = get_personal_id(request)
-    permitted = personal_id == personal_id_ or is_admin(personal_id)
+    permitted = personal_id == personal_id_ or is_admin(request)
 
     if not permitted:
         return {}, STATUS_FORBIDDEN
@@ -199,7 +203,7 @@ def delete_user(personal_id_):
 def set_as_committeeMember(personal_id_):
 
     personal_id = get_personal_id(request)
-    permitted = is_admin(personal_id)
+    permitted = is_admin(request)
 
     if not permitted:
         return {}, STATUS_FORBIDDEN
@@ -212,7 +216,7 @@ def set_as_committeeMember(personal_id_):
 def set_as_ordinaryMember(personal_id_):
 
     personal_id = get_personal_id(request)
-    permitted = is_admin(personal_id)
+    permitted = is_admin(request)
 
     if not permitted:
         return {}, STATUS_FORBIDDEN
@@ -381,7 +385,7 @@ def dislike_idea(idea_id):
 def create_idea_cat():
 
     personal_id = get_personal_id(request)
-    permitted = is_admin(personal_id)
+    permitted = is_admin(request)
 
     if not permitted:
         return {}, STATUS_FORBIDDEN
@@ -406,7 +410,7 @@ def get_idea_cats():
 def update_ideaCat(idea_cat_id):
 
     personal_id = get_personal_id(request)
-    permitted = is_admin(personal_id)
+    permitted = is_admin(request)
     
     if not permitted:
         return {}, STATUS_FORBIDDEN
@@ -427,7 +431,7 @@ def update_ideaCat(idea_cat_id):
 def delete_ideaCat_byId(idea_cat_id):
 
     personal_id = get_personal_id(request)
-    permitted = is_admin(personal_id)
+    permitted = is_admin(request)
     
     if not permitted:
         return {}, STATUS_FORBIDDEN
@@ -449,7 +453,7 @@ def delete_ideaCat_byTitle(title):
 
 
     personal_id = get_personal_id(request)
-    permitted = is_admin(personal_id)
+    permitted = is_admin(request)
     
     if not permitted:
         return {}, STATUS_FORBIDDEN
@@ -500,7 +504,7 @@ def delete_comment(comment_id):
 
     employeeId = request.json['employeeId']
     personal_id = get_personal_id(request)
-    permitted = comment_DB.comment_is_for_user(employeeId, comment_id) or is_admin(personal_id)
+    permitted = comment_DB.comment_is_for_user(employeeId, comment_id) or is_admin(request)
     if not permitted:
         return {}, STATUS_FORBIDDEN
 
@@ -566,7 +570,7 @@ def get_ev_crits():
 def create_ev_crit():
 
     personal_id = get_personal_id(request)
-    permitted = is_admin(personal_id)
+    permitted = is_admin(request)
     
     if not permitted:
         return {}, STATUS_FORBIDDEN
@@ -584,7 +588,7 @@ def create_ev_crit():
 def update_ev_crit(ev_crit_id):
 
     personal_id = get_personal_id(request)
-    permitted = is_admin(personal_id)
+    permitted = is_admin(request)
     
     if not permitted:
         return {}, STATUS_FORBIDDEN
@@ -605,7 +609,7 @@ def update_ev_crit(ev_crit_id):
 def delete_ev_crit_byId(ev_crit_id):
 
     personal_id = get_personal_id(request)
-    permitted = is_admin(personal_id)
+    permitted = is_admin(request)
     
     if not permitted:
         return {}, STATUS_FORBIDDEN
@@ -627,7 +631,7 @@ def delete_ev_crit_byTitle(title):
 
 
     personal_id = get_personal_id(request)
-    permitted = is_admin(personal_id)
+    permitted = is_admin(request)
     
     if not permitted:
         return {}, STATUS_FORBIDDEN

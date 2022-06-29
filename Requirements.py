@@ -39,10 +39,6 @@ STATUS_INTERNAL_SERVER_ERROR = 500
 ADMIN_personal_id = '11111111'
 
 
-def is_admin(personal_id):
-    return personal_id == ADMIN_personal_id
-
-
 def log(to_print):
     print('#LOG -> ', end='')
     print(to_print)
