@@ -61,9 +61,9 @@ def create(data):
     committeeMember = True if data["committeeMember"] == 1 else False
     isAdmin = True if data["isAdmin"] == 1 else False
     
-    insert_query = 'INSERT INTO employee (id, firstName, lastName, personal_id, password, mobile , email , committeeMember) ' \
-                   'VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-    fields = (id, firstName, lastName, personal_id, hashed_password, mobile, email, committeeMember)
+    insert_query = 'INSERT INTO employee (id, firstName, lastName, personal_id, password, mobile , email , committeeMember , isAdmin) ' \
+                   'VALUES (?, ?, ?, ?, ?, ?, ?, ? , ?)'
+    fields = (id, firstName, lastName, personal_id, hashed_password, mobile, email, committeeMember,isAdmin)
 
     try:
         #check if employee already exists :
@@ -92,10 +92,10 @@ def update(data):
     mobile          = data["mobile"]
     email           = data["email"]
     committeeMember = True if data["committeeMember"] == 1 else False
-    update_query = 'UPDATE employee SET firstName =?, lastName =?, password =?, mobile  =? , email  =?, committeeMember =? , isAdmin = ? ' \
+    update_query = 'UPDATE employee SET firstName =?, lastName =?, password =?, mobile  =? , email  =?, committeeMember =? ' \
                    'WHERE personal_id=?'
                    
-    fields = (firstName, lastName, hashed_password, mobile, email, committeeMember, personal_id, isAdmn)
+    fields = (firstName, lastName, hashed_password, mobile, email, committeeMember, personal_id)
 
     try:
         if getEmployeeByPersonalId(personal_id, cursor) is None:
