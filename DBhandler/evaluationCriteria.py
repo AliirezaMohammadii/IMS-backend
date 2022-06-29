@@ -33,19 +33,20 @@ def create(data):
     insert_query = 'INSERT INTO evaluationCriteria (id, title, weight) ' \
                    'VALUES (?,?, ?)'
     fields = (id, title, weight)
+    		
 
-    try:
-        cursor.execute(insert_query, fields)
-        db.commit()
-        close_db()
-        return MESSAGE_OK
-
-    except sqlite3.Error:  
-        close_db()
+    try:	
+        cursor.execute(insert_query, fields)	
+        db.commit()	
+        close_db()	
+        return MESSAGE_OK	
+    except sqlite3.Error:  	
+        close_db()	
         return DB_ERROR
 
 
-def update(data):
+
+def update(data,id):
     db = get_db()
     cursor = db.cursor()
     
@@ -54,8 +55,10 @@ def update(data):
     update_query = 'UPDATE evaluationCriteria SET title =?, weight =?' \
                    'WHERE id=?'
     fields = (title, weight , id)
-
-    try:    
+    try:
+        if getEvaluationCriteriaByID(id, cursor) is None:
+            return NOT_FOUND
+        # update db:
         cursor.execute(update_query, fields)
         db.commit()
         close_db()
@@ -83,21 +86,49 @@ def get_all_ev_crits():
         return DB_ERROR
 
 
-
-def getEvaluationCriteriaByID(id):
-
+def delete_by_id(id):
     db = get_db()
     cursor = db.cursor()
 
-    select_query = 'SELECT * FROM evaluationCriteria WHERE id=?'
+    query = 'DELETE FROM evaluationCriteria WHERE id=?'
+    fields = (id,)
 
     try:
-        cursor.execute(select_query, (id,))
-        ev_crits = dict(cursor.fetchone())
+        if getEvaluationCriteriaByID(id, cursor) is None:
+            return NOT_FOUND
+
+        cursor.execute(query, fields)
+        db.commit()
         close_db()
-        return json.dumps(ev_crits)
+        return MESSAGE_OK
 
     except sqlite3.Error:
         close_db()
         return DB_ERROR
 
+def clear_table():
+    db = get_db()
+    cursor = db.cursor()
+
+    query = 'DELETE FROM evaluationCriteria '
+
+    try:
+        cursor.execute(query)
+        db.commit()
+        close_db()
+        return MESSAGE_OK
+
+    except sqlite3.Error:
+        close_db()
+        return DB_ERROR
+# def getEvaluationCriteriaByID(id):
+#     select_query = 'SELECT * FROM evaluationCriteria WHERE id=?'
+#     cursor.execute(select_query, (id,))
+#     evaluationCriteria = cursor.fetchall()
+#     return evaluationCriteria
+
+def getEvaluationCriteriaByID(id,cursor):
+    select_query = 'SELECT * FROM evaluationCriteria WHERE id=?'
+    cursor.execute(select_query, (id,))
+    ideaCategory = cursor.fetchall()
+    return 

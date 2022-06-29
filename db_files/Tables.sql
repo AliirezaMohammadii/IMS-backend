@@ -8,8 +8,8 @@ CREATE TABLE employee (
   password VARCHAR(100) NOT NULL,
   mobile VARCHAR(15) NULL,
   email VARCHAR(50) NULL,
-  committeeMember INTEGER NOT NULL
-  
+  committeeMember INTEGER NOT NULL,
+  isAdmin INTEGER NOT NULL
 );
 
 
@@ -153,3 +153,22 @@ CREATE TABLE committeeScoreDetail (
   FOREIGN KEY (committeeScoreHeaderId) REFERENCES committeeScoreHeader(id),
   FOREIGN KEY (evaluationCriteriaId) REFERENCES evaluationCriteria(id)
 );
+
+
+
+
+DROP VIEW IF EXISTS totalScore;
+CREATE VIEW totalScore (
+    ideaId,
+    meanScore
+)
+AS
+    SELECT ideaId , AVG(sumScore) as meanScore FROM
+    (SELECT committeeScoreDetail.committeeScoreHeaderId, committeeScoreHeader.ideaId
+           ,
+           sum(committeeScoreDetail.score * evaluationCriteria.weight) as sumScore
+      FROM committeeScoreHeader INNER JOIN committeeScoreDetail
+           ON committeeScoreHeader.id = committeeScoreDetail.committeeScoreHeaderId  INNER JOIN evaluationCriteria
+           ON evaluationCriteria.id = committeeScoreDetail.evaluationCriteriaId
+      GROUP BY committeeScoreHeader.id) a
+      GROUP BY a.ideaId
