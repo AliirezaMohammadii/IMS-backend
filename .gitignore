@@ -200,4 +200,4 @@ cython_debug/
 test.py
 
 # End of https://www.toptal.com/developers/gitignore/api/python,macos
-backend/app.sqlite
+db_files/app.sqlite
