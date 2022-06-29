@@ -58,7 +58,7 @@ def create(data):
     lastName        = ""
     mobile          = ""
     email           = ""
-    committeeMember = False
+    committeeMember = True if data["committeeMember"] == 1 else False
    
     insert_query = 'INSERT INTO employee (id, firstName, lastName, personal_id, password, mobile , email , committeeMember) ' \
                    'VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
