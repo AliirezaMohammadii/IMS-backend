@@ -92,7 +92,6 @@ def update(data):
     mobile          = data["mobile"]
     email           = data["email"]
     committeeMember = True if data["committeeMember"] == 1 else False
-    isAdmin = data["isAdmin"]
     update_query = 'UPDATE employee SET firstName =?, lastName =?, password =?, mobile  =? , email  =?, committeeMember =? , isAdmin = ? ' \
                    'WHERE personal_id=?'
                    
