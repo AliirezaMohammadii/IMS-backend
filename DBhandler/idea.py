@@ -332,7 +332,7 @@ def get_all_ideas():
 def change_idea_status(idea_id, data):
 
     db = get_db()
-    cursor = db.cursor()
+    cursor = db.cursor() 
 
     status = data['status']
 
