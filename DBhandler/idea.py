@@ -69,7 +69,7 @@ def getIdeaByID_loggedIn(id, personal_id):
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type as userVote from ideaVote inner join employee on employee.id = ideaVote.employeeId Where employee.personal_id =? ) S ON S.ideaId = idea.id  WHERE idea.id=? Order BY idea.time DESC'
 
     
-    cursor.execute(select_query, (personal_id,id , ))
+    cursor.execute(select_query, (personal_id, id, ))
     idea = cursor.fetchone()
     close_db()
 
@@ -323,6 +323,30 @@ def get_all_ideas():
         ideas = cursor.fetchall()
         close_db()
         return convert_to_json(ideas)
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
+
+def change_idea_status(idea_id, data):
+
+    db = get_db()
+    cursor = db.cursor()
+
+    status = data['status']
+
+    update_query = 'UPDATE idea SET status = ? WHERE id = ?'
+    fields = (status, idea_id)
+                   
+    try:
+        if getIdeaByID(idea_id) == NOT_FOUND:
+            return NOT_FOUND
+
+        cursor.execute(update_query, fields)
+        db.commit()
+        close_db()
+        return MESSAGE_OK
 
     except sqlite3.Error:  
         close_db()

@@ -2,6 +2,8 @@ import json
 import re
 import sys
 
+from attr import field
+
 # windows
 sys.path.insert(0, 'C://Users//asus//Desktop//Uni//SW Eng//Project//project files//venv//IMS//backend//DBhandler')
 sys.path.insert(0, 'C://Users//asus//Desktop//Uni//SW Eng//Project//project files//venv//IMS//backend')
@@ -90,7 +92,7 @@ def update(data):
     lastName        = data["lastName"]
     mobile          = data["mobile"]
     email           = data["email"]
-    committeeMember = data["committeeMember"]
+    committeeMember = True if data["committeeMember"] == 1 else False
 
     update_query = 'UPDATE employee SET firstName =?, lastName =?, password =?, mobile  =? , email  =?, committeeMember =? ' \
                    'WHERE personal_id=?'
@@ -101,7 +103,6 @@ def update(data):
         if getEmployeeByPersonalId(personal_id, cursor) is None:
             return NOT_FOUND
 
-        # insert into db:
         cursor.execute(update_query, fields)
         db.commit()
         close_db()
@@ -110,7 +111,6 @@ def update(data):
     except sqlite3.Error:  
         close_db()
         return DB_ERROR
-
 
 
 def delete(personal_id):
@@ -221,6 +221,48 @@ def get_user_id(personal_id):
         return id
     
     except:
+        close_db()
+        return DB_ERROR
+
+
+def set_as_committeeMember(personal_id):
+    db = get_db()
+    cursor = db.cursor()
+
+    update_query = 'UPDATE employee SET committeeMember = ?'
+    fields = (True,)
+                   
+    try:
+        if getEmployeeByPersonalId(personal_id, cursor) is None:
+            return NOT_FOUND
+
+        cursor.execute(update_query, fields)
+        db.commit()
+        close_db()
+        return MESSAGE_OK
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
+
+def set_as_ordinaryMember(personal_id):
+    db = get_db()
+    cursor = db.cursor()
+
+    update_query = 'UPDATE employee SET committeeMember = ?'
+    fields = (False,)
+                   
+    try:
+        if getEmployeeByPersonalId(personal_id, cursor) is None:
+            return NOT_FOUND
+
+        cursor.execute(update_query, fields)
+        db.commit()
+        close_db()
+        return MESSAGE_OK
+
+    except sqlite3.Error:  
         close_db()
         return DB_ERROR
 

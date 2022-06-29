@@ -21,7 +21,7 @@ def create(data):
     db = get_db()
     cursor = db.cursor()
 
-    id          = get_table_size(cursor) +1
+    id          = get_table_size(cursor) + 1
     employeeId  = employee_DB.get_user_id(data["personal_id"])
     commentId   = data["commentId"]
     type        = data["type"]

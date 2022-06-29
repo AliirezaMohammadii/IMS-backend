@@ -58,10 +58,9 @@ def get(jwt_token):
 
     select_query = 'SELECT personal_id FROM tpi WHERE jwt_token=?'
     cursor.execute(select_query, (jwt_token,))
-    personal_id = cursor.fetchone()
+    personal_id = dict(cursor.fetchone())['personal_id']
 
     close_db()
 
-    print('dict(personal_id):', dict(personal_id))
-
-    return dict(personal_id)['personal_id']
+    return personal_id
+    

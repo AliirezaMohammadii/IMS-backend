@@ -34,15 +34,15 @@ def create(data):
                    'VALUES (?,?, ?)'
     fields = (id, title, weight)
 
-    # try:
-    cursor.execute(insert_query, fields)
-    db.commit()
-    close_db()
-    return MESSAGE_OK
+    try:
+        cursor.execute(insert_query, fields)
+        db.commit()
+        close_db()
+        return MESSAGE_OK
 
-    # except sqlite3.Error:  
-    close_db()
-    return DB_ERROR
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
 
 
 def update(data):
@@ -54,9 +54,8 @@ def update(data):
     update_query = 'UPDATE evaluationCriteria SET title =?, weight =?' \
                    'WHERE id=?'
     fields = (title, weight , id)
-    try:
-        
-        # update db:
+
+    try:    
         cursor.execute(update_query, fields)
         db.commit()
         close_db()
@@ -85,9 +84,20 @@ def get_all_ev_crits():
 
 
 
-# def getEvaluationCriteriaByID(id):
-#     select_query = 'SELECT * FROM evaluationCriteria WHERE id=?'
-#     cursor.execute(select_query, (id,))
-#     evaluationCriteria = cursor.fetchall()
-#     return evaluationCriteria
+def getEvaluationCriteriaByID(id):
+
+    db = get_db()
+    cursor = db.cursor()
+
+    select_query = 'SELECT * FROM evaluationCriteria WHERE id=?'
+
+    try:
+        cursor.execute(select_query, (id,))
+        ev_crits = dict(cursor.fetchone())
+        close_db()
+        return json.dumps(ev_crits)
+
+    except sqlite3.Error:
+        close_db()
+        return DB_ERROR
 
