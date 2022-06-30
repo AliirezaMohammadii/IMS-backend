@@ -123,6 +123,7 @@ def getIdeaScoreByPersonalID(ideaId, personal_id): # emtiaze har meyar ke yek fa
                     ' WHERE committeeScoreHeader.employeeId = ? and committeeScoreHeader.ideaId=? '
 
                     
+                    
     cursor.execute(select_query, (employee_id,ideaId,))
     ideaScore = cursor.fetchall()
     close_db()

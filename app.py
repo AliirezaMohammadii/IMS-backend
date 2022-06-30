@@ -904,10 +904,6 @@ def _icov3():
 # ------ TESTING DB /  ------ Evaluation Criteria ------
 @app.route('/test_create_ev_crit')
 def _ec1():
-    ev_crit0 = {
-                'title': '---',
-                'weight': 0
-                }
     ev_crit1 = {
                 'title': 'ev crit 1',
                 'weight': 0.2
@@ -921,7 +917,6 @@ def _ec1():
                 'weight': 0.4
                 }
     
-    evaluationCriteria_DB.create(ev_crit0)
     evaluationCriteria_DB.create(ev_crit1)
     evaluationCriteria_DB.create(ev_crit2)
     evaluationCriteria_DB.create(ev_crit3)
