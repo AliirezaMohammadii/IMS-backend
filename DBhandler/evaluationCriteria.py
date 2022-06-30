@@ -130,5 +130,5 @@ def clear_table():
 def getEvaluationCriteriaByID(id,cursor):
     select_query = 'SELECT * FROM evaluationCriteria WHERE id=?'
     cursor.execute(select_query, (id,))
-    ideaCategory = cursor.fetchall()
+    crits = cursor.fetchall()
     return 

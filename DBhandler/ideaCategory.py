@@ -28,11 +28,11 @@ def create(data):
     cursor = db.cursor()
 
     id = get_table_size(cursor) + 1
-    title = data["title"]
-
-    insert_query = 'INSERT INTO ideaCategory (id, title) ' \
-                   'VALUES (?,?)'
-    fields = (id, title)
+    label = data["label"]
+    value = data["value"]
+    insert_query = 'INSERT INTO ideaCategory (id, label , value) ' \
+                   'VALUES (?,?,?)'
+    fields = (id, label , value)
 
     try:
         cursor.execute(insert_query, fields)
@@ -50,12 +50,12 @@ def update(data, id):
     db = get_db()
     cursor = db.cursor()
 
-    title = data["title"]
-
-    update_query = 'UPDATE ideaCategory SET title =?' \
+    label = data["label"]
+    value = data["value"]
+    update_query = 'UPDATE ideaCategory SET label =? , value =? ' \
                    'WHERE id=?'
 
-    fields = (title, id)
+    fields = (label , value, id)
 
     try:
         if getIdeaCategoryByID(id, cursor) is None:
@@ -92,15 +92,15 @@ def delete_by_id(id):
         return DB_ERROR
 
 
-def delete_by_title(title):
+def delete_by_title(lable):
     db = get_db()
     cursor = db.cursor()
 
-    query = 'DELETE FROM ideaCategory WHERE title=?'
-    fields = (title,)
+    query = 'DELETE FROM ideaCategory WHERE label=?'
+    fields = (label,)
 
     try:
-        if getIdeaCategoryByTitle(title, cursor) is None:
+        if getIdeaCategoryByTitle(label, cursor) is None:
             return NOT_FOUND
 
         cursor.execute(query, fields)
@@ -137,9 +137,9 @@ def getIdeaCategoryByID(id,cursor):
     return ideaCategory
 
 
-def getIdeaCategoryByTitle(title, cursor):
-    select_query = 'SELECT * FROM ideaCategory WHERE title=?'
-    cursor.execute(select_query, (title,))
+def getIdeaCategoryByTitle(label, cursor):
+    select_query = 'SELECT * FROM ideaCategory WHERE label=?'
+    cursor.execute(select_query, (label,))
     ideaCategory = cursor.fetchall()
     return ideaCategory
 
