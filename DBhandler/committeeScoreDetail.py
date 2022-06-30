@@ -29,7 +29,6 @@ def create(committeeScoreHeaderId, evaluationCriteriaId, score):
     db = get_db()
     cursor = db.cursor()
 
-    data = json.loads(json)
     id = get_table_size(cursor) +1
     #committeeScoreHeaderId = data["committeeScoreHeaderId"]
     #evaluationCriteriaId = data["evaluationCriteriaId"]
@@ -57,8 +56,7 @@ def create(committeeScoreHeaderId, evaluationCriteriaId, score):
 def update(committeeScoreHeaderId,evaluationCriteriaId,score ):
     db = get_db()
     cursor = db.cursor()
-    
-    data = json.loads(json)
+
     
     #committeeScoreHeaderId = data["committeeScoreHeaderId"]
     #evaluationCriteriaId = data["evaluationCriteriaId"]
@@ -131,7 +129,7 @@ def getCommitteeScoreDetailByID(id):
 
 
 
-def getHeader(committeeScoreHeaderId,evaluationCriteriaId, cursor):
+def getDetail(committeeScoreHeaderId,evaluationCriteriaId, cursor):
     select_query = 'SELECT * FROM committeeScoreDetail WHERE committeeScoreHeaderId=? and evaluationCriteriaId=? '
     cursor.execute(select_query, (committeeScoreHeaderId,evaluationCriteriaId,))
     detail = cursor.fetchone()
