@@ -798,9 +798,9 @@ def _iv4():
 # ------ TESTING DB / IDEA CATEGORY ------
 @app.route('/test_create_idea_cats')
 def _ic1():
-    idea_cat1 = {'title': 'آموزشی'}
-    idea_cat2 = {'title': 'خدمات رفاهی'}
-    idea_cat3 = {'title': 'خدمات انسانی'}
+    idea_cat1 = {'label': 'آموزشی' , 'value': 'آموزشی' }
+    idea_cat2 = {'label': 'خدمات رفاهی','value': 'خدمات رفاهی' }
+    idea_cat3 = {'label': 'خدمات انسانی','value': 'خدمات انسانی'}
     
     ideaCategory_DB.create(idea_cat1)
     ideaCategory_DB.create(idea_cat2)

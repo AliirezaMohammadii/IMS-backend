@@ -139,8 +139,8 @@ CREATE TABLE evaluationCriteria (
 DROP TABLE IF EXISTS ideaCategory;
 CREATE TABLE ideaCategory (
   id INTEGER NOT NULL PRIMARY KEY ,
-  title TEXT NOT NULL
-  
+  label TEXT NOT NULL,
+  value TEXT NOT NULL
 );
 
 
