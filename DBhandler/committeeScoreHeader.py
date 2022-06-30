@@ -115,10 +115,13 @@ def getIdeaScoreByPersonalID(ideaId, personal_id): # emtiaze har meyar ke yek fa
     employee_id = employee_DB.get_user_id(personal_id)
     db = get_db()
     cursor = db.cursor()
-    select_query =  'SELECT evaluationCriteria.id , evaluationCriteria.title , ifnull(committeeScoreDetail.score,0)  FROM committeeScoreHeader  LEFT JOIN committeeScoreDetail '\
-           'ON committeeScoreHeader.id = committeeScoreDetail.committeeScoreHeaderId  INNER JOIN evaluationCriteria '\
-           'ON evaluationCriteria.id = committeeScoreDetail.evaluationCriteriaId '\
-            ' WHERE committeeScoreHeader.employeeId = ? and committeeScoreHeader.ideaId=? '
+    select_query =  ' SELECT * FROM evaluationCriteria LEFT JOIN  '\
+                    ' (SELECT evaluationCriteria.id , evaluationCriteria.title , ifnull(committeeScoreDetail.score,0)  FROM  '\
+                    'committeeScoreHeader  LEFT JOIN committeeScoreDetail '\
+                    'ON committeeScoreHeader.id = committeeScoreDetail.committeeScoreHeaderId)  '\
+                    'ON evaluationCriteria.id = committeeScoreDetail.evaluationCriteriaId '\
+                    ' WHERE committeeScoreHeader.employeeId = ? and committeeScoreHeader.ideaId=? '
+
                     
     cursor.execute(select_query, (employee_id,ideaId,))
     ideaScore = cursor.fetchall()
