@@ -117,12 +117,12 @@ def getIdeaScoreByPersonalID(ideaId, personal_id): # emtiaze har meyar ke yek fa
     employee_id = employee_DB.get_user_id(personal_id)
     db = get_db()
     cursor = db.cursor()
-    select_query = ' SELECT evaluationCriteria.id ,evaluationCriteria.title, A.SC FROM evaluationCriteria LEFT JOIN  ' \
-                   ' (SELECT evaluationCriteriaId, ifnull(committeeScoreDetail.score,0) as SC  FROM  ' \
-                   'committeeScoreHeader  LEFT JOIN committeeScoreDetail ' \
-                   'ON committeeScoreHeader.id = committeeScoreDetail.committeeScoreHeaderId  ' \
-                   ' WHERE committeeScoreHeader.employeeId = ? and committeeScoreHeader.ideaId=? ) A ' \
-                   'ON evaluationCriteria.id = A.evaluationCriteriaId '
+    select_query = ' SELECT evaluationCriteria.id ,evaluationCriteria.title, ifnull(A.SC1,0) as SC FROM evaluationCriteria LEFT JOIN  ' \
+                ' (SELECT evaluationCriteriaId, ifnull(committeeScoreDetail.score,0) as SC1  FROM  ' \
+                'committeeScoreHeader  LEFT JOIN committeeScoreDetail ' \
+                'ON committeeScoreHeader.id = committeeScoreDetail.committeeScoreHeaderId  ' \
+                ' WHERE committeeScoreHeader.employeeId = ? and committeeScoreHeader.ideaId=? ) A ' \
+                'ON evaluationCriteria.id = A.evaluationCriteriaId '
 
                     
                     
@@ -150,14 +150,9 @@ def getIdeaScore(ideaId):    # miangin emtiaze har meyar baraye yek idea
 
 
 def getHeader(employeeId,ideaId, cursor):
-
-    db = get_db()
-    cursor = db.cursor()
-
     select_query = 'SELECT * FROM committeeScoreHeader WHERE employeeId=? and ideaId=? '
     cursor.execute(select_query, (employeeId,ideaId,))
     header = cursor.fetchone()
-    close_db()
     return header
 
 

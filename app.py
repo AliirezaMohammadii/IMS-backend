@@ -606,7 +606,7 @@ def get_idea_scores(idea_id, personal_id):
     if not permitted:
         return {}, STATUS_FORBIDDEN
 
-    data = committeeScoreHeader_DB.getIdeaScoreByPersonalID(personal_id, idea_id)
+    data = committeeScoreHeader_DB.getIdeaScoreByPersonalID(idea_id, personal_id)
 
     if data == DB_ERROR:
         return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
