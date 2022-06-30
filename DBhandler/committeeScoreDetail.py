@@ -29,7 +29,6 @@ def create(committeeScoreHeaderId, evaluationCriteriaId, score):
     db = get_db()
     cursor = db.cursor()
 
-    data = json.loads(json)
     id = get_table_size(cursor) +1
     #committeeScoreHeaderId = data["committeeScoreHeaderId"]
     #evaluationCriteriaId = data["evaluationCriteriaId"]
@@ -57,8 +56,6 @@ def create(committeeScoreHeaderId, evaluationCriteriaId, score):
 def update(committeeScoreHeaderId,evaluationCriteriaId,score ):
     db = get_db()
     cursor = db.cursor()
-    
-    data = json.loads(json)
     
     #committeeScoreHeaderId = data["committeeScoreHeaderId"]
     #evaluationCriteriaId = data["evaluationCriteriaId"]

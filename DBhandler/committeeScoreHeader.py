@@ -29,7 +29,6 @@ def create(employeeId, ideaId):
     db = get_db()
     cursor = db.cursor()
 
-    data = json.loads(json)
     id = get_table_size(cursor)+1
     # employeeId = employee_DB.get_user_id(data["personal_id"])
     # ideaId = data["ideaId"]
