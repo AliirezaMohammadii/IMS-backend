@@ -867,15 +867,13 @@ def _iv4():
 # ------ TESTING DB / IDEA CATEGORY ------
 @app.route('/test_create_idea_cats')
 def _ic1():
-    idea_cat1 = {'title': '---'}
-    idea_cat2 = {'title': 'آموزشی'}
-    idea_cat3 = {'title': 'خدمات رفاهی'}
-    idea_cat4 = {'title': 'خدمات انسانی'}
+    idea_cat1 = {'title': 'آموزشی'}
+    idea_cat2 = {'title': 'خدمات رفاهی'}
+    idea_cat3 = {'title': 'خدمات انسانی'}
     
     ideaCategory_DB.create(idea_cat1)
     ideaCategory_DB.create(idea_cat2)
     ideaCategory_DB.create(idea_cat3)
-    ideaCategory_DB.create(idea_cat4)
     return str(STATUS_CREATED)
 
 
