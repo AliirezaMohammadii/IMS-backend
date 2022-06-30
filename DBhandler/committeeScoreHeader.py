@@ -188,3 +188,4 @@ def scoreAnIdea(personal_id , ideaId , evaluationCriteriaId , scoreOfCriteria):
         res = committeeScoreDetail_DB.update(headerId,evaluationCriteriaId,scoreOfCriteria)
 
     return res
+
