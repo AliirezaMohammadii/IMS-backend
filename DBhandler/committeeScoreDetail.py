@@ -14,9 +14,18 @@ sys.path.insert(0, '/Users/mohammad/Documents/Github/IMS-backend')
 sys.path.insert(0, '/Users/narges/Documents/GitHub/IMS-backend')
 
 from db import *
+from Requirements import *
 
 
-def create(committeeScoreHeaderId,evaluationCriteriaId,score ):
+def get_table_size(cursor):
+    cursor.execute("select max(ifnull(id,0)) from committeeScoreDetail")
+    results = cursor.fetchone()[0]
+    if results is None:
+        return 0
+    return (results)
+
+
+def create(committeeScoreHeaderId, evaluationCriteriaId, score):
     db = get_db()
     cursor = db.cursor()
 
@@ -111,20 +120,14 @@ def deleteByID(id):
 
 
 def getCommitteeScoreDetailByID(id):
+    db = get_db()
+    cursor = db.cursor()
+
     select_query = 'SELECT * FROM committeeScoreDetail WHERE id=?'
     cursor.execute(select_query, (id,))
     detail = cursor.fetchall()
+    close_db()
     return detail
-
-
-
-def get_table_size(cursor):
-    cursor.execute("select max(ifnull(id,0)) from committeeScoreDetail")
-    results = cursor.fetchone()[0]
-    if results is None:
-        return 0
-    return (results)
-
 
 
 

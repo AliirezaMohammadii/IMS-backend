@@ -15,24 +15,36 @@ from db import *
 from Requirements import *
 from DBhandler import employee as employee_DB
 from DBhandler import committeeScoreDetail as committeeScoreDetail_DB
-def create(employeeId , ideaId):
+
+
+def get_table_size(cursor):
+    cursor.execute("select max(ifnull(id,0)) from committeeScoreHeader")
+    results = cursor.fetchone()[0]
+    if results is None:
+        return 0
+    return (results)
+
+
+def create(employeeId, ideaId):
     db = get_db()
     cursor = db.cursor()
 
     data = json.loads(json)
-    id = get_table_size(cursor) +1
-    #employeeId = employee_DB.get_user_id(data["personal_id"])
-    #ideaId = data["ideaId"]
+    id = get_table_size(cursor)+1
+    # employeeId = employee_DB.get_user_id(data["personal_id"])
+    # ideaId = data["ideaId"]
 
     time = solar_date_now()
 
-    insert_query = 'INSERT INTO committeeScoreHeader (id,employeeId, ideaId,time) ' \
-                   'VALUES (?,?, ?,?)'
-    fields = (id,employeeId, ideaId,time)
+    insert_query = 'INSERT INTO committeeScoreHeader (id,employeeId,ideaId,time) ' \
+                   'VALUES (?,?,?,?)'
+
+    fields = (id,employeeId,ideaId,time)
+
     try:
         if getHeader(employeeId,ideaId, cursor) is not None:
             return SCORE_HEADER_ALREADY_EXISTS
-        # insert into db:
+
         cursor.execute(insert_query, fields)
         db.commit()
         close_db()
@@ -41,8 +53,6 @@ def create(employeeId , ideaId):
     except sqlite3.Error:  
         close_db()
         return DB_ERROR
-
-
 
 
 def update(data, id):
@@ -65,7 +75,6 @@ def update(data, id):
 
     except sqlite3.Error:  
         close_db()
-        response = "SQlite Error - committeeScoreHeader update Failed"
         return DB_ERROR
 
 
@@ -77,7 +86,6 @@ def delete(id):
     fields = (id,)
 
     try:
-
         cursor.execute(query, fields)
         db.commit()
         close_db()
@@ -90,25 +98,24 @@ def delete(id):
 
 
 def getHeaderByID(id):
+    db = get_db()
+    cursor = db.cursor()
+
     select_query = 'SELECT * FROM committeeScoreHeader WHERE id=?'
     cursor.execute(select_query, (id,))
     comment = cursor.fetchall()
+
+    close_db()
+
     return comment
 
 
-
-def get_table_size(cursor):
-    cursor.execute("select max(ifnull(id,0)) from committeeScoreHeader")
-    results = cursor.fetchone()[0]
-    if results is None:
-        return 0
-    return (results)
-
-
-
-
 def getIdeaScoreByPersonalID(ideaId, personal_id): # emtiaze har meyar ke yek fard dade be yek idea
-    employee_id = employee_DB.get_user_id(data["personal_id"])
+    db = get_db()
+    cursor = db.cursor()
+    
+    employee_id = employee_DB.get_user_id(personal_id)
+    
     select_query =  'SELECT evaluationCriteria.id , evaluationCriteria.title , ifnull(committeeScoreDetail.score,0)  FROM committeeScoreHeader  LEFT JOIN committeeScoreDetail '\
            'ON committeeScoreHeader.id = committeeScoreDetail.committeeScoreHeaderId  RIGHT JOIN evaluationCriteria '\
            'ON evaluationCriteria.id = committeeScoreDetail.evaluationCriteriaId '\
@@ -116,9 +123,13 @@ def getIdeaScoreByPersonalID(ideaId, personal_id): # emtiaze har meyar ke yek fa
                     
     cursor.execute(select_query, (employee_id,ideaId,))
     ideaScore = cursor.fetchall()
+    close_db()
     return ideaScore
 
-def getIdeaScore():    # miangin emtiaze har meyar baraye yek idea
+
+def getIdeaScore(ideaId):    # miangin emtiaze har meyar baraye yek idea
+    db = get_db()
+    cursor = db.cursor()
     
     select_query =  'SELECT evaluationCriteria.id , evaluationCriteria.title , AVG(ifnull(committeeScoreDetail.score,0)) score  FROM committeeScoreHeader  LEFT JOIN committeeScoreDetail '\
            'ON committeeScoreHeader.id = committeeScoreDetail.committeeScoreHeaderId  RIGHT JOIN JOIN evaluationCriteria '\
@@ -129,30 +140,34 @@ def getIdeaScore():    # miangin emtiaze har meyar baraye yek idea
                     
     cursor.execute(select_query, (ideaId,))
     ideasScores = cursor.fetchall()
+    close_db()
     return ideasScores
 
 
-
-
-
-
-
-
-
 def getHeader(employeeId,ideaId, cursor):
+
+    db = get_db()
+    cursor = db.cursor()
+
     select_query = 'SELECT * FROM committeeScoreHeader WHERE employeeId=? and ideaId=? '
     cursor.execute(select_query, (employeeId,ideaId,))
     header = cursor.fetchone()
+    close_db()
     return header
 
+
 def get_header_id(employeeId,ideaId,cursor):
+
+    db = get_db()
+    cursor = db.cursor()
+
     query = 'SELECT id FROM committeeScoreHeader WHERE employeeId=? and and ideaId=? '
 
     try:
         cursor.execute(query, (employeeId,ideaId,))
         data = dict(cursor.fetchone())
         id = int(data['id'])
-        # close_db()
+        close_db()
         return id
     
     except:
@@ -161,11 +176,12 @@ def get_header_id(employeeId,ideaId,cursor):
 
 
 def scoreAnIdea(personal_id , ideaId , evaluationCriteriaId , scoreOfCriteria):
-    employeeId = employee_DB.get_user_id(data["personal_id"])
+    employeeId = employee_DB.get_user_id(personal_id)
     create(employeeId , ideaId)
-    headerId = get_header_id(employeeId,ideaId)
+    headerId = get_header_id(employeeId, ideaId)
 
     # detail:
-    res = committeeScoreDetail_DB.create(headerId,evaluationCriteriaId,scoreOfCriteria )
+    res = committeeScoreDetail_DB.create(headerId,evaluationCriteriaId,scoreOfCriteria)
+
     if res == SCORE_DETAIL_ALREADY_EXISTS:
         committeeScoreDetail_DB.update(headerId,evaluationCriteriaId,scoreOfCriteria)

@@ -202,10 +202,7 @@ def delete_user(personal_id_):
 @login_required()
 def set_as_committeeMember(personal_id_):
 
-    personal_id = get_personal_id(request)
-    permitted = is_admin(request)
-
-    if not permitted:
+    if not is_admin(request):
         return {}, STATUS_FORBIDDEN
 
     employee_DB.set_as_committeeMember(personal_id_)
@@ -215,10 +212,7 @@ def set_as_committeeMember(personal_id_):
 @login_required()
 def set_as_ordinaryMember(personal_id_):
 
-    personal_id = get_personal_id(request)
-    permitted = is_admin(request)
-
-    if not permitted:
+    if not is_admin(request):
         return {}, STATUS_FORBIDDEN
 
     employee_DB.set_as_ordinaryMember(personal_id_)
@@ -343,7 +337,6 @@ def change_idea_status(idea_id):
 @login_required()
 def like_idea(idea_id):
     personal_id = get_personal_id(request)
-
     idea = dict(json.loads(idea_DB.getIdeaByID(idea_id)))
     
     not_permitted = idea['personal_id'] == personal_id
@@ -384,10 +377,7 @@ def dislike_idea(idea_id):
 @login_required()
 def create_idea_cat():
 
-    personal_id = get_personal_id(request)
-    permitted = is_admin(request)
-
-    if not permitted:
+    if not is_admin(request):
         return {}, STATUS_FORBIDDEN
 
     message = ideaCategory_DB.create(request.json)
@@ -409,10 +399,7 @@ def get_idea_cats():
 @login_required()
 def update_ideaCat(idea_cat_id):
 
-    personal_id = get_personal_id(request)
-    permitted = is_admin(request)
-    
-    if not permitted:
+    if not is_admin(request):
         return {}, STATUS_FORBIDDEN
 
     message = ideaCategory_DB.update(request.json, idea_cat_id)
@@ -430,35 +417,10 @@ def update_ideaCat(idea_cat_id):
 @login_required()
 def delete_ideaCat_byId(idea_cat_id):
 
-    personal_id = get_personal_id(request)
-    permitted = is_admin(request)
-    
-    if not permitted:
+    if not is_admin(request):
         return {}, STATUS_FORBIDDEN
 
     message = ideaCategory_DB.delete_by_id(idea_cat_id)
-
-    if message == NOT_FOUND:
-        return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
-
-    elif message == DB_ERROR:
-        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
-
-    return {}, STATUS_OK
-
-
-@app.route('/delete_idea_cat_byTitle/<title>', methods=['DELETE'])
-@login_required()
-def delete_ideaCat_byTitle(title):
-
-
-    personal_id = get_personal_id(request)
-    permitted = is_admin(request)
-    
-    if not permitted:
-        return {}, STATUS_FORBIDDEN
-
-    message = ideaCategory_DB.delete_by_title(title)
 
     if message == NOT_FOUND:
         return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
@@ -503,7 +465,6 @@ def get_idea_comments(idea_id):
 def delete_comment(comment_id):
 
     employeeId = request.json['employeeId']
-    personal_id = get_personal_id(request)
     permitted = comment_DB.comment_is_for_user(employeeId, comment_id) or is_admin(request)
     if not permitted:
         return {}, STATUS_FORBIDDEN
@@ -569,10 +530,7 @@ def get_ev_crits():
 @login_required()
 def create_ev_crit():
 
-    personal_id = get_personal_id(request)
-    permitted = is_admin(request)
-    
-    if not permitted:
+    if not is_admin(request):
         return {}, STATUS_FORBIDDEN
 
     message = evaluationCriteria_DB.create(request.json)
@@ -587,10 +545,7 @@ def create_ev_crit():
 @login_required()
 def update_ev_crit(ev_crit_id):
 
-    personal_id = get_personal_id(request)
-    permitted = is_admin(request)
-    
-    if not permitted:
+    if not is_admin(request):
         return {}, STATUS_FORBIDDEN
 
     message = evaluationCriteria_DB.update(request.json, ev_crit_id)
@@ -608,10 +563,7 @@ def update_ev_crit(ev_crit_id):
 @login_required()
 def delete_ev_crit_byId(ev_crit_id):
 
-    personal_id = get_personal_id(request)
-    permitted = is_admin(request)
-    
-    if not permitted:
+    if not is_admin(request):
         return {}, STATUS_FORBIDDEN
 
     message = evaluationCriteria_DB.delete_by_id(ev_crit_id)
@@ -624,27 +576,6 @@ def delete_ev_crit_byId(ev_crit_id):
 
     return {}, STATUS_OK
 
-
-@app.route('/delete_ev_crit_byTitle/<title>', methods=['DELETE'])
-@login_required()
-def delete_ev_crit_byTitle(title):
-
-
-    personal_id = get_personal_id(request)
-    permitted = is_admin(request)
-    
-    if not permitted:
-        return {}, STATUS_FORBIDDEN
-
-    message = evaluationCriteria_DB.delete_by_title(title)
-
-    if message == NOT_FOUND:
-        return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
-
-    elif message == DB_ERROR:
-        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
-
-    return {}, STATUS_OK
 
 
 
