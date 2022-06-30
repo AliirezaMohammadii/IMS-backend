@@ -41,18 +41,20 @@ def create(employeeId, ideaId):
 
     fields = (id,employeeId,ideaId,time)
 
-    try:
-        if getHeader(employeeId,ideaId, cursor) is not None:
-            return SCORE_HEADER_ALREADY_EXISTS
+    # try:
+    if getHeader(employeeId,ideaId, cursor) is not None:
+        return SCORE_HEADER_ALREADY_EXISTS
 
-        cursor.execute(insert_query, fields)
-        db.commit()
-        close_db()
-        return MESSAGE_OK
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(insert_query, fields)
+    db.commit()
+    close_db()
+    return MESSAGE_OK
 
-    except sqlite3.Error:  
-        close_db()
-        return DB_ERROR
+    # except sqlite3.Error:
+    close_db()
+    return DB_ERROR
 
 
 def update(data, id):
@@ -115,12 +117,12 @@ def getIdeaScoreByPersonalID(ideaId, personal_id): # emtiaze har meyar ke yek fa
     employee_id = employee_DB.get_user_id(personal_id)
     db = get_db()
     cursor = db.cursor()
-    select_query =  ' SELECT * FROM evaluationCriteria LEFT JOIN  '\
-                    ' (SELECT evaluationCriteria.id , evaluationCriteria.title , ifnull(committeeScoreDetail.score,0)  FROM  '\
-                    'committeeScoreHeader  LEFT JOIN committeeScoreDetail '\
-                    'ON committeeScoreHeader.id = committeeScoreDetail.committeeScoreHeaderId)  '\
-                    'ON evaluationCriteria.id = committeeScoreDetail.evaluationCriteriaId '\
-                    ' WHERE committeeScoreHeader.employeeId = ? and committeeScoreHeader.ideaId=? '
+    select_query = ' SELECT evaluationCriteria.id ,evaluationCriteria.title, A.SC FROM evaluationCriteria LEFT JOIN  ' \
+                   ' (SELECT evaluationCriteriaId, ifnull(committeeScoreDetail.score,0) as SC  FROM  ' \
+                   'committeeScoreHeader  LEFT JOIN committeeScoreDetail ' \
+                   'ON committeeScoreHeader.id = committeeScoreDetail.committeeScoreHeaderId  ' \
+                   ' WHERE committeeScoreHeader.employeeId = ? and committeeScoreHeader.ideaId=? ) A ' \
+                   'ON evaluationCriteria.id = A.evaluationCriteriaId '
 
                     
                     
@@ -159,12 +161,12 @@ def getHeader(employeeId,ideaId, cursor):
     return header
 
 
-def get_header_id(employeeId,ideaId,cursor):
+def get_header_id(employeeId,ideaId, cursor):
 
     db = get_db()
     cursor = db.cursor()
 
-    query = 'SELECT id FROM committeeScoreHeader WHERE employeeId=? and and ideaId=? '
+    query = 'SELECT id FROM committeeScoreHeader WHERE employeeId=? and ideaId=? '
 
     try:
         cursor.execute(query, (employeeId,ideaId,))
@@ -180,16 +182,21 @@ def get_header_id(employeeId,ideaId,cursor):
 
 def scoreAnIdea(personal_id , ideaId , evaluationCriteriaId , scoreOfCriteria):
     employeeId = employee_DB.get_user_id(personal_id)
-    create(employeeId , ideaId)
+    result = create(employeeId , ideaId)
     db = get_db()
     cursor = db.cursor()
     headerId = get_header_id(employeeId, ideaId, cursor=cursor)
 
+    print("score", scoreOfCriteria)
+    print(result)
     # detail:
     res = committeeScoreDetail_DB.create(headerId,evaluationCriteriaId,scoreOfCriteria)
 
     if res == SCORE_DETAIL_ALREADY_EXISTS:
         res = committeeScoreDetail_DB.update(headerId,evaluationCriteriaId,scoreOfCriteria)
 
+    db = get_db()
+    cursor = db.cursor()
+    print(convert_to_json(committeeScoreDetail_DB.getDetail_test(cursor)))
     return res
 

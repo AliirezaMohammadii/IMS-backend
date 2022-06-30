@@ -133,3 +133,9 @@ def getDetail(committeeScoreHeaderId,evaluationCriteriaId, cursor):
     cursor.execute(select_query, (committeeScoreHeaderId,evaluationCriteriaId,))
     detail = cursor.fetchone()
     return detail
+
+def getDetail_test( cursor):
+    select_query = 'SELECT * FROM committeeScoreDetail'
+    cursor.execute(select_query)
+    detail = cursor.fetchall()
+    return detail
