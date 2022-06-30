@@ -124,7 +124,7 @@ def getIdeaScoreByPersonalID(ideaId, personal_id): # emtiaze har meyar ke yek fa
     cursor.execute(select_query, (employee_id,ideaId,))
     ideaScore = cursor.fetchall()
     close_db()
-    return ideaScore
+    return convert_to_json(ideaScore)
 
 
 def getIdeaScore(ideaId):    # miangin emtiaze har meyar baraye yek idea
@@ -141,7 +141,7 @@ def getIdeaScore(ideaId):    # miangin emtiaze har meyar baraye yek idea
     cursor.execute(select_query, (ideaId,))
     ideasScores = cursor.fetchall()
     close_db()
-    return ideasScores
+    return convert_to_json(ideasScores)
 
 
 def getHeader(employeeId,ideaId, cursor):
@@ -184,4 +184,6 @@ def scoreAnIdea(personal_id , ideaId , evaluationCriteriaId , scoreOfCriteria):
     res = committeeScoreDetail_DB.create(headerId,evaluationCriteriaId,scoreOfCriteria)
 
     if res == SCORE_DETAIL_ALREADY_EXISTS:
-        committeeScoreDetail_DB.update(headerId,evaluationCriteriaId,scoreOfCriteria)
+        res = committeeScoreDetail_DB.update(headerId,evaluationCriteriaId,scoreOfCriteria)
+
+    return res

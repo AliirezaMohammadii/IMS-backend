@@ -121,6 +121,7 @@ def clear_table():
     except sqlite3.Error:
         close_db()
         return DB_ERROR
+
 # def getEvaluationCriteriaByID(id):
 #     select_query = 'SELECT * FROM evaluationCriteria WHERE id=?'
 #     cursor.execute(select_query, (id,))
@@ -131,4 +132,4 @@ def getEvaluationCriteriaByID(id,cursor):
     select_query = 'SELECT * FROM evaluationCriteria WHERE id=?'
     cursor.execute(select_query, (id,))
     crits = cursor.fetchall()
-    return 
+    return convert_to_json(crits)

@@ -58,6 +58,9 @@ def current_user(request):
 def is_admin(request):
     return current_user(request)['isAdmin'] == 1
 
+def is_committeeMember(request):
+    return current_user(request)['committeeMember'] == 1
+
 
 @app.after_request
 def refresh_expiring_jwts(response):
@@ -577,7 +580,38 @@ def delete_ev_crit_byId(ev_crit_id):
     return {}, STATUS_OK
 
 
+# ------ COMMITTEE_SCORE_HEADER ENDPOINTS ------
+@app.route('/star_criteria/<int:idea_id>/<int:criteria_id>/<int:personal_id>', methods=['POST'])
+@login_required()
+def star_criteria(idea_id , criteria_id , personal_id):
 
+    permitted = is_committeeMember(request) or is_admin(request)
+    if not permitted:
+        return {}, STATUS_FORBIDDEN
+
+    scoreOfCriteria = request.json['scoreOfCriteria']
+    message = committeeScoreHeader_DB.scoreAnIdea(personal_id, idea_id , criteria_id , scoreOfCriteria)
+
+    if message == DB_ERROR:
+        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
+
+    return {}, STATUS_OK
+
+
+@app.route('/get_idea_scores/<int:idea_id>/<int:personal_id>', methods=['GET'])
+@login_required()
+def get_idea_scores(idea_id, personal_id):
+
+    permitted = is_committeeMember(request) or is_admin(request)
+    if not permitted:
+        return {}, STATUS_FORBIDDEN
+
+    data = committeeScoreHeader_DB.getIdeaScoreByPersonalID(personal_id, idea_id)
+
+    if data == DB_ERROR:
+        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
+
+    return data, STATUS_OK
 
 
 

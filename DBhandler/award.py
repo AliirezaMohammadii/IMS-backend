@@ -6,7 +6,9 @@ sys.path.insert(0, 'C://Users//asus//Desktop//Uni//SW Eng//Project//project file
 # macOs
 sys.path.insert(0, '/Users/mohammad/Documents/Github/IMS-backend/DBhandler')
 sys.path.insert(0, '/Users/narges/Documents/GitHub/IMS-backend/DBhandler')
+
 from db import *
+
 
 
 def create(data):
