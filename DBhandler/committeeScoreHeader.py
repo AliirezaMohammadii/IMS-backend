@@ -29,6 +29,7 @@ def create(employeeId, ideaId):
     db = get_db()
     cursor = db.cursor()
 
+
     id = get_table_size(cursor)+1
     # employeeId = employee_DB.get_user_id(data["personal_id"])
     # ideaId = data["ideaId"]
@@ -110,13 +111,12 @@ def getHeaderByID(id):
 
 
 def getIdeaScoreByPersonalID(ideaId, personal_id): # emtiaze har meyar ke yek fard dade be yek idea
-    db = get_db()
-    cursor = db.cursor()
     
     employee_id = employee_DB.get_user_id(personal_id)
-    
+    db = get_db()
+    cursor = db.cursor()
     select_query =  'SELECT evaluationCriteria.id , evaluationCriteria.title , ifnull(committeeScoreDetail.score,0)  FROM committeeScoreHeader  LEFT JOIN committeeScoreDetail '\
-           'ON committeeScoreHeader.id = committeeScoreDetail.committeeScoreHeaderId  RIGHT JOIN evaluationCriteria '\
+           'ON committeeScoreHeader.id = committeeScoreDetail.committeeScoreHeaderId  INNER JOIN evaluationCriteria '\
            'ON evaluationCriteria.id = committeeScoreDetail.evaluationCriteriaId '\
             ' WHERE committeeScoreHeader.employeeId = ? and committeeScoreHeader.ideaId=? '
                     
@@ -177,7 +177,9 @@ def get_header_id(employeeId,ideaId,cursor):
 def scoreAnIdea(personal_id , ideaId , evaluationCriteriaId , scoreOfCriteria):
     employeeId = employee_DB.get_user_id(personal_id)
     create(employeeId , ideaId)
-    headerId = get_header_id(employeeId, ideaId)
+    db = get_db()
+    cursor = db.cursor()
+    headerId = get_header_id(employeeId, ideaId, cursor=cursor)
 
     # detail:
     res = committeeScoreDetail_DB.create(headerId,evaluationCriteriaId,scoreOfCriteria)

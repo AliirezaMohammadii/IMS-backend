@@ -59,7 +59,7 @@ def is_admin(request):
     return current_user(request)['isAdmin'] == 1
 
 def is_committeeMember(request):
-    return current_user(request)['committeeMember'] == 1
+    return dict(json.loads(current_user(request)))['committeeMember'] == 1
 
 
 @app.after_request

@@ -128,7 +128,7 @@ def getCommitteeScoreDetailByID(id):
 
 
 
-def getHeader(committeeScoreHeaderId,evaluationCriteriaId, cursor):
+def getDetail(committeeScoreHeaderId,evaluationCriteriaId, cursor):
     select_query = 'SELECT * FROM committeeScoreDetail WHERE committeeScoreHeaderId=? and evaluationCriteriaId=? '
     cursor.execute(select_query, (committeeScoreHeaderId,evaluationCriteriaId,))
     detail = cursor.fetchone()
