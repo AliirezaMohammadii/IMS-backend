@@ -629,14 +629,96 @@ def get_idea_scores(idea_id, personal_id):
     return data, STATUS_OK
 
 
+# ----------------------------------------------
+
+@app.route('/getCostReduction')
+def getCostReduction():
+    value = idea_DB.costReductionValue()
+    return value
 
 
+@app.route('/getAwardsValue')
+def getAwardsValue():
+    value = award_DB.sumAwardsValue()
+    return value
 
 
+@app.route('/getIdeaCounts')
+def getIdeaCounts():
+    value = idea_DB.ideasCount()
+    return value
 
 
+@app.route('/getBestIdeasByUsersALL')
+def getBestIdeasByUsersALL():
+    value = idea_DB.getBestIdeasByUsersALL()
+    return value
 
 
+@app.route('/getBestIdeasByUsersMONTH')
+def getBestIdeasByUsersMONTH():
+    value = idea_DB.getBestIdeasByUsersMONTH()
+    return value
+
+
+@app.route('/getBestIdeasByUsersWEEK')
+def getBestIdeasByUsersWEEK():
+    value = idea_DB.getBestIdeasByUsersWEEK()
+    return value
+
+
+@app.route('/getBestIdeasByCommitteeALL')
+def getBestIdeasByCommitteeALL():
+    value = idea_DB.getBestIdeasByCommitteeALL()
+    return value
+
+
+@app.route('/getBestIdeasByCommitteeMONTH')
+def getBestIdeasByCommitteeMONTH():
+    value = idea_DB.getBestIdeasByCommitteeMONTH()
+    return value
+
+
+@app.route('/getBestIdeasByCommitteeWEEK')
+def getBestIdeasByCommitteeWEEK():
+    value = idea_DB.getBestIdeasByCommitteeWEEK()
+    return value
+
+
+@app.route('/awardBestIdeasByCommitteeWEEK')
+def awardBestIdeasByCommitteeWEEK():
+    value = idea_DB.awardBestIdeasByCommitteeWEEK()
+    return value
+
+
+@app.route('/awardBestIdeasByCommitteeMONTH')
+def awardBestIdeasByCommitteeMONTH():
+    value = idea_DB.awardBestIdeasByCommitteeMONTH()
+    return value
+
+
+@app.route('/awardBestIdeasByCommitteeALL')
+def awardBestIdeasByCommitteeALL():
+    value = idea_DB.awardBestIdeasByCommitteeALL()
+    return value
+
+
+@app.route('/awardBestIdeasByLotteryMONTH')
+def awardBestIdeasByLotteryMONTH():
+    value = idea_DB.awardBestIdeasByLotteryMONTH()
+    return value
+
+
+@app.route('/awardBestIdeasByCommitteeALL')
+def awardBestIdeasByCommitteeALL():
+    value = idea_DB.awardBestIdeasByCommitteeALL()
+    return value
+
+
+@app.route('/thinkersList')
+def thinkersList():
+    value = idea_DB.thinkersList()
+    return value
 
 
 
@@ -842,19 +924,6 @@ def _i7(employeeId,idea_id):
     return str(data)
 
 
-@app.route('/getCostReduction')
-def _ir1():
-    value = idea_DB.costReductionValue()
-    return value
-
-@app.route('/getAwardsValue')
-def _ir2():
-    value = award_DB.sumAwardsValue()
-    return value
-@app.route('/getIdeaCounts')
-def _ir3():
-    value = idea_DB.ideasCount()
-    return value
 # ------ TESTING DB / IDEA VOTE------
 @app.route('/test_create_upvote')
 def _iv1():

@@ -249,6 +249,7 @@ def getIdeasByAdmin():
         close_db()
         return DB_ERROR
 
+
 def getBestIdeasByUsersALL():
     db = get_db()
     cursor = db.cursor()
