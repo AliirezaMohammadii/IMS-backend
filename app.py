@@ -274,8 +274,15 @@ def get_user_ideas(personal_id):
 
 @app.route('/get_all_ideas/<pagination_id>')
 def get_ideas(pagination_id):
-    ideas = idea_DB.getIdeas(pagination_id)
+
+    if is_admin(request):
+        ideas = idea_DB.getIdeasByAdmin()
+
+    else:
+        ideas = idea_DB.getIdeas(pagination_id)
+        
     return ideas, STATUS_OK
+
 
 
 @app.route('/update_idea/<idea_id>', methods=['PATCH'])
