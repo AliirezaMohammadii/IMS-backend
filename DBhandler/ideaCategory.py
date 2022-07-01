@@ -100,8 +100,7 @@ def delete_by_id(id):
         close_db()
         return DB_ERROR
 
-
-def delete_by_title(lable):
+def delete_by_title(label):
     db = get_db()
     cursor = db.cursor()
 
