@@ -588,15 +588,16 @@ def awardBestIdeasByLotteryMONTH():
 def costReductionValue():
     db = get_db()
     cursor = db.cursor()
-    select_query = 'SELECT SUM(idea.costReduction)  '\
+    select_query = 'SELECT SUM(idea.costReduction) as costReduction  '\
                     'FROM idea  '\
                         'WHERE idea.status=? '\
 
+
     try:
-        cursor.execute(select_query, ('Implemented',))
-        value = cursor.fetchone()[0]
+        cursor.execute(select_query)
+        value = cursor.fetchone()
         close_db()
-        return convert_to_json(value)
+        return json.dumps(dict(value))
 
     except sqlite3.Error:  
         close_db()
@@ -605,14 +606,14 @@ def costReductionValue():
 def ideasCount():
     db = get_db()
     cursor = db.cursor()
-    select_query = 'SELECT Count(*)  '\
+    select_query = 'SELECT Count(*) as cnt '\
                     'FROM idea  '
 
     try:
         cursor.execute(select_query)
-        value = cursor.fetchone()[0]
+        value = cursor.fetchone()
         close_db()
-        return convert_to_json(value)
+        return json.dumps(dict(value))
 
     except sqlite3.Error:  
         close_db()

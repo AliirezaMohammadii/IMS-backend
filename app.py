@@ -782,6 +782,8 @@ def _i5():
 
     return str(data)
 
+
+
 @app.route('/test_clear_idea_ID/<id>')
 def _i6(id):
 
@@ -795,6 +797,20 @@ def _i7(employeeId,idea_id):
     data = idea_DB.idea_is_for_user(employeeId,idea_id)
     return str(data)
 
+
+@app.route('/getCostReduction')
+def _ir1():
+    value = idea_DBcostReductionValue()
+    return value
+
+@app.route('/getAwardsValue')
+def _ir2():
+    value = award_DB.sumAwardsValue()
+    return value
+@app.route('/getIdeaCounts')
+def _ir3():
+    value = idea_DB.ideasCount()
+    return value
 # ------ TESTING DB / IDEA VOTE------
 @app.route('/test_create_upvote/')
 def _iv1():

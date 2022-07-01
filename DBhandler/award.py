@@ -192,14 +192,15 @@ def getAwardByID(id, cursor) :
 def sumAwardsValue():
     db = get_db()
     cursor = db.cursor()
-    select_query = 'SELECT SUM(idea.value)  '\
+    select_query = 'SELECT SUM(award.value) as awardvalues  '\
                     'FROM award  '
 
+
     try:
-        cursor.execute(select_query,)
-        value = cursor.fetchone()[0]
+        cursor.execute(select_query)
+        value = cursor.fetchone()
         close_db()
-        return convert_to_json(value)
+        return json.dumps(dict(value))
 
     except sqlite3.Error:  
         close_db()
