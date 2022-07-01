@@ -932,7 +932,20 @@ def _ec1():
     evaluationCriteria_DB.create(ev_crit3)
     return str(STATUS_CREATED)
 
+@app.route('/test_eva_delete')
+def _ec999():
+    title = 'ev crit 3'
+    evaluationCriteria_DB.delete_by_title(title)
+    return str(STATUS_CREATED)
 
+@app.route('/test_eva_getall')
+def _ec000():
+    res = evaluationCriteria_DB.get_all_ev_crits()
+    return res
+@app.route('/test_clearEV')
+def _ec2222():
+    evaluationCriteria_DB.clear_table()
+    return str(STATUS_CREATED)
 # @app.route('/test_clear_idea_cat_table')
 # def _ec2():
 #     message = ideaCategory_DB.clear_table()

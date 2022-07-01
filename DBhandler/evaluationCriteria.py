@@ -116,15 +116,16 @@ def delete_by_id(id):
     except sqlite3.Error:
         close_db()
         return DB_ERROR
+
 def delete_by_title(title):
     db = get_db()
     cursor = db.cursor()
 
     query = 'DELETE FROM evaluationCriteria WHERE title=?'
-    fields = (id,)
+    fields = (title,)
 
     try:
-        if getEvaluationCriteriaByID(id, cursor) is None:
+        if checkIfExists(title, cursor) is None:
             return NOT_FOUND
 
         cursor.execute(query, fields)
@@ -141,7 +142,6 @@ def clear_table():
     cursor = db.cursor()
 
     query = 'DELETE FROM evaluationCriteria '
-
     try:
         cursor.execute(query)
         db.commit()
