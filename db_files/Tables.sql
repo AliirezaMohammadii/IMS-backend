@@ -8,6 +8,7 @@ CREATE TABLE employee (
   password VARCHAR(100) NOT NULL,
   mobile VARCHAR(15) NULL,
   email VARCHAR(50) NULL,
+  image VARBINARY(32000 - 1) NULL,
   committeeMember INTEGER NOT NULL,
   isAdmin INTEGER NOT NULL
 );

@@ -96,7 +96,8 @@ def create(data):
     text            = data["text"]
     costReduction   = 0.0
     time            = solar_date_now()
-    status          = 'NotChecked'
+    # status          = 'NotChecked'
+    status          = data['status']
     
     insert_query = 'INSERT INTO idea (id, employeeId, categoryId, title, text, costReduction, time, status) ' \
                    'VALUES (?,?,?,?,?,?,?,?)'
@@ -204,10 +205,11 @@ def getIdeas(pagination_id):
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
                         'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
-                        'Order BY idea.time DESC'\
+                        'WHERE idea.status != ? '\
+                        'Order BY idea.status= ?  DESC, idea.status= ?  DESC, idea.status= ?  DESC, idea.status= ?  DESC , idea.time DESC'\
 
     try:
-        cursor.execute(select_query)
+        cursor.execute(select_query,('NotChecked','Pending','Accepted','Rejected','Implemented'))
         ideasWithVotes = cursor.fetchall()
         close_db()
         return convert_to_json(ideasWithVotes)
@@ -355,19 +357,23 @@ def change_idea_status(idea_id, data):
 
     status = data['status']
 
+    print(status)
+
     update_query = 'UPDATE idea SET status = ? WHERE id = ?'
     fields = (status, idea_id)
                    
-    try:
-        if getIdeaByID(idea_id) == NOT_FOUND:
-            return NOT_FOUND
+    # try:
+    if getIdeaByID(idea_id) == NOT_FOUND:
+        return NOT_FOUND
 
-        cursor.execute(update_query, fields)
-        db.commit()
-        close_db()
-        return MESSAGE_OK
+    db = get_db()
+    cursor = db.cursor() 
+    cursor.execute(update_query, fields)
+    db.commit()
+    close_db()
+    return MESSAGE_OK
 
-    except sqlite3.Error:  
-        close_db()
-        return DB_ERROR
+    # except sqlite3.Error:  
+    #     close_db()
+    #     return DB_ERROR
 

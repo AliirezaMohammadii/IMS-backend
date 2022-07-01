@@ -56,7 +56,8 @@ def current_user(request):
 
 
 def is_admin(request):
-    return current_user(request)['isAdmin'] == 1
+    return dict(json.loads(current_user(request)))['isAdmin'] == 1
+    
 
 def is_committeeMember(request):
     return dict(json.loads(current_user(request)))['committeeMember'] == 1
@@ -675,7 +676,7 @@ def _1():
     data_dict = {
         'personal_id' : '2222',
         'password' : '2222',
-        'committeeMember' : 0,
+        'committeeMember' : 1,
         'isAdmin' : 0,
     }
 
@@ -704,7 +705,8 @@ def _4():
         'password' : '2222',
         'mobile' : '09129293929',
         'email' : 'm6@a.com',
-        'committeeMember' : 0,
+        'committeeMember' : 1,
+        'isAdmin' : 0,
     }
 
     message = employee_DB.update(data_dict)
@@ -732,9 +734,46 @@ def _i1():
         'categoryId' : 3,
         'title' : 'some title 1',
         'text' : 'some text 1',
+        'status': 'NotChecked'
+    }
+
+    data_dict2 = {
+        'personal_id' : 2222,
+        'categoryId' : 3,
+        'title' : 'some title 1',
+        'text' : 'some text 1',
+        'status': 'Accepted'
+    }
+
+    data_dict3 = {
+        'personal_id' : 2222,
+        'categoryId' : 3,
+        'title' : 'some title 1',
+        'text' : 'some text 1',
+        'status': 'Rejected'
+    }
+
+    data_dict4 = {
+        'personal_id' : 2222,
+        'categoryId' : 3,
+        'title' : 'some title 1',
+        'text' : 'some text 1',
+        'status': 'NotChecked'
+    }
+
+    data_dict5 = {
+        'personal_id' : 2222,
+        'categoryId' : 3,
+        'title' : 'some title 1',
+        'text' : 'some text 1',
+        'status': 'Pending'
     }
 
     message = idea_DB.create(data_dict)
+    message = idea_DB.create(data_dict2)
+    message = idea_DB.create(data_dict3)
+    message = idea_DB.create(data_dict4)
+    message = idea_DB.create(data_dict5)
     return str(message)
 
 
@@ -930,6 +969,31 @@ def _ec1():
 
 
 # ----------------------------------------------------------
+
+@app.route('/test_setScore')
+def _icovsc1():
+    data_dict = {
+        'idea_id' : 1,
+        'criteria_id' : 2,
+        'personal_id' : 2222,
+        'score' : 8,
+    }
+    message = committeeScoreHeader_DB.scoreAnIdea(data_dict['personal_id'], data_dict['idea_id'] , data_dict['criteria_id'] , data_dict['score'] )
+    return str(message)
+
+
+
+@app.route('/test_getScore')
+def _icovsc2():
+
+    personal_id= 2222
+    idea_id=1
+    message = committeeScoreHeader_DB.getIdeaScoreByPersonalID(idea_id, personal_id) 
+    #committeeScoreDetail_DB.deleteByID(1)
+    return str(message)
+
+
+
 
 @app.errorhandler(STATUS_NOT_FOUND)
 def not_found(error):
