@@ -56,7 +56,7 @@ def current_user(request):
 
 
 def is_admin(request):
-    return current_user(request)['isAdmin'] == 1
+    return dict(json.loads(current_user(request)))['isAdmin'] == 1
 
 def is_committeeMember(request):
     return dict(json.loads(current_user(request)))['committeeMember'] == 1
@@ -382,11 +382,14 @@ def create_idea_cat():
 
     if not is_admin(request):
         return {}, STATUS_FORBIDDEN
+    cats = request.json['cats']
+    for c in cats:
+        to_be_added = {'label': c['label'],
+                       'value': c['value']}
+        message = ideaCategory_DB.create(to_be_added)
 
-    message = ideaCategory_DB.create(request.json)
-
-    if message == DB_ERROR:
-        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
+        if message == DB_ERROR:
+            return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
 
     return {}, STATUS_CREATED
 
