@@ -200,7 +200,7 @@ def getIdeaByEmployeePersonalId(personal_id):
 
 #get all ideas with their votes
 def getIdeas(pagination_id):
-    db = get_db() 
+    db = get_db()
     cursor = db.cursor()
     # ideas + upvotes + down_votes + employees info
     select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
