@@ -198,7 +198,7 @@ def getIdeaByEmployeePersonalId(personal_id):
 # TODO
 # pagination_id must be handled ??
 
-#get all ideas with their votes
+#get all ideas with their votes 
 def getIdeas(pagination_id):
     db = get_db()
     cursor = db.cursor()
@@ -211,10 +211,9 @@ def getIdeas(pagination_id):
                         'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
                         'WHERE idea.status != ? '\
                         'Order BY idea.status= ?  DESC, idea.status= ?  DESC, idea.status= ?  DESC, idea.status= ?  DESC , idea.time DESC'\
-                            'WHERE idea.status != ? '\
 
     try:
-        cursor.execute(select_query,('NotChecked',))
+        cursor.execute(select_query,('NotChecked', 'Pending','Accepted','Rejected','Implemented'))
         ideasWithVotes = cursor.fetchall()
         close_db()
         return convert_to_json(ideasWithVotes)
