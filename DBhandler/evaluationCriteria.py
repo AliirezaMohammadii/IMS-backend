@@ -22,6 +22,13 @@ def get_table_size(cursor):
         return 0
     return (results)
 
+def checkIfExists(title , cursor) : 
+    select_query = 'SELECT * FROM evaluationCriteria WHERE evaluationCriteria.title=?   '
+    cursor.execute(select_query, (title,))
+    crit = cursor.fetchone()
+    print(crit)
+    return crit
+
 
 def create(data):
     db = get_db()
@@ -36,6 +43,9 @@ def create(data):
     		
 
     try:	
+        res = checkIfExists(title, cursor)
+        if res is not None:
+            return EVCRITS_ALREADY_EXISTS
         cursor.execute(insert_query, fields)	
         db.commit()	
         close_db()	
@@ -43,6 +53,7 @@ def create(data):
     except sqlite3.Error:  	
         close_db()	
         return DB_ERROR
+
 
 
 
