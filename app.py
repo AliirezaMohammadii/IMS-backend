@@ -272,7 +272,7 @@ def get_user_ideas(personal_id):
     return str(data)
 
 
-@app.route('/get_all_ideas/')
+@app.route('/get_all_ideas')
 def get_ideas():
 
     if is_admin(request):
@@ -856,7 +856,7 @@ def _ir3():
     value = idea_DB.ideasCount()
     return value
 # ------ TESTING DB / IDEA VOTE------
-@app.route('/test_create_upvote/')
+@app.route('/test_create_upvote')
 def _iv1():
     data_dict = {
         'employeeId' : 2,
@@ -867,7 +867,7 @@ def _iv1():
     message = ideaVote_DB.create(data_dict)
     return str(message)
 
-@app.route('/test_update_upvote/')
+@app.route('/test_update_upvote')
 def _iv2():
     data_dict = {
         'employeeId' : 2,
@@ -879,7 +879,7 @@ def _iv2():
     return str(message)
 
 
-@app.route('/test_create_downvote/')
+@app.route('/test_create_downvote')
 def _iv3():
     data_dict = {
         'employeeId' : 2,
@@ -890,7 +890,7 @@ def _iv3():
     message = ideaVote_DB.create(data_dict)
     return str(message)
 
-@app.route('/test_update_downvote/')
+@app.route('/test_update_downvote')
 def _iv4():
     data_dict = {
         'employeeId' : 2,

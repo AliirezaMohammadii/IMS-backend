@@ -217,7 +217,7 @@ def getIdeas():
                         'Order BY idea.status= ?  DESC, idea.status= ?  DESC, idea.status= ?  DESC, idea.status= ?  DESC , idea.time DESC'
 
     try:
-        cursor.execute(select_query,('NotChecked', 'Pending','Accepted','Rejected','Implemented')) 
+        cursor.execute(select_query,('NotChecked', 'Pending', 'Accepted', 'Rejected', 'Implemented'))
         ideasWithVotes = cursor.fetchall()
         close_db()
         return convert_to_json(ideasWithVotes)
