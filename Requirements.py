@@ -68,10 +68,8 @@ def fix_time_diff(time):
 
     hour = int(time.split()[-1][-5:-3])
     diff = int(solar_date_now()[-5:-3]) - hour
-    if diff > 0:
-        diff_str = str(diff) + ' ساعت قبل'
 
-    else:
+    if diff < 0:
         minute = int(time.split()[-1][-2:])
         diff = int(solar_date_now()[-2:]) - minute
         diff = 60 + diff if diff < 0 else diff
@@ -81,7 +79,10 @@ def fix_time_diff(time):
         else:
             diff_str = str(diff) + ' دقیقه قبل'
 
-    return diff_str
+        return diff_str
+
+    else:
+        return time
 
 
 def convert_to_json_editTime(data):

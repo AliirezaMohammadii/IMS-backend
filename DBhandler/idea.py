@@ -100,7 +100,8 @@ def create(data):
     text            = data["text"]
     costReduction   = 0.0
     time            = solar_date_now()
-    status          = 'NotChecked'
+    # status          = 'NotChecked'
+    status          = data['status']
     
     insert_query = 'INSERT INTO idea (id, employeeId, categoryId, title, text, costReduction, time, status) ' \
                    'VALUES (?,?,?,?,?,?,?,?)'
@@ -801,19 +802,23 @@ def change_idea_status(idea_id, data):
 
     status = data['status']
 
+    print(status)
+
     update_query = 'UPDATE idea SET status = ? WHERE id = ?'
     fields = (status, idea_id)
                    
-    try:
-        if getIdeaByID(idea_id) == NOT_FOUND:
-            return NOT_FOUND
+    # try:
+    if getIdeaByID(idea_id) == NOT_FOUND:
+        return NOT_FOUND
 
-        cursor.execute(update_query, fields)
-        db.commit()
-        close_db()
-        return MESSAGE_OK
+    db = get_db()
+    cursor = db.cursor() 
+    cursor.execute(update_query, fields)
+    db.commit()
+    close_db()
+    return MESSAGE_OK
 
-    except sqlite3.Error:  
-        close_db()
-        return DB_ERROR
+    # except sqlite3.Error:  
+    #     close_db()
+    #     return DB_ERROR
 

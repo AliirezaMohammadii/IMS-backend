@@ -14,6 +14,7 @@ sys.path.insert(0, '/Users/narges/Documents/GitHub/IMS-backend')
 from db import *
 from Requirements import *
 from DBhandler import employee as employee_DB
+from DBhandler import idea as idea_DB
 from DBhandler import committeeScoreDetail as committeeScoreDetail_DB
 
 
@@ -175,6 +176,36 @@ def get_header_id(employeeId,ideaId, cursor):
         return DB_ERROR
 
 
+def checkChangeStatus(ideaId):
+    db = get_db()
+    cursor = db.cursor()
+
+    query = 'SELECT count(*) FROM committeeScoreHeader WHERE committeeScoreHeader.ideaId=? '
+    cursor.execute(query, (ideaId,))
+    header = cursor.fetchone()[0]
+    query = 'SELECT count(*) FROM employee WHERE committeeMember=1 '
+    cursor.execute(query)
+    committee = cursor.fetchone()[0]
+    if header==committee:
+
+        select_query = 'SELECT ifnull(totalScore.meanScore,0) meanScore  '\
+                        'FROM idea '\
+                        'LEFT JOIN totalScore ON totalScore.ideaId =idea.id WHERE idea.id=? '
+        
+        cursor.execute(select_query, (ideaId,))
+        score = cursor.fetchone()[0]
+        if score > 6:
+            data_dict = {
+            'status' : 'Accepted',
+            }
+        else :
+            data_dict = {
+            'status' : 'Rejected',
+            }
+
+        idea_DB.change_idea_status(ideaId,data_dict)
+
+
 def scoreAnIdea(personal_id , ideaId , evaluationCriteriaId , scoreOfCriteria):
     employeeId = employee_DB.get_user_id(personal_id)
     result = create(employeeId , ideaId)
@@ -182,16 +213,14 @@ def scoreAnIdea(personal_id , ideaId , evaluationCriteriaId , scoreOfCriteria):
     cursor = db.cursor()
     headerId = get_header_id(employeeId, ideaId, cursor=cursor)
 
-    print("score", scoreOfCriteria)
-    print(result)
+
     # detail:
     res = committeeScoreDetail_DB.create(headerId,evaluationCriteriaId,scoreOfCriteria)
 
     if res == SCORE_DETAIL_ALREADY_EXISTS:
         res = committeeScoreDetail_DB.update(headerId,evaluationCriteriaId,scoreOfCriteria)
 
-    db = get_db()
-    cursor = db.cursor()
-    print(convert_to_json(committeeScoreDetail_DB.getDetail_test(cursor)))
+    # print(convert_to_json(committeeScoreDetail_DB.getDetail_test(cursor)))
+    checkChangeStatus(ideaId)
     return res
 
