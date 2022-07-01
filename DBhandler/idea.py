@@ -181,11 +181,10 @@ def getIdeaByEmployeePersonalId(personal_id):
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
                         'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
-                            'WHERE idea.status != ? '\
                         ' WHERE employee.personal_id=? Order BY idea.time DESC'\
 
     try:
-        cursor.execute(select_query,('NotChecked',personal_id,))
+        cursor.execute(select_query,(personal_id,))
         ideas = cursor.fetchall()
         close_db()
         return convert_to_json(ideas)
@@ -223,7 +222,7 @@ def getIdeas(pagination_id):
         return DB_ERROR
 
 
-def getIdeasByAdmin(pagination_id):
+def getIdeasByAdmin():
     db = get_db()
     cursor = db.cursor()
     # ideas + upvotes + down_votes + employees info

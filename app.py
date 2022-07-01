@@ -427,7 +427,6 @@ def delete_ideaCat():
         return {}, STATUS_FORBIDDEN
 
     cat = request.json['cat']
-    print(cat)
     message = ideaCategory_DB.delete_by_title(cat['value'])
 
     if message == NOT_FOUND:
@@ -776,8 +775,11 @@ def _i4(personal_id):
 
 @app.route('/test_get_all_ideas')
 def _i5():
+    if not is_admin(request):
+        data = idea_DB.get_all_ideas()
+    else:
+        data = idea_DB.getIdeasByAdmin()
 
-    data = idea_DB.get_all_ideas()
     return str(data)
 
 @app.route('/test_clear_idea_ID/<id>')
