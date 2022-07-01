@@ -844,7 +844,7 @@ def _i7(employeeId,idea_id):
 
 @app.route('/getCostReduction')
 def _ir1():
-    value = idea_DBcostReductionValue()
+    value = idea_DB.costReductionValue()
     return value
 
 @app.route('/getAwardsValue')
