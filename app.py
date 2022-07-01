@@ -140,8 +140,8 @@ def get_user(personal_id_):
     personal_id = get_personal_id(request)
     permitted = personal_id == personal_id_ or is_admin(request)
 
-    print(personal_id)
-    print(personal_id_)
+    # print(personal_id)
+    # print(personal_id_)
 
     if not permitted:
         return {}, STATUS_FORBIDDEN
@@ -419,14 +419,16 @@ def update_ideaCat(idea_cat_id):
     return {}, STATUS_OK
 
 
-@app.route('/delete_idea_cat_byId/<int:idea_cat_id>', methods=['DELETE'])
+@app.route('/delete_idea_cat', methods=['POST'])
 @login_required()
-def delete_ideaCat_byId(idea_cat_id):
+def delete_ideaCat():
 
     if not is_admin(request):
         return {}, STATUS_FORBIDDEN
 
-    message = ideaCategory_DB.delete_by_id(idea_cat_id)
+    cat = request.json['cat']
+    print(cat)
+    message = ideaCategory_DB.delete_by_title(cat['value'])
 
     if message == NOT_FOUND:
         return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
@@ -538,11 +540,15 @@ def create_ev_crit():
 
     if not is_admin(request):
         return {}, STATUS_FORBIDDEN
+    criteria = request.json['criteria']
+    for c in criteria:
+        to_be_added = {'label': c['label'],
+                       'title': c['value'],
+                       'weight': c['weight']}
+        message = evaluationCriteria_DB.create(to_be_added)
 
-    message = evaluationCriteria_DB.create(request.json)
-
-    if message == DB_ERROR:
-        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
+        if message == DB_ERROR:
+            return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
 
     return {}, STATUS_CREATED
 
@@ -565,14 +571,15 @@ def update_ev_crit(ev_crit_id):
     return {}, STATUS_OK
 
 
-@app.route('/delete_ev_crit_byId/<int:ev_crit_id>', methods=['DELETE'])
+@app.route('/delete_ev_crit', methods=['POST'])
 @login_required()
-def delete_ev_crit_byId(ev_crit_id):
+def delete_ev_crit():
 
     if not is_admin(request):
         return {}, STATUS_FORBIDDEN
 
-    message = evaluationCriteria_DB.delete_by_id(ev_crit_id)
+    criteria = request.json['criteria']
+    message = evaluationCriteria_DB.delete_by_title(criteria['value'])
 
     if message == NOT_FOUND:
         return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
@@ -654,7 +661,7 @@ def test2():
     if correct_password:
         access_token = create_access_token(identity=personal_id)
         tpi[access_token] = personal_id
-        print(access_token)
+        # print(access_token)
         response = {"access_token": access_token}
         return response, STATUS_OK
 
