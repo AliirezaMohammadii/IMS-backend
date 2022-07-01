@@ -16,7 +16,7 @@ from Requirements import *
 
 
 def getEmployeeByPersonalId(personal_id, cursor):
-    print(personal_id)
+    # print(personal_id)
     select_query = 'SELECT * FROM employee WHERE personal_id=?'
     cursor.execute(select_query, (personal_id,))
     employee = cursor.fetchone()

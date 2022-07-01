@@ -600,12 +600,12 @@ def costReductionValue():
 
 
     try:
-        cursor.execute(select_query)
+        cursor.execute(select_query,('Implemented',))
         value = cursor.fetchone()
         close_db()
         return json.dumps(dict(value))
 
-    except sqlite3.Error:  
+    except sqlite3.Error:
         close_db()
         return DB_ERROR
 
