@@ -101,7 +101,7 @@ def create(data):
     costReduction   = 0.0
     time            = solar_date_now()
     # status          = 'NotChecked'
-    status          = data['status']
+    status          = 'NotChecked'
     
     insert_query = 'INSERT INTO idea (id, employeeId, categoryId, title, text, costReduction, time, status) ' \
                    'VALUES (?,?,?,?,?,?,?,?)'
