@@ -198,7 +198,7 @@ def getIdeaByEmployeePersonalId(personal_id):
 # TODO
 # pagination_id must be handled ??
 
-#get all ideas with their votes  
+#get all ideas with their votes
 def getIdeas(pagination_id):
     db = get_db()
     cursor = db.cursor()
