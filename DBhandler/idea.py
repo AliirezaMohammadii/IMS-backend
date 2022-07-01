@@ -3,7 +3,10 @@ import json
 import re
 import sys
 from datetime import datetime
-
+import random
+import khayyam
+from datetime import timedelta
+from khayyam import *
 # windows
 sys.path.insert(0, 'C://Users//asus//Desktop//Uni//SW Eng//Project//project files//venv//IMS//backend//DBhandler')
 sys.path.insert(0, 'C://Users//asus//Desktop//Uni//SW Eng//Project//project files//venv//IMS//backend')
@@ -18,6 +21,7 @@ from Requirements import *
 from ideaStatus import *
 from DBhandler import employee as employee_DB
 from DBhandler import ideaVote as ideaVote_DB
+from DBhandler import award as award_DB
 from DBhandler import ideaStatus
 
 
@@ -207,6 +211,30 @@ def getIdeas(pagination_id):
                         'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
                         'WHERE idea.status != ? '\
                         'Order BY idea.status= ?  DESC, idea.status= ?  DESC, idea.status= ?  DESC, idea.status= ?  DESC , idea.time DESC'\
+                            'WHERE idea.status != ? '\
+
+    try:
+        cursor.execute(select_query,('NotChecked',))
+        ideasWithVotes = cursor.fetchall()
+        close_db()
+        return convert_to_json(ideasWithVotes)
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
+
+def getIdeasByAdmin():
+    db = get_db()
+    cursor = db.cursor()
+    # ideas + upvotes + down_votes + employees info
+    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
+                    'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
+                        'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
+                        'Order BY idea.status ASC , idea.time DESC'\
 
     try:
         cursor.execute(select_query,('NotChecked','Pending','Accepted','Rejected','Implemented'))
@@ -217,6 +245,406 @@ def getIdeas(pagination_id):
     except sqlite3.Error:  
         close_db()
         return DB_ERROR
+
+def getBestIdeasByUsersALL():
+    db = get_db()
+    cursor = db.cursor()
+    # ideas + upvotes + down_votes + employees info
+    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
+                    'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
+                        'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
+                        'WHERE idea.status != ? '\
+                        'Order BY  upvotes - downvotes  DESC , idea.time DESC '\
+                        'LIMIT 10'
+
+    try:
+        cursor.execute(select_query,('NotChecked',))
+        ideasWithVotes = cursor.fetchall()
+        close_db()
+        return convert_to_json(ideasWithVotes)
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
+
+
+
+def getBestIdeasByUsersMONTH():
+    db = get_db()
+    cursor = db.cursor()
+    source_date = khayyam.JalaliDatetime.now()
+    firstDayOfLastMonth = str(JalaliDatetime(source_date.year, source_date.month-1, 1))[0:-10]
+    lastDayOfLastMonth  = str(JalaliDatetime(source_date.year, source_date.month-1, 31,23,59))[0:-10]
+    #print(firstDayOfLastMonth)
+    #print(lastDayOfLastMonth)
+    # ideas + upvotes + down_votes + employees info
+    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
+                    'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
+                        'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
+                        'WHERE idea.status != ? and idea.time >= ? and idea.time <= ? '\
+                        'Order BY  upvotes - downvotes  DESC , idea.time DESC '\
+                        'LIMIT 10'
+    #select_query = 'SELECT idea.time FROM idea '
+    try:
+        cursor.execute(select_query,('NotChecked',firstDayOfLastMonth,lastDayOfLastMonth,))
+        #cursor.execute(select_query)
+
+        ideasWithVotes = cursor.fetchall()
+        close_db()
+        return convert_to_json(ideasWithVotes)
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
+
+def getBestIdeasByUsersWEEK():
+    db = get_db()
+    cursor = db.cursor()
+    source_date = khayyam.JalaliDatetime.now()
+
+    firstDayOfLastWeek=   str(JalaliDate(source_date -timedelta(7+JalaliDate(source_date).weekday())))
+    lastDayOfLastWeek = str(JalaliDate(source_date -timedelta(1+JalaliDate(source_date).weekday())))
+
+    #print(firstDayOfLastWeek)
+    #print(lastDayOfLastWeek)
+    # ideas + upvotes + down_votes + employees info
+    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
+                    'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
+                        'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
+                        'WHERE idea.status != ? and substr(idea.time,0,11) >= ? and substr(idea.time,0,11) <= ? '\
+                        'Order BY  upvotes - downvotes  DESC , idea.time DESC '\
+                        'LIMIT 10'
+    #select_query = 'SELECT substr(idea.time,0,11) FROM idea '
+    try:
+        cursor.execute(select_query,('NotChecked',firstDayOfLastWeek,lastDayOfLastWeek,))
+        #cursor.execute(select_query)
+
+        ideasWithVotes = cursor.fetchall()
+        close_db()
+        return convert_to_json(ideasWithVotes)
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
+
+
+
+
+def getBestIdeasByCommitteeALL():
+    db = get_db()
+    cursor = db.cursor()
+    # ideas + upvotes + down_votes + employees info
+    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
+                    'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
+                        'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
+                        'WHERE idea.status != ? and idea.status != ? '\
+                        'Order BY  meanScore  DESC , idea.time DESC '\
+                        'LIMIT 10'
+
+    try:
+        cursor.execute(select_query,('NotChecked','Rejected'))
+        ideasWithVotes = cursor.fetchall()
+        close_db()
+        return convert_to_json(ideasWithVotes)
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
+
+
+
+def getBestIdeasByCommitteeMONTH():
+    db = get_db()
+    cursor = db.cursor()
+    source_date = khayyam.JalaliDatetime.now()
+    firstDayOfLastMonth = str(JalaliDatetime(source_date.year, source_date.month-1, 1))[0:-10]
+    lastDayOfLastMonth  = str(JalaliDatetime(source_date.year, source_date.month-1, 31,23,59))[0:-10]
+    #print(firstDayOfLastMonth)
+    #print(lastDayOfLastMonth)
+    # ideas + upvotes + down_votes + employees info
+    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
+                    'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
+                        'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
+                        'WHERE idea.status != ? and idea.status != ? and idea.time >= ? and idea.time <= ? '\
+                        'Order BY  meanScore  DESC , idea.time DESC '\
+                        'LIMIT 10'
+
+    #select_query = 'SELECT idea.time FROM idea '
+    try:
+        cursor.execute(select_query,('NotChecked','Rejected',firstDayOfLastMonth,lastDayOfLastMonth,))
+        #cursor.execute(select_query)
+
+        ideasWithVotes = cursor.fetchall()
+        close_db()
+        return convert_to_json(ideasWithVotes)
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
+
+def getBestIdeasByCommitteeWEEK():
+    db = get_db()
+    cursor = db.cursor()
+    source_date = khayyam.JalaliDatetime.now()
+
+    firstDayOfLastWeek=   str(JalaliDate(source_date -timedelta(7+JalaliDate(source_date).weekday())))
+    lastDayOfLastWeek = str(JalaliDate(source_date -timedelta(1+JalaliDate(source_date).weekday())))
+
+    #print(firstDayOfLastWeek)
+    #print(lastDayOfLastWeek)
+    # ideas + upvotes + down_votes + employees info
+    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
+                    'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
+                        'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
+                        'WHERE idea.status != ? and idea.status != ? and substr(idea.time,0,11) >= ? and substr(idea.time,0,11) <= ? '\
+                        'Order BY  meanScore  DESC , idea.time DESC '\
+                        'LIMIT 10'
+    #select_query = 'SELECT substr(idea.time,0,11) FROM idea '
+    try:
+        cursor.execute(select_query,('NotChecked','Rejected',firstDayOfLastWeek,lastDayOfLastWeek,))
+        #cursor.execute(select_query)
+
+        ideasWithVotes = cursor.fetchall()
+        close_db()
+        return convert_to_json(ideasWithVotes)
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
+
+
+
+def awardBestIdeasByCommitteeWEEK():
+    db = get_db()
+    cursor = db.cursor()
+    source_date = khayyam.JalaliDatetime.now()
+    firstDayOfLastWeek=   str(JalaliDate(source_date -timedelta(7+JalaliDate(source_date).weekday())))
+    lastDayOfLastWeek = str(JalaliDate(source_date -timedelta(1+JalaliDate(source_date).weekday())))
+    select_query = 'SELECT  idea.employeeId, idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
+                    'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
+                        'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
+                        'WHERE idea.status != ? and idea.status != ? and substr(idea.time,0,11) >= ? and substr(idea.time,0,11) <= ? '\
+                        'Order BY  meanScore  DESC , idea.time DESC '\
+                        'LIMIT 10'
+    try:
+        cursor.execute(select_query,('NotChecked','Rejected',firstDayOfLastWeek,lastDayOfLastWeek,))
+        ideas = cursor.fetchall()
+        close_db()
+        
+        for idea in ideas:
+            
+            res = award_DB.create(dict(idea)['employeeId'], dict(idea)['id'], 'committee', 2000000)
+        return res
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
+
+
+
+
+
+
+
+def awardBestIdeasByCommitteeMONTH():
+    db = get_db()
+    cursor = db.cursor()
+    source_date = khayyam.JalaliDatetime.now()
+    firstDayOfLastMonth = str(JalaliDatetime(source_date.year, source_date.month-1, 1))[0:-10]
+    lastDayOfLastMonth  = str(JalaliDatetime(source_date.year, source_date.month-1, 31,23,59))[0:-10]
+    select_query = 'SELECT  idea.employeeId ,idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
+                    'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
+                        'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
+                        'WHERE idea.status != ? and idea.status != ? and idea.time >= ? and idea.time <= ? '\
+                        'Order BY  meanScore  DESC , idea.time DESC '\
+                        'LIMIT 10'
+    try:
+        cursor.execute(select_query,('NotChecked','Rejected',firstDayOfLastMonth,lastDayOfLastMonth,))
+        ideas = cursor.fetchall()
+        close_db()
+        print(ideas)
+        for idea in ideas:
+            print("idea = = = " , dict(idea))
+            res = award_DB.create(dict(idea)['employeeId'], dict(idea)['id'], 'committee', 2000000)
+        return res
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
+
+
+
+
+
+
+def awardBestIdeasByCommitteeALL():
+    db = get_db()
+    cursor = db.cursor()
+    source_date = khayyam.JalaliDatetime.now()
+
+    select_query = 'SELECT  idea.employeeId ,idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
+                    'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
+                        'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
+                        'WHERE idea.status != ? and idea.status != ? '\
+                        'Order BY  meanScore  DESC , idea.time DESC '\
+                        'LIMIT 10'
+    try:
+        cursor.execute(select_query,('NotChecked','Rejected',))
+        ideas = cursor.fetchall()
+        close_db()
+        print(ideas)
+        for idea in ideas:
+            print("idea = = = " , dict(idea))
+            res = award_DB.create(dict(idea)['employeeId'], dict(idea)['id'], 'committee', 2000000)
+        return res
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def awardBestIdeasByLotteryMONTH():
+    db = get_db()
+    cursor = db.cursor()
+    source_date = khayyam.JalaliDatetime.now()
+    firstDayOfLastMonth = str(JalaliDatetime(source_date.year, source_date.month-1, 1))[0:-10]
+    lastDayOfLastMonth  = str(JalaliDatetime(source_date.year, source_date.month-1, 31,23,59))[0:-10]
+    select_query = 'SELECT  idea.employeeId ,idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
+                    'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
+                        'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
+                        'WHERE idea.status = ?  and idea.time >= ? and idea.time <= ? '\
+                        'Order BY  meanScore  DESC , idea.time DESC '\
+                        'LIMIT 10'
+    try:
+        cursor.execute(select_query,('Rejected',firstDayOfLastMonth,lastDayOfLastMonth,))
+        ideas = cursor.fetchall()
+        close_db()
+        print(ideas)
+        rowOfWinner  = random.randint(0, len(ideas))
+        idea = ideas[rowOfWinner]
+        print("idea = = = " , dict(idea))
+        res = award_DB.create(dict(idea)['employeeId'], dict(idea)['id'], 'committee', 2000000)
+        return res
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
+
+
+
+def costReductionValue():
+    db = get_db()
+    cursor = db.cursor()
+    select_query = 'SELECT SUM(idea.costReduction) as costReduction  '\
+                    'FROM idea  '\
+                        'WHERE idea.status=? '\
+
+
+    try:
+        cursor.execute(select_query)
+        value = cursor.fetchone()
+        close_db()
+        return json.dumps(dict(value))
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
+def ideasCount():
+    db = get_db()
+    cursor = db.cursor()
+    select_query = 'SELECT Count(*) as cnt '\
+                    'FROM idea  '
+
+    try:
+        cursor.execute(select_query)
+        value = cursor.fetchone()
+        close_db()
+        return json.dumps(dict(value))
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
+
+
+def thinkersList():
+    db = get_db()
+    cursor = db.cursor()
+    select_query = 'SELECT Distinct employee.* FROM idea INNER JOIN employee ON idea.employeeId=employee.id  '\
+
+    try:
+        cursor.execute(select_query)
+        value = cursor.fetchall()
+        close_db()
+        return convert_to_json(value)
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
+
+
+
+
+
+
+
 
 
 #get an idea with its votes by ideaID
@@ -251,11 +679,11 @@ def getIdeasByIdeaCategoryID(id):
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
-                        'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  WHERE idea.categoryId=? '\
+                        'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  WHERE idea.categoryId=? and dea.status != ?'\
                         'Order BY idea.time DESC'\
 
     try:
-        cursor.execute(select_query, (id,))
+        cursor.execute(select_query, (id,'NotChecked',))
         ideasWithVotesByCategory = cursor.fetchall()
         close_db()
         return convert_to_json(ideasWithVotesByCategory)
@@ -263,6 +691,17 @@ def getIdeasByIdeaCategoryID(id):
     except sqlite3.Error:  
         close_db()
         return DB_ERROR
+
+
+
+
+
+
+
+
+
+
+
 
 
 def idea_is_for_user(employeeId, idea_id):
@@ -322,14 +761,17 @@ def get_all_ideas():
 
     #select_query = 'SELECT Count(*) FROM idea INNER JOIN ideaVote ON idea.id=ideaVote.ideaId Where ideaVote.type is NOT NULL and ideaVote.type=1 '
     #, (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes , (SELECT COUNT(*) FROM comment where idea.id=comment.ideaId) as commentsCount
-    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount ,ifnull(totalScore.meanScore,0) meanScore '\
+    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
                     'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
-                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  LEFT JOIN totalScore ON totalScore.ideaId =idea.id Order BY idea.time DESC'\
+                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
+                        'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
+                            'WHERE idea.status != ? '\
+                        'Order BY idea.status ASC , idea.time DESC'\
 
     try:
-        cursor.execute(select_query)
+        cursor.execute(select_query,('NotChecked',))
         ideas = cursor.fetchall()
         close_db()
         return convert_to_json(ideas)

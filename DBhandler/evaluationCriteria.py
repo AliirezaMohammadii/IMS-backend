@@ -22,6 +22,13 @@ def get_table_size(cursor):
         return 0
     return (results)
 
+def checkIfExists(title , cursor) : 
+    select_query = 'SELECT * FROM evaluationCriteria WHERE evaluationCriteria.title=?   '
+    cursor.execute(select_query, (title,))
+    crit = cursor.fetchone()
+    print(crit)
+    return crit
+
 
 def create(data):
     db = get_db()
@@ -36,6 +43,9 @@ def create(data):
     		
 
     try:	
+        res = checkIfExists(title, cursor)
+        if res is not None:
+            return EVCRITS_ALREADY_EXISTS
         cursor.execute(insert_query, fields)	
         db.commit()	
         close_db()	
@@ -43,6 +53,7 @@ def create(data):
     except sqlite3.Error:  	
         close_db()	
         return DB_ERROR
+
 
 
 
@@ -106,12 +117,31 @@ def delete_by_id(id):
         close_db()
         return DB_ERROR
 
+def delete_by_title(title):
+    db = get_db()
+    cursor = db.cursor()
+
+    query = 'DELETE FROM evaluationCriteria WHERE title=?'
+    fields = (title,)
+
+    try:
+        if checkIfExists(title, cursor) is None:
+            return NOT_FOUND
+
+        cursor.execute(query, fields)
+        db.commit()
+        close_db()
+        return MESSAGE_OK
+
+    except sqlite3.Error:
+        close_db()
+        return DB_ERROR
+        
 def clear_table():
     db = get_db()
     cursor = db.cursor()
 
     query = 'DELETE FROM evaluationCriteria '
-
     try:
         cursor.execute(query)
         db.commit()

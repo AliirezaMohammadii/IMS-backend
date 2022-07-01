@@ -14,6 +14,12 @@ sys.path.insert(0, '/Users/narges/Documents/GitHub/IMS-backend')
 from db import *
 from Requirements import *
 
+def checkIfExists(label , cursor) : 
+    select_query = 'SELECT * FROM ideaCategory WHERE ideaCategory.label=?   '
+    cursor.execute(select_query, (label,))
+    cat = cursor.fetchone()
+    print(cat)
+    return cat
 
 def get_table_size(cursor):
     cursor.execute("select max(ifnull(id,0)) from ideaCategory")
@@ -35,6 +41,9 @@ def create(data):
     fields = (id, label , value)
 
     try:
+        res = checkIfExists(label, cursor)
+        if res is not None:
+            return CAT_ALREADY_EXISTS
         cursor.execute(insert_query, fields)
         db.commit()
         close_db()
@@ -91,8 +100,7 @@ def delete_by_id(id):
         close_db()
         return DB_ERROR
 
-
-def delete_by_title(lable):
+def delete_by_title(label):
     db = get_db()
     cursor = db.cursor()
 

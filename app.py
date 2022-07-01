@@ -57,7 +57,6 @@ def current_user(request):
 
 def is_admin(request):
     return dict(json.loads(current_user(request)))['isAdmin'] == 1
-    
 
 def is_committeeMember(request):
     return dict(json.loads(current_user(request)))['committeeMember'] == 1
@@ -141,8 +140,8 @@ def get_user(personal_id_):
     personal_id = get_personal_id(request)
     permitted = personal_id == personal_id_ or is_admin(request)
 
-    print(personal_id)
-    print(personal_id_)
+    # print(personal_id)
+    # print(personal_id_)
 
     if not permitted:
         return {}, STATUS_FORBIDDEN
@@ -383,11 +382,14 @@ def create_idea_cat():
 
     if not is_admin(request):
         return {}, STATUS_FORBIDDEN
+    cats = request.json['cats']
+    for c in cats:
+        to_be_added = {'label': c['label'],
+                       'value': c['value']}
+        message = ideaCategory_DB.create(to_be_added)
 
-    message = ideaCategory_DB.create(request.json)
-
-    if message == DB_ERROR:
-        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
+        if message == DB_ERROR:
+            return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
 
     return {}, STATUS_CREATED
 
@@ -417,14 +419,15 @@ def update_ideaCat(idea_cat_id):
     return {}, STATUS_OK
 
 
-@app.route('/delete_idea_cat_byId/<int:idea_cat_id>', methods=['DELETE'])
+@app.route('/delete_idea_cat', methods=['POST'])
 @login_required()
-def delete_ideaCat_byId(idea_cat_id):
+def delete_ideaCat():
 
     if not is_admin(request):
         return {}, STATUS_FORBIDDEN
 
-    message = ideaCategory_DB.delete_by_id(idea_cat_id)
+    cat = request.json['cat']
+    message = ideaCategory_DB.delete_by_title(cat['value'])
 
     if message == NOT_FOUND:
         return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
@@ -536,11 +539,15 @@ def create_ev_crit():
 
     if not is_admin(request):
         return {}, STATUS_FORBIDDEN
+    criteria = request.json['criteria']
+    for c in criteria:
+        to_be_added = {'label': c['label'],
+                       'title': c['value'],
+                       'weight': c['weight']}
+        message = evaluationCriteria_DB.create(to_be_added)
 
-    message = evaluationCriteria_DB.create(request.json)
-
-    if message == DB_ERROR:
-        return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
+        if message == DB_ERROR:
+            return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
 
     return {}, STATUS_CREATED
 
@@ -563,14 +570,15 @@ def update_ev_crit(ev_crit_id):
     return {}, STATUS_OK
 
 
-@app.route('/delete_ev_crit_byId/<int:ev_crit_id>', methods=['DELETE'])
+@app.route('/delete_ev_crit', methods=['POST'])
 @login_required()
-def delete_ev_crit_byId(ev_crit_id):
+def delete_ev_crit():
 
     if not is_admin(request):
         return {}, STATUS_FORBIDDEN
 
-    message = evaluationCriteria_DB.delete_by_id(ev_crit_id)
+    criteria = request.json['criteria']
+    message = evaluationCriteria_DB.delete_by_title(criteria['value'])
 
     if message == NOT_FOUND:
         return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
@@ -652,7 +660,7 @@ def test2():
     if correct_password:
         access_token = create_access_token(identity=personal_id)
         tpi[access_token] = personal_id
-        print(access_token)
+        # print(access_token)
         response = {"access_token": access_token}
         return response, STATUS_OK
 
@@ -805,9 +813,14 @@ def _i4(personal_id):
 
 @app.route('/test_get_all_ideas')
 def _i5():
+    if not is_admin(request):
+        data = idea_DB.get_all_ideas()
+    else:
+        data = idea_DB.getIdeasByAdmin()
 
-    data = idea_DB.get_all_ideas()
     return str(data)
+
+
 
 @app.route('/test_clear_idea_ID/<id>')
 def _i6(id):
@@ -822,6 +835,20 @@ def _i7(employeeId,idea_id):
     data = idea_DB.idea_is_for_user(employeeId,idea_id)
     return str(data)
 
+
+@app.route('/getCostReduction')
+def _ir1():
+    value = idea_DBcostReductionValue()
+    return value
+
+@app.route('/getAwardsValue')
+def _ir2():
+    value = award_DB.sumAwardsValue()
+    return value
+@app.route('/getIdeaCounts')
+def _ir3():
+    value = idea_DB.ideasCount()
+    return value
 # ------ TESTING DB / IDEA VOTE------
 @app.route('/test_create_upvote/')
 def _iv1():
@@ -961,7 +988,20 @@ def _ec1():
     evaluationCriteria_DB.create(ev_crit3)
     return str(STATUS_CREATED)
 
+@app.route('/test_eva_delete')
+def _ec999():
+    title = 'ev crit 3'
+    evaluationCriteria_DB.delete_by_title(title)
+    return str(STATUS_CREATED)
 
+@app.route('/test_eva_getall')
+def _ec000():
+    res = evaluationCriteria_DB.get_all_ev_crits()
+    return res
+@app.route('/test_clearEV')
+def _ec2222():
+    evaluationCriteria_DB.clear_table()
+    return str(STATUS_CREATED)
 # @app.route('/test_clear_idea_cat_table')
 # def _ec2():
 #     message = ideaCategory_DB.clear_table()
