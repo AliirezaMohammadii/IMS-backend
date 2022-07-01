@@ -181,10 +181,11 @@ def getIdeaByEmployeePersonalId(personal_id):
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
                         'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
+                            'WHERE idea.status != ? '\
                         ' WHERE employee.personal_id=? Order BY idea.time DESC'\
 
     try:
-        cursor.execute(select_query,(personal_id,))
+        cursor.execute(select_query,('NotChecked',personal_id,))
         ideas = cursor.fetchall()
         close_db()
         return convert_to_json(ideas)
@@ -213,6 +214,29 @@ def getIdeas(pagination_id):
 
     try:
         cursor.execute(select_query,('NotChecked',))
+        ideasWithVotes = cursor.fetchall()
+        close_db()
+        return convert_to_json(ideasWithVotes)
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
+
+def getIdeasByAdmin(pagination_id):
+    db = get_db()
+    cursor = db.cursor()
+    # ideas + upvotes + down_votes + employees info
+    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
+                    'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
+                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
+                        'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
+                        'Order BY idea.status ASC , idea.time DESC'\
+
+    try:
+        cursor.execute(select_query)
         ideasWithVotes = cursor.fetchall()
         close_db()
         return convert_to_json(ideasWithVotes)
@@ -653,11 +677,11 @@ def getIdeasByIdeaCategoryID(id):
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
-                        'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  WHERE idea.categoryId=? '\
+                        'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  WHERE idea.categoryId=? and dea.status != ?'\
                         'Order BY idea.time DESC'\
 
     try:
-        cursor.execute(select_query, (id,))
+        cursor.execute(select_query, (id,'NotChecked',))
         ideasWithVotesByCategory = cursor.fetchall()
         close_db()
         return convert_to_json(ideasWithVotesByCategory)
@@ -735,14 +759,17 @@ def get_all_ideas():
 
     #select_query = 'SELECT Count(*) FROM idea INNER JOIN ideaVote ON idea.id=ideaVote.ideaId Where ideaVote.type is NOT NULL and ideaVote.type=1 '
     #, (SELECT COUNT(*) FROM  ideaVote where idea.id=ideaVote.ideaId and ideaVote.type=0) as downVotes , (SELECT COUNT(*) FROM comment where idea.id=comment.ideaId) as commentsCount
-    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount ,ifnull(totalScore.meanScore,0) meanScore '\
+    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
                     'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
-                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  LEFT JOIN totalScore ON totalScore.ideaId =idea.id Order BY idea.time DESC'\
+                    'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
+                        'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
+                            'WHERE idea.status != ? '\
+                        'Order BY idea.status ASC , idea.time DESC'\
 
     try:
-        cursor.execute(select_query)
+        cursor.execute(select_query,('NotChecked',))
         ideas = cursor.fetchall()
         close_db()
         return convert_to_json(ideas)
