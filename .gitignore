@@ -198,6 +198,6 @@ cython_debug/
 
 # added later
 test.py
-db_files\app.sqlite
+db_files/app.sqlite
 
 # End of https://www.toptal.com/developers/gitignore/api/python,macos

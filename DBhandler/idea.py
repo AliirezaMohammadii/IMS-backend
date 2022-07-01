@@ -202,7 +202,7 @@ def getIdeaByEmployeePersonalId(personal_id):
 
 
 def getIdeas(pagination_id):
-    db = get_db()
+    db = get_db() 
     cursor = db.cursor()
     # ideas + upvotes + down_votes + employees info
 
