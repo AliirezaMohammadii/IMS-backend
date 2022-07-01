@@ -709,12 +709,6 @@ def awardBestIdeasByLotteryMONTH():
     return value
 
 
-@app.route('/awardBestIdeasByCommitteeALL')
-def awardBestIdeasByCommitteeALL():
-    value = idea_DB.awardBestIdeasByCommitteeALL()
-    return value
-
-
 @app.route('/thinkersList')
 def thinkersList():
     value = idea_DB.thinkersList()
