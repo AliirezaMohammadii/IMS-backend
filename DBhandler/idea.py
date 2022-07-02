@@ -499,10 +499,10 @@ def awardBestIdeasByCommitteeMONTH():
         ideas = cursor.fetchall()
         close_db()
         print(ideas)
-        for idea in ideas:
-            print("idea = = = " , dict(idea))
-            res = award_DB.create(dict(idea)['employeeId'], dict(idea)['id'], 'committee', 2000000)
-        return res
+        idea = ideas[0]
+        
+        res = award_DB.create(dict(idea)['employeeId'], dict(idea)['id'], 'committee', 2000000)
+        return json.dumps(dict(idea))
 
     except sqlite3.Error:  
         close_db()
@@ -564,12 +564,15 @@ def awardBestIdeasByLotteryMONTH():
         ideas = cursor.fetchall()
         close_db()
         print(ideas)
-        rowOfWinner  = random.randint(0, len(ideas))
+        if len(ideas)==0:
+            return MESSAGE_OK
+
+        rowOfWinner  = random.randint(0, len(ideas)-1)
         print(len(ideas), rowOfWinner)
         idea = ideas[rowOfWinner]
         print("idea = = = " , dict(idea))
         res = award_DB.create(dict(idea)['employeeId'], dict(idea)['id'], 'committee', 2000000)
-        return res
+        return json.dumps(dict(idea))
 
     except sqlite3.Error:  
         close_db()
