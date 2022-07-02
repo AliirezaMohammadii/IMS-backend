@@ -56,7 +56,7 @@ def has_rude_concept(text):
 
 def remove_bad_words(text):
     sansorchi = Sansorchi()
-    return sansorchi.remove_bad_words(text, replace_text='*')
+    return sansorchi.remove_bad_words(text, replace_text='***')
 
 
 def solar_date_now():

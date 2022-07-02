@@ -148,8 +148,6 @@ def update(data, id):
 
 
 def delete(id):
-    db = get_db()
-    cursor = db.cursor()
 
     query = 'DELETE FROM idea WHERE id=?'
     fields = (id,)
@@ -157,6 +155,9 @@ def delete(id):
     try:
         if getIdeaByID(id) is None:
             return NOT_FOUND
+
+        db = get_db()
+        cursor = db.cursor()
 
         cursor.execute(query, fields)
         db.commit()
