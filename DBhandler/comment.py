@@ -30,9 +30,9 @@ def create(data):
     text        = data["text"]
     time        = solar_date_now()
 
-    if has_rude_consept(text):
+    if has_rude_concept(text):
         close_db()
-        return RUDE_CONSEPT
+        return RUDE_CONCEPT
 
     insert_query = 'INSERT INTO comment (id,employeeId, ideaId,text,time) ' \
                    'VALUES (?,?, ?,?,?)'
