@@ -747,7 +747,7 @@ def awardBestIdeasByCommittee():
 
 
 @app.route('/awardBestIdeasByLotteryMONTH')
-@login_required()
+# @login_required()
 def awardBestIdeasByLotteryMONTH():
     value = idea_DB.awardBestIdeasByLotteryMONTH()
     return value

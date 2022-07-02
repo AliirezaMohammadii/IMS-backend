@@ -544,8 +544,8 @@ def awardBestIdeasByLotteryMONTH():
     db = get_db()
     cursor = db.cursor()
     source_date = khayyam.JalaliDatetime.now()
-    firstDayOfLastMonth = str(JalaliDatetime(source_date.year, source_date.month-1, 1))[0:-10]
-    lastDayOfLastMonth  = str(JalaliDatetime(source_date.year, source_date.month-1, 31,23,59))[0:-10]
+    firstDayOfLastMonth = str(JalaliDatetime(source_date.year, source_date.month, 1))[0:-10]
+    lastDayOfLastMonth  = str(JalaliDatetime(source_date.year, source_date.month, 31,23,59))[0:-10]
 
     exists = award_DB.checkIfLotteryMonthExists(firstDayOfLastMonth, cursor)
     if (exists):
@@ -567,6 +567,7 @@ def awardBestIdeasByLotteryMONTH():
         close_db()
         print(ideas)
         rowOfWinner  = random.randint(0, len(ideas))
+        print(len(ideas), rowOfWinner)
         idea = ideas[rowOfWinner]
         print("idea = = = " , dict(idea))
         res = award_DB.create(dict(idea)['employeeId'], dict(idea)['id'], 'committee', 2000000)
