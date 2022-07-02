@@ -510,7 +510,7 @@ def getCommentsByIdeaIDLoggedIn(idea_id):
     return data,  STATUS_OK 
 
 
-@app.route('/delete_comment/<int:comment_id>', methods=['DELETE'])
+@app.route('/delete_comment/<int:comment_id>', methods=['POST'])
 @login_required()
 def delete_comment(comment_id):
 
