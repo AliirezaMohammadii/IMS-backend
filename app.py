@@ -247,7 +247,6 @@ def create_idea():
 
 
 @app.route('/get_idea/<idea_id>')
-# @login_required()
 def get_idea(idea_id):
     message = idea_DB.getIdeaByID(idea_id)
 
@@ -706,7 +705,6 @@ def getIdeaCounts():
 
 
 @app.route('/getBestIdeas')
-@login_required()
 def getBestIdeas():
 
     type = request.json['type']
