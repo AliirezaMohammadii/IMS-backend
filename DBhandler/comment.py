@@ -106,7 +106,7 @@ def getCommentByID(id):
 
     select_query = 'SELECT * FROM comment WHERE id=?'
     cursor.execute(select_query, (id,))
-    comment = cursor.fetchall()
+    comment = cursor.fetchone()
     try:
         if comment is None:
             return NOT_FOUND
