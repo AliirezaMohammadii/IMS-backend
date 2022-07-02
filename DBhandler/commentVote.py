@@ -20,7 +20,6 @@ from DBhandler import employee as employee_DB
 def create(data):
     db = get_db()
     cursor = db.cursor()
-
     id          = get_table_size(cursor) + 1
     employeeId  = employee_DB.get_user_id(data["personal_id"])
     commentId   = data["commentId"]
@@ -31,41 +30,72 @@ def create(data):
                    'VALUES (?,?,?,?,?)'
     fields = (id, employeeId, commentId, type, time,)
 
+    db = get_db()
+    cursor = db.cursor()
     try:
         if getCommentVoteByEmployeeComment(employeeId , commentId, cursor) is not None:
             return COMMENTVOTE_ALREADY_EXISTS
 
+        db = get_db()
+        cursor = db.cursor()
         cursor.execute(insert_query, fields)
         db.commit()
         close_db()
         return MESSAGE_OK
 
-    except sqlite3.Error:  
+    except sqlite3.Error:
         close_db()
         return DB_ERROR
 
 
-def update(data, id): 
+def get_commentVoteID(employeeId, commentId):
+    db = get_db()
+    cursor = db.cursor()
+
+    select_query = 'SELECT  commentVote.id FROM commentVote Where employeeId=? AND commentId=? '
+
+    cursor.execute(select_query, (employeeId, commentId,))
+    idd = cursor.fetchone()
+    id = dict(idd)['id']
+
+    try:
+        if idd is None:
+            return NOT_FOUND
+        close_db()
+
+        return id
+
+    except sqlite3.Error:
+        close_db()
+        return DB_ERROR
+
+
+def update(data):
     db = get_db()
     cursor = db.cursor()
 
     employeeId = employee_DB.get_user_id(data["personal_id"])
     commentId = data["commentId"]
     type = data["type"]
-    time = data["time"]
+    time = solar_date_now()
 
+    id = get_commentVoteID(employeeId, commentId)
     update_query = 'UPDATE commentVote SET employeeId=?, commentId=?,type=?,time=? ' \
                    'WHERE id=?'
     fields = (employeeId, commentId,type,time , id)
+    db = get_db()
+    cursor = db.cursor()
     try:
-        res = getCommentVoteByEmployeeComment(employeeId, commentId)
-        if res in None :
+        res = getCommentVoteByEmployeeComment(employeeId, commentId, cursor)
+        if res is None :
             return NOT_FOUND
         if   type ==res['type'] : # double upvotes ==> No vote  # double downvotes ==> No vote 
             delete(commentId , employeeId)
             return MESSAGE_OK
-            
+
         # update db:
+        db = get_db()
+        cursor = db.cursor()
         cursor.execute(update_query, fields)
         db.commit()
         close_db()
@@ -133,7 +163,7 @@ def getCommentVoteByID(id):
     return commentVote
 
 
-def getCommentVoteByEmployeeComment(employeeID , commentID,cursor):
+def getCommentVoteByEmployeeComment(employeeID , commentID, cursor):
     select_query = 'SELECT * FROM commentVote '\
             'WHERE commentVote.employeeId=? AND commentVote.commentId=? '
             
