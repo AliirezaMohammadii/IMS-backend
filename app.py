@@ -511,11 +511,11 @@ def getCommentsByIdeaIDLoggedIn(idea_id):
 
 
 
-@app.route('/delete_comment/<int:comment_id>', methods=['DELETE'])
+@app.route('/delete_comment/<int:comment_id>', methods=['POST'])
 @login_required()
 def delete_comment(comment_id):
 
-    employeeId = current_user()['id']
+    employeeId = current_user(request)['id']
     permitted = comment_DB.comment_is_for_user(employeeId, comment_id) or is_admin(request)
     if not permitted:
         return {}, STATUS_FORBIDDEN
