@@ -536,7 +536,9 @@ def delete_comment(comment_id):
 def like_comment(comment_id):
     personal_id = get_personal_id(request)
 
-    not_permitted = comment_DB.getCommentByID(comment_id)['personal_id'] == personal_id
+    comment = comment_DB.getCommentByID(comment_id)
+    comment = json.loads(comment)
+    not_permitted = comment['personal_id'] == personal_id
     if not_permitted:
         return {}, STATUS_FORBIDDEN
 
@@ -554,7 +556,9 @@ def like_comment(comment_id):
 def dislike_comment(comment_id):
     personal_id = get_personal_id(request)
 
-    not_permitted = comment_DB.getCommentByID(comment_id)['personal_id'] == personal_id
+    comment = comment_DB.getCommentByID(comment_id)
+    comment = json.loads(comment)
+    not_permitted = comment['personal_id'] == personal_id
     if not_permitted:
         return {}, STATUS_FORBIDDEN
 
