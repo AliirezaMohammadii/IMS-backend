@@ -105,11 +105,12 @@ def delete(commentId, employeeId):
             'WHERE  commentVote.commentId = ? and '\
             'commentVote.emplyee.id = ?  '
             
-    fields = (commentId,employeeId, )
+    fields = (commentId,employeeId,)
+    
     if getCommentVoteByEmployeeComment(employeeId , commentId, cursor) is None:
         return NOT_FOUND
-    try:
 
+    try:
         cursor.execute(query, fields)
         db.commit()
         close_db()
@@ -201,4 +202,3 @@ def clear_table():
     close_db()
 
     return 'CommentVote table Has been cleared succesfully.'
-    

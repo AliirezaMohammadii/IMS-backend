@@ -141,9 +141,6 @@ def get_user(personal_id_):
     personal_id = get_personal_id(request)
     permitted = personal_id == personal_id_ or is_admin(request)
 
-    # print(personal_id)
-    # print(personal_id_)
-
     if not permitted:
         return {}, STATUS_FORBIDDEN
 
