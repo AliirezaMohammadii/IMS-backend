@@ -53,8 +53,7 @@ def current_user(request):
     jwt_token = request.headers['Authorization'].split()[1]
     personal_id = tpi_DB.get(jwt_token)
     user = employee_DB.get_by_personal_id(personal_id)
-    user = dict(json.loads(current_user(request)))
-    return user
+    return dict(json.loads(user))
 
 
 def is_admin(request):
