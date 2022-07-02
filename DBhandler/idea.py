@@ -274,8 +274,6 @@ def getBestIdeasByUsersALL():
         return DB_ERROR
 
 
-
-
 def getBestIdeasByUsersMONTH():
     db = get_db()
     cursor = db.cursor()
@@ -342,9 +340,6 @@ def getBestIdeasByUsersWEEK():
         return DB_ERROR
 
 
-
-
-
 def getBestIdeasByCommitteeALL():
     db = get_db()
     cursor = db.cursor()
@@ -368,8 +363,6 @@ def getBestIdeasByCommitteeALL():
     except sqlite3.Error:  
         close_db()
         return DB_ERROR
-
-
 
 
 def getBestIdeasByCommitteeMONTH():
@@ -439,8 +432,6 @@ def getBestIdeasByCommitteeWEEK():
         return DB_ERROR
 
 
-
-
 def awardBestIdeasByCommitteeWEEK():
     db = get_db()
     cursor = db.cursor()
@@ -469,12 +460,6 @@ def awardBestIdeasByCommitteeWEEK():
     except sqlite3.Error:  
         close_db()
         return DB_ERROR
-
-
-
-
-
-
 
 
 def awardBestIdeasByCommitteeMONTH():
@@ -507,11 +492,6 @@ def awardBestIdeasByCommitteeMONTH():
         return DB_ERROR
 
 
-
-
-
-
-
 def awardBestIdeasByCommitteeALL():
     db = get_db()
     cursor = db.cursor()
@@ -539,22 +519,6 @@ def awardBestIdeasByCommitteeALL():
     except sqlite3.Error:  
         close_db()
         return DB_ERROR
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def awardBestIdeasByLotteryMONTH():
@@ -626,7 +590,6 @@ def ideasCount():
         return DB_ERROR
 
 
-
 def thinkersList():
     db = get_db()
     cursor = db.cursor()
@@ -641,14 +604,6 @@ def thinkersList():
     except sqlite3.Error:  
         close_db()
         return DB_ERROR
-
-
-
-
-
-
-
-
 
 
 #get an idea with its votes by ideaID
@@ -695,17 +650,6 @@ def getIdeasByIdeaCategoryID(id):
     except sqlite3.Error:  
         close_db()
         return DB_ERROR
-
-
-
-
-
-
-
-
-
-
-
 
 
 def idea_is_for_user(employeeId, idea_id):
@@ -823,3 +767,17 @@ def change_idea_status(idea_id, data):
     #     close_db()
     #     return DB_ERROR
 
+
+def idea_has_rude_consept(idea_id):
+    idea = getIdeaByID(idea_id)
+    idea = json.loads(idea)
+    title = idea['title']
+    text = idea['text']
+    
+    consept_is_rudely = has_rude_consept(text) or has_rude_consept(title)
+
+    if consept_is_rudely:
+        return remove_bad_words(title), remove_bad_words(text), True
+    
+    else:
+        return title, text, False

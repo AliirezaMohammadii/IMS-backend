@@ -20,6 +20,7 @@ from DBhandler import commentVote as commentVote_DB
 
 
 def create(data):
+
     db = get_db()
     cursor = db.cursor()
 
@@ -28,6 +29,10 @@ def create(data):
     ideaId      = data["ideaId"]
     text        = data["text"]
     time        = solar_date_now()
+
+    if has_rude_consept(text):
+        close_db()
+        return RUDE_CONSEPT
 
     insert_query = 'INSERT INTO comment (id,employeeId, ideaId,text,time) ' \
                    'VALUES (?,?, ?,?,?)'

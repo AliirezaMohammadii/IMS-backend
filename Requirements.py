@@ -6,6 +6,8 @@ from hashlib import sha256
 #from khayyam import JalaliDateTime as JDateTime
 import khayyam
 import sys
+from sansorchi import Sansorchi
+
 
 # windows
 sys.path.insert(0, 'C://Users//asus//Desktop//Uni//SW Eng//Project//project files//venv//IMS//backend')
@@ -28,6 +30,8 @@ SCORE_DETAIL_ALREADY_EXISTS = 8
 AWARD_ALREADY_EXISTS = 9
 EVCRITS_ALREADY_EXISTS = 10
 CAT_ALREADY_EXISTS  = 11
+RUDE_CONSEPT = 12
+
 ### STATUS CODES
 STATUS_OK           = 200
 STATUS_CREATED      = 201
@@ -46,6 +50,16 @@ ADMIN_personal_id = '11111111'
 def log(to_print):
     print('#LOG -> ', end='')
     print(to_print)
+
+
+def has_rude_consept(text):
+    sansorchi = Sansorchi()
+    return sansorchi.is_bad_word(text)
+
+
+def remove_bad_words(text):
+    sansorchi = Sansorchi()
+    return sansorchi.remove_bad_words(text)
 
 
 def solar_date_now():

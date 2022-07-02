@@ -1,4 +1,5 @@
 
+from email import message
 from flask import Flask, request, url_for, redirect
 from flask_cors import CORS
 import sys, os, time
@@ -306,7 +307,7 @@ def update_idea(idea_id):
 @login_required()
 def delete_idea(idea_id):
     employeeId = current_user(request)['id']
-    permitted = idea_DB.idea_is_for_user(employeeId, idea_id)
+    permitted = idea_DB.idea_is_for_user(employeeId, idea_id) or is_admin(request)
     if not permitted:
         return {}, STATUS_FORBIDDEN
 
@@ -338,6 +339,22 @@ def change_idea_status(idea_id):
         return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
 
     return {}, STATUS_OK
+
+
+@app.route('/has_rude_consept/<int:idea_id>')
+@login_required()
+def has_rude_consept(idea_id):
+
+    if not is_admin(request):
+        return {}, STATUS_FORBIDDEN
+
+    idea_title, idea_text, consept_is_rudely = idea_DB.idea_has_rude_consept(idea_id)
+        
+    return {
+            'idea_title': idea_title,
+            'idea_text': idea_text,
+            'result': consept_is_rudely
+            }, STATUS_OK
 
 
 # ------ LIKE/DISLIKE IDEA ENDPOINTS ------
@@ -452,6 +469,9 @@ def create_comment():
 
     if message == DB_ERROR:
         return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
+
+    elif message == RUDE_CONSEPT:
+        return {'message': RUDE_CONSEPT}, STATUS_BAD_REQUEST
 
     return {}, STATUS_CREATED
 
@@ -630,87 +650,104 @@ def get_idea_scores(idea_id, personal_id):
 
 # ------------- AWARDS ENDPOINTS -----------------
 @app.route('/getCostReduction')
+@login_required()
 def getCostReduction():
     value = idea_DB.costReductionValue()
     return value
 
 
 @app.route('/getAwardsValue')
+@login_required()
 def getAwardsValue():
     value = award_DB.sumAwardsValue()
     return value
 
 
 @app.route('/getIdeaCounts')
+@login_required()
 def getIdeaCounts():
     value = idea_DB.ideasCount()
     return value
 
 
 @app.route('/getBestIdeasByUsersALL')
+@login_required()
 def getBestIdeasByUsersALL():
     value = idea_DB.getBestIdeasByUsersALL()
     return value
 
 
 @app.route('/getBestIdeasByUsersMONTH')
+@login_required()
 def getBestIdeasByUsersMONTH():
     value = idea_DB.getBestIdeasByUsersMONTH()
     return value
 
 
 @app.route('/getBestIdeasByUsersWEEK')
+@login_required()
 def getBestIdeasByUsersWEEK():
     value = idea_DB.getBestIdeasByUsersWEEK()
     return value
 
 
 @app.route('/getBestIdeasByCommitteeALL')
+@login_required()
 def getBestIdeasByCommitteeALL():
     value = idea_DB.getBestIdeasByCommitteeALL()
     return value
 
 
 @app.route('/getBestIdeasByCommitteeMONTH')
+@login_required()
 def getBestIdeasByCommitteeMONTH():
     value = idea_DB.getBestIdeasByCommitteeMONTH()
     return value
 
 
 @app.route('/getBestIdeasByCommitteeWEEK')
+@login_required()
 def getBestIdeasByCommitteeWEEK():
     value = idea_DB.getBestIdeasByCommitteeWEEK()
     return value
 
 
 @app.route('/awardBestIdeasByCommitteeWEEK')
+@login_required()
 def awardBestIdeasByCommitteeWEEK():
     value = idea_DB.awardBestIdeasByCommitteeWEEK()
     return value
 
 
 @app.route('/awardBestIdeasByCommitteeMONTH')
+@login_required()
 def awardBestIdeasByCommitteeMONTH():
     value = idea_DB.awardBestIdeasByCommitteeMONTH()
     return value
 
 
 @app.route('/awardBestIdeasByCommitteeALL')
+@login_required()
 def awardBestIdeasByCommitteeALL():
     value = idea_DB.awardBestIdeasByCommitteeALL()
     return value
 
 
 @app.route('/awardBestIdeasByLotteryMONTH')
+@login_required()
 def awardBestIdeasByLotteryMONTH():
     value = idea_DB.awardBestIdeasByLotteryMONTH()
     return value
 
 
 @app.route('/thinkersList')
+@login_required()
 def thinkersList():
     value = idea_DB.thinkersList()
     return value
+
+
+
 
 
 
@@ -764,7 +801,7 @@ def _1():
     data_dict = {
         'personal_id' : '2222',
         'password' : '2222',
-        'committeeMember' : 1,
+        'committeeMember' : 0,
         'isAdmin' : 0,
     }
 
@@ -825,43 +862,43 @@ def _i1():
         'status': 'NotChecked'
     }
 
-    data_dict2 = {
-        'personal_id' : 2222,
-        'categoryId' : 3,
-        'title' : 'some title 1',
-        'text' : 'some text 1',
-        'status': 'Accepted'
-    }
+    # data_dict2 = {
+    #     'personal_id' : 2222,
+    #     'categoryId' : 3,
+    #     'title' : 'some title 1',
+    #     'text' : 'some text 1',
+    #     'status': 'Accepted'
+    # }
 
-    data_dict3 = {
-        'personal_id' : 2222,
-        'categoryId' : 3,
-        'title' : 'some title 1',
-        'text' : 'some text 1',
-        'status': 'Rejected'
-    }
+    # data_dict3 = {
+    #     'personal_id' : 2222,
+    #     'categoryId' : 3,
+    #     'title' : 'some title 1',
+    #     'text' : 'some text 1',
+    #     'status': 'Rejected'
+    # }
 
-    data_dict4 = {
-        'personal_id' : 2222,
-        'categoryId' : 3,
-        'title' : 'some title 1',
-        'text' : 'some text 1',
-        'status': 'NotChecked'
-    }
+    # data_dict4 = {
+    #     'personal_id' : 2222,
+    #     'categoryId' : 3,
+    #     'title' : 'some title 1',
+    #     'text' : 'some text 1',
+    #     'status': 'NotChecked'
+    # }
 
-    data_dict5 = {
-        'personal_id' : 2222,
-        'categoryId' : 3,
-        'title' : 'some title 1',
-        'text' : 'some text 1',
-        'status': 'Pending'
-    }
+    # data_dict5 = {
+    #     'personal_id' : 2222,
+    #     'categoryId' : 3,
+    #     'title' : 'some title 1',
+    #     'text' : 'some text 1',
+    #     'status': 'Pending'
+    # }
 
     message = idea_DB.create(data_dict)
-    message = idea_DB.create(data_dict2)
-    message = idea_DB.create(data_dict3)
-    message = idea_DB.create(data_dict4)
-    message = idea_DB.create(data_dict5)
+    # message = idea_DB.create(data_dict2)
+    # message = idea_DB.create(data_dict3)
+    # message = idea_DB.create(data_dict4)
+    # message = idea_DB.create(data_dict5)
     return str(message)
 
 
