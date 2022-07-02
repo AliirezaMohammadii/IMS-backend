@@ -265,14 +265,15 @@ def getBestIdeasByUsersALL():
     db = get_db()
     cursor = db.cursor()
     # ideas + upvotes + down_votes + employees info
-    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
+    select_query = 'SELECT DISTINCT A.personal_id , A.firstName , A.lastName  FROM  '\
+                    '(SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
                     'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
                         'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
                         'WHERE idea.status != ? '\
-                        'Order BY  upvotes - downvotes  DESC , idea.time DESC '\
+                        'Order BY  upvotes - downvotes  DESC , idea.time DESC ) A '\
                         'LIMIT 10'
 
     try:
@@ -295,14 +296,15 @@ def getBestIdeasByUsersMONTH():
     #print(firstDayOfLastMonth)
     #print(lastDayOfLastMonth)
     # ideas + upvotes + down_votes + employees info
-    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
+    select_query = 'SELECT DISTINCT A.personal_id , A.firstName , A.lastName  FROM  '\
+                    '(SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
                     'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
                         'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
                         'WHERE idea.status != ? and idea.time >= ? and idea.time <= ? '\
-                        'Order BY  upvotes - downvotes  DESC , idea.time DESC '\
+                        'Order BY  upvotes - downvotes  DESC , idea.time DESC ) A '\
                         'LIMIT 10'
     #select_query = 'SELECT idea.time FROM idea '
     try:
@@ -329,14 +331,15 @@ def getBestIdeasByUsersWEEK():
     #print(firstDayOfLastWeek)
     #print(lastDayOfLastWeek)
     # ideas + upvotes + down_votes + employees info
-    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
+    select_query =  'SELECT DISTINCT A.personal_id , A.firstName , A.lastName  FROM  '\
+                    '(SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
                     'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
                         'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
                         'WHERE idea.status != ? and substr(idea.time,0,11) >= ? and substr(idea.time,0,11) <= ? '\
-                        'Order BY  upvotes - downvotes  DESC , idea.time DESC '\
+                        'Order BY  upvotes - downvotes  DESC , idea.time DESC ) A '\
                         'LIMIT 10'
     #select_query = 'SELECT substr(idea.time,0,11) FROM idea '
     try:
@@ -356,7 +359,7 @@ def getBestIdeasByCommitteeALL():
     db = get_db()
     cursor = db.cursor()
     # ideas + upvotes + down_votes + employees info
-    select_query = 'SELECT DISTINCT employee.personal_id , employee.firstName , employee.lastName  FROM  '\
+    select_query = 'SELECT DISTINCT A.personal_id , A.firstName , A.lastName  FROM  '\
                     '(SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
                     'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
@@ -364,18 +367,16 @@ def getBestIdeasByCommitteeALL():
                     'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
                         'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
                         'WHERE idea.status != ? and idea.status != ? '\
-                        'Order BY  meanScore  DESC , idea.time DESC) '\
+                        'Order BY  meanScore  DESC , idea.time DESC) A '\
                         'LIMIT 10'
 
-    try:
-        cursor.execute(select_query,('NotChecked','Rejected'))
-        ideasWithVotes = cursor.fetchall()
-        close_db()
-        return convert_to_json(ideasWithVotes)
+    
 
-    except sqlite3.Error:  
-        close_db()
-        return DB_ERROR
+    cursor.execute(select_query,('NotChecked','Rejected',))
+    ideasWithVotes = cursor.fetchall()
+    close_db()
+    return convert_to_json(ideasWithVotes)
+
 
 
 def getBestIdeasByCommitteeMONTH():
@@ -387,14 +388,15 @@ def getBestIdeasByCommitteeMONTH():
     #print(firstDayOfLastMonth)
     #print(lastDayOfLastMonth)
     # ideas + upvotes + down_votes + employees info
-    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
+    select_query = 'SELECT DISTINCT A.personal_id , A.firstName , A.lastName  FROM  '\
+                    '(SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
                     'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
                         'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
                         'WHERE idea.status != ? and idea.status != ? and idea.time >= ? and idea.time <= ? '\
-                        'Order BY  meanScore  DESC , idea.time DESC '\
+                        'Order BY  meanScore  DESC , idea.time DESC ) A '\
                         'LIMIT 10'
 
     #select_query = 'SELECT idea.time FROM idea '
@@ -422,14 +424,15 @@ def getBestIdeasByCommitteeWEEK():
     #print(firstDayOfLastWeek)
     #print(lastDayOfLastWeek)
     # ideas + upvotes + down_votes + employees info
-    select_query = 'SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
+    select_query = 'SELECT DISTINCT A.personal_id , A.firstName , A.lastName  FROM  '\
+                    '(SELECT  idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
                     'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
                         'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
                         'WHERE idea.status != ? and idea.status != ? and substr(idea.time,0,11) >= ? and substr(idea.time,0,11) <= ? '\
-                        'Order BY  meanScore  DESC , idea.time DESC '\
+                        'Order BY  meanScore  DESC , idea.time DESC ) A '\
                         'LIMIT 10'
     #select_query = 'SELECT substr(idea.time,0,11) FROM idea '
     try:
@@ -451,14 +454,15 @@ def awardBestIdeasByCommitteeWEEK():
     source_date = khayyam.JalaliDatetime.now()
     firstDayOfLastWeek=   str(JalaliDate(source_date -timedelta(7+JalaliDate(source_date).weekday())))
     lastDayOfLastWeek = str(JalaliDate(source_date -timedelta(1+JalaliDate(source_date).weekday())))
-    select_query = 'SELECT  idea.employeeId, idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
+    select_query = 'SELECT DISTINCT A.personal_id , A.firstName , A.lastName  FROM  '\
+                    '(SELECT  idea.employeeId, idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
                     'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
                         'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
                         'WHERE idea.status != ? and idea.status != ? and substr(idea.time,0,11) >= ? and substr(idea.time,0,11) <= ? '\
-                        'Order BY  meanScore  DESC , idea.time DESC '\
+                        'Order BY  meanScore  DESC , idea.time DESC ) A'\
                         'LIMIT 10'
     try:
         cursor.execute(select_query,('NotChecked','Rejected',firstDayOfLastWeek,lastDayOfLastWeek,))
@@ -481,14 +485,15 @@ def awardBestIdeasByCommitteeMONTH():
     source_date = khayyam.JalaliDatetime.now()
     firstDayOfLastMonth = str(JalaliDatetime(source_date.year, source_date.month-1, 1))[0:-10]
     lastDayOfLastMonth  = str(JalaliDatetime(source_date.year, source_date.month-1, 31,23,59))[0:-10]
-    select_query = 'SELECT  idea.employeeId ,idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
+    select_query = 'SELECT DISTINCT A.personal_id , A.firstName , A.lastName  FROM  '\
+                    '(SELECT  idea.employeeId ,idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
                     'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
                         'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
                         'WHERE idea.status != ? and idea.status != ? and idea.time >= ? and idea.time <= ? '\
-                        'Order BY  meanScore  DESC , idea.time DESC '\
+                        'Order BY  meanScore  DESC , idea.time DESC ) A '\
                         'LIMIT 10'
     try:
         cursor.execute(select_query,('NotChecked','Rejected',firstDayOfLastMonth,lastDayOfLastMonth,))
@@ -510,14 +515,15 @@ def awardBestIdeasByCommitteeALL():
     cursor = db.cursor()
     source_date = khayyam.JalaliDatetime.now()
 
-    select_query = 'SELECT  idea.employeeId ,idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
+    select_query = 'SELECT DISTINCT A.personal_id , A.firstName , A.lastName  FROM  '\
+                    '(SELECT  idea.employeeId ,idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
                     'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
                         'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
                         'WHERE idea.status != ? and idea.status != ? '\
-                        'Order BY  meanScore  DESC , idea.time DESC '\
+                        'Order BY  meanScore  DESC , idea.time DESC ) A '\
                         'LIMIT 10'
     try:
         cursor.execute(select_query,('NotChecked','Rejected',))
@@ -545,14 +551,15 @@ def awardBestIdeasByLotteryMONTH():
     if (exists):
         return AWARD_ALREADY_EXISTS
 
-    select_query = 'SELECT  idea.employeeId ,idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
+    select_query = 'SELECT DISTINCT A.personal_id , A.firstName , A.lastName  FROM  '\
+                    '(SELECT  idea.employeeId ,idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
                     'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
                         'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
                         'WHERE idea.status = ?  and idea.time >= ? and idea.time <= ? '\
-                        'Order BY  meanScore  DESC , idea.time DESC '\
+                        'Order BY  meanScore  DESC , idea.time DESC ) A '\
                         'LIMIT 10'
     try:
         cursor.execute(select_query,('Rejected',firstDayOfLastMonth,lastDayOfLastMonth,))

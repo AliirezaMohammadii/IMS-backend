@@ -703,8 +703,7 @@ def getIdeaCounts():
     value = idea_DB.ideasCount()
     return value
 
-
-@app.route('/getBestIdeas')
+@app.route('/getBestIdeas', methods=["POST"])
 def getBestIdeas():
 
     type = request.json['type']
