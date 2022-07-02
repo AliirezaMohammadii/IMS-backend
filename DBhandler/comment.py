@@ -177,7 +177,7 @@ def getCommentsByIdeaID_loggedIn(id,personal_id):  # Get an idea comments with v
     db = get_db()
     cursor = db.cursor()
 
-    select_query = 'SELECT  comment.id , comment.employeeId, comment.text, comment.time , employee.personal_id , employee.firstName , employee.lastName ,ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  '\
+    select_query = 'SELECT  comment.id , comment.employeeId, comment.text, comment.time , employee.personal_id , employee.firstName , employee.lastName ,ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes , ifnull(userVote,0) vote '\
                     'FROM comment INNER JOIN employee ON comment.employeeId=employee.id '\
                     'LEFT JOIN ( SELECT commentVote.commentId , commentVote.type ,count(commentVote.type) as cntUP FROM commentVote Where commentVote.type is not null and commentVote.type =1 Group BY (commentVote.commentId) ) C ON C.commentId = comment.id '\
                     'LEFT JOIN ( SELECT commentVote.commentId , commentVote.type ,count(commentVote.type) as cntDOWN FROM commentVote Where commentVote.type is not null and commentVote.type =2 Group BY (commentVote.commentId) ) D ON D.commentId = comment.id '\
