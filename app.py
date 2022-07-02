@@ -650,21 +650,18 @@ def get_idea_scores(idea_id, personal_id):
 
 # ------------- AWARDS ENDPOINTS -----------------
 @app.route('/getCostReduction')
-@login_required()
 def getCostReduction():
     value = idea_DB.costReductionValue()
     return value
 
 
 @app.route('/getAwardsValue')
-@login_required()
 def getAwardsValue():
     value = award_DB.sumAwardsValue()
     return value
 
 
 @app.route('/getIdeaCounts')
-@login_required()
 def getIdeaCounts():
     value = idea_DB.ideasCount()
     return value

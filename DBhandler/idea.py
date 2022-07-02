@@ -127,7 +127,7 @@ def update(data, id):
     status = data["status"]
     
     update_query = 'UPDATE idea SET costReduction=?, status=?' \
-                   'WHERE id=?'
+                   ' WHERE id=?'
 
     fields = (costReduction, status , id)
 
@@ -752,20 +752,41 @@ def change_idea_status(idea_id, data):
     update_query = 'UPDATE idea SET status = ? WHERE id = ?'
     fields = (status, idea_id)
                    
-    # try:
-    if getIdeaByID(idea_id) == NOT_FOUND:
-        return NOT_FOUND
+    try:
+        if getIdeaByID(idea_id) == NOT_FOUND:
+            return NOT_FOUND
+
+        db = get_db()
+        cursor = db.cursor() 
+        cursor.execute(update_query, fields)
+        db.commit()
+        close_db()
+        return MESSAGE_OK
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
+
+def update_title_text(new_title, new_text, idea_id):
 
     db = get_db()
     cursor = db.cursor() 
-    cursor.execute(update_query, fields)
-    db.commit()
-    close_db()
-    return MESSAGE_OK
 
-    # except sqlite3.Error:  
-    #     close_db()
-    #     return DB_ERROR
+    update_query = 'UPDATE idea SET title = ?, text = ? WHERE id = ?'
+    fields = (new_title, new_text, idea_id)
+
+    try:
+        db = get_db()
+        cursor = db.cursor() 
+        cursor.execute(update_query, fields)
+        db.commit()
+        close_db()
+        return MESSAGE_OK
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
 
 
 def idea_has_rude_concept(idea_id):
@@ -777,7 +798,10 @@ def idea_has_rude_concept(idea_id):
     concept_is_rudely = has_rude_concept(text) or has_rude_concept(title)
 
     if concept_is_rudely:
-        return remove_bad_words(title), remove_bad_words(text), True
+        new_title = remove_bad_words(title)
+        new_text = remove_bad_words(text)
+        update_title_text(new_title, new_text, idea_id)
+        return new_title, new_text, True
     
     else:
         return title, text, False
