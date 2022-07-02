@@ -25,6 +25,13 @@ def getAwardBYEmployeeIdIdeaId(employeeId , ideaId, cursor) :
     print(employeeAward)
     return employeeAward
 
+def checkIfLotteryMonthExists(firstDayOfLastMonth, cursor): 
+    select_query = 'SELECT * FROM award WHERE award.time=?  and award.type= ? '
+    cursor.execute(select_query, (firstDayOfLastMonth , 'lottery'))
+    employeeAward = cursor.fetchone()
+    print(employeeAward)
+    return employeeAward
+    
 def create(employeeId,ideaId,type,value):
     db = get_db()
     cursor = db.cursor()
@@ -220,3 +227,6 @@ def sumAwardsValue():
         close_db()
         return DB_ERROR
 
+
+
+    
