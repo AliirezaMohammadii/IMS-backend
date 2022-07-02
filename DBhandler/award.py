@@ -18,6 +18,7 @@ sys.path.insert(0, '/Users/narges/Documents/GitHub/IMS-backend')
 from db import *
 from Requirements import *
 from ideaStatus import *
+
 def getAwardBYEmployeeIdIdeaId(employeeId , ideaId, cursor) : 
     select_query = 'SELECT * FROM award WHERE award.employeeId=? and award.ideaId=?  '
     cursor.execute(select_query, (employeeId , ideaId,))

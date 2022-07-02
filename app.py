@@ -690,36 +690,29 @@ def getIdeaCounts():
     return value
 
 
-@app.route('/getBestIdeasByUsers')
+@app.route('/getBestIdeas')
 @login_required()
-def getBestIdeasByUsers():
+def getBestIdeas():
 
     type = request.json['type']
+    employee_type = request.json['employee_type']
     value = ''
 
-    if type == 'ALL':
-        value = idea_DB.getBestIdeasByUsersALL()
-    elif type == 'MONTH':
-        value = idea_DB.getBestIdeasByUsersMONTH()
+    if employee_type == 'User':
+        if type == 'ALL':
+            value = idea_DB.getBestIdeasByUsersALL()
+        elif type == 'MONTH':
+            value = idea_DB.getBestIdeasByUsersMONTH()
+        else:
+            value = idea_DB.getBestIdeasByUsersWEEK()
+
     else:
-        value = idea_DB.getBestIdeasByUsersWEEK()
-
-    return value
-
-
-@app.route('/getBestIdeasByCommittee')
-@login_required()
-def getBestIdeasByCommittee():
-
-    type = request.json['type']
-    value = ''
-
-    if type == 'ALL':
-        value = idea_DB.getBestIdeasByCommitteeALL()
-    elif type == 'MONTH':
-        value = idea_DB.getBestIdeasByCommitteeMONTH()
-    else:
-        value = idea_DB.getBestIdeasByCommitteeWEEK()
+        if type == 'ALL':
+            value = idea_DB.getBestIdeasByCommitteeALL()
+        elif type == 'MONTH':
+            value = idea_DB.getBestIdeasByCommitteeMONTH()
+        else:
+            value = idea_DB.getBestIdeasByCommitteeWEEK()
 
     return value
 
