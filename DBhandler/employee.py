@@ -227,8 +227,8 @@ def set_as_committeeMember(personal_id):
     db = get_db()
     cursor = db.cursor()
 
-    update_query = 'UPDATE employee SET committeeMember = ?'
-    fields = (True,)
+    update_query = 'UPDATE employee SET committeeMember = ? WHERE personal_id = ?'
+    fields = (True, personal_id,)
                    
     try:
         if getEmployeeByPersonalId(personal_id, cursor) is None:
@@ -248,8 +248,8 @@ def set_as_ordinaryMember(personal_id):
     db = get_db()
     cursor = db.cursor()
 
-    update_query = 'UPDATE employee SET committeeMember = ? WHERE personal_id=?'
-    fields = (False, personal_id)
+    update_query = 'UPDATE employee SET committeeMember = ? WHERE personal_id = ?'
+    fields = (False, personal_id,)
                    
     try:
         if getEmployeeByPersonalId(personal_id, cursor) is None:
