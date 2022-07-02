@@ -125,20 +125,20 @@ def update(data, id):
     
     status = data["status"]
     if status == 'Pending':
-        costReduction = data["costReduction"]
         title = data['title']
         text = data['text']
     
-        update_query = 'UPDATE idea SET title=?, text=?, costReduction=?, status=?' \
+        update_query = 'UPDATE idea SET title=?, text=?, status=?' \
                     ' WHERE id=?'
 
-        fields = (title, text, costReduction, status , id)
+        fields = (title, text, status , id)
 
     else:
-        update_query = 'UPDATE idea SET status=?' \
+        costReduction = data['costReduction']
+        update_query = 'UPDATE idea SET costReduction=?, status=?' \
                     ' WHERE id=?'
 
-        fields = (status , id)
+        fields = (costReduction, status , id)
 
     try:
         if getIdeaByID(id) == NOT_FOUND:
