@@ -534,11 +534,13 @@ def delete_comment(comment_id):
 @app.route('/like_comment/<comment_id>', methods=['POST'])
 @login_required()
 def like_comment(comment_id):
-    personal_id = get_personal_id(request)
 
+    personal_id = get_personal_id(request)
     comment = comment_DB.getCommentByID(comment_id)
     comment = json.loads(comment)
-    not_permitted = comment['personal_id'] == personal_id
+    employeeId = employee_DB.get_user_id(personal_id)
+
+    not_permitted = comment['employeeId'] == employeeId
     if not_permitted:
         return {}, STATUS_FORBIDDEN
 
@@ -554,11 +556,13 @@ def like_comment(comment_id):
 @app.route('/dislike_comment/<comment_id>', methods=['POST'])
 @login_required()
 def dislike_comment(comment_id):
-    personal_id = get_personal_id(request)
 
+    personal_id = get_personal_id(request)
     comment = comment_DB.getCommentByID(comment_id)
     comment = json.loads(comment)
-    not_permitted = comment['personal_id'] == personal_id
+    employeeId = employee_DB.get_user_id(personal_id)
+
+    not_permitted = comment['employeeId'] == employeeId
     if not_permitted:
         return {}, STATUS_FORBIDDEN
 
