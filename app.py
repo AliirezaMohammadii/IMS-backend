@@ -219,6 +219,16 @@ def set_as_ordinaryMember(personal_id_):
     employee_DB.set_as_ordinaryMember(personal_id_)
 
 
+@app.route('/get_all_users', methods=['GET'])
+@login_required()
+def get_all_users():
+
+    if not is_admin(request):
+        return {}, STATUS_FORBIDDEN
+
+    employee_DB.get_all_employees()
+
+
 # ------ IDEA ENDPOINTS ------
 @app.route('/create_idea', methods=['POST'])
 @login_required()
