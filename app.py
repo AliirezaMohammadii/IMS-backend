@@ -285,7 +285,7 @@ def get_ideas():
     return ideas, STATUS_OK
 
 
-@app.route('/update_idea/<idea_id>', methods=['PATCH'])
+@app.route('/update_idea/<idea_id>', methods=['POST'])
 @login_required()
 def update_idea(idea_id):
 
