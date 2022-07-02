@@ -119,17 +119,26 @@ def create(data):
 
 
 def update(data, id):
-    
-    costReduction = 0.0
-    if 'costReduction' in data:
-        costReduction = data["costReduction"]
 
+    update_query = ''
+    fields = ''
+    
     status = data["status"]
+    if status == 'Pending':
+        costReduction = data["costReduction"]
+        title = data['title']
+        text = data['text']
     
-    update_query = 'UPDATE idea SET costReduction=?, status=?' \
-                   ' WHERE id=?'
+        update_query = 'UPDATE idea SET title=?, text=?, costReduction=?, status=?' \
+                    ' WHERE id=?'
 
-    fields = (costReduction, status , id)
+        fields = (title, text, costReduction, status , id)
+
+    else:
+        update_query = 'UPDATE idea SET status=?' \
+                    ' WHERE id=?'
+
+        fields = (status , id)
 
     try:
         if getIdeaByID(id) == NOT_FOUND:
@@ -801,7 +810,6 @@ def idea_has_rude_concept(idea_id):
     if concept_is_rudely:
         new_title = remove_bad_words(title)
         new_text = remove_bad_words(text)
-        update_title_text(new_title, new_text, idea_id)
         return new_title, new_text, True
     
     else:
