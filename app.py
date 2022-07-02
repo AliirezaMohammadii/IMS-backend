@@ -294,6 +294,9 @@ def update_idea(idea_id):
 
     message = idea_DB.update(request.json, idea_id)
 
+    data = idea_DB.getIdeaByID(idea_id)
+    print(data)
+
     if message == NOT_FOUND:
         return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
 

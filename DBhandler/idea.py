@@ -124,6 +124,7 @@ def update(data, id):
     fields = ''
     
     status = data["status"]
+    print(status)
     if status == 'Pending':
         title = data['title']
         text = data['text']
@@ -131,6 +132,7 @@ def update(data, id):
         update_query = 'UPDATE idea SET title=?, text=?, status=?' \
                     ' WHERE id=?'
 
+        log('Im here')
         fields = (title, text, status , id)
 
     else:
