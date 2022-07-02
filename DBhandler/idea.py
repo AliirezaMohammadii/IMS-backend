@@ -119,25 +119,24 @@ def create(data):
 
 
 def update(data, id):
-    db = get_db()
-    cursor = db.cursor()
     
-    employeeId      = employee_DB.get_user_id(data["personal_id"])
-    categoryId      = data["categoryId"]
-    title           = data["title"]
-    text            = data["text"]
-    costReduction   = data["costReduction"]
-    time            = data["time"]
-    status          = data["status"]
+    costReduction = 0.0
+    if 'costReduction' in data:
+        costReduction = data["costReduction"]
+
+    status = data["status"]
     
-    update_query = 'UPDATE idea SET employeeId=?,categoryId=?, title=?,text=?,costReduction=?,time=?, status=?' \
+    update_query = 'UPDATE idea SET costReduction=?, status=?' \
                    'WHERE id=?'
-    fields = (employeeId,categoryId, title,text,costReduction,time, status , id)
+
+    fields = (costReduction, status , id)
 
     try:
         if getIdeaByID(id) == NOT_FOUND:
             return NOT_FOUND
 
+        db = get_db()
+        cursor = db.cursor()
         cursor.execute(update_query, fields)
         db.commit()
         close_db()
@@ -608,12 +607,13 @@ def costReductionValue():
     except sqlite3.Error:  
         close_db()
         return DB_ERROR
+        
 
 def ideasCount():
     db = get_db()
     cursor = db.cursor()
     select_query = 'SELECT Count(*) as cnt '\
-                    'FROM idea  '
+                    'FROM idea'
 
     try:
         cursor.execute(select_query)

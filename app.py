@@ -287,9 +287,8 @@ def get_ideas():
 @app.route('/update_idea/<idea_id>', methods=['PATCH'])
 @login_required()
 def update_idea(idea_id):
-    employeeId = current_user(request)['id']
-    permitted = idea_DB.idea_is_for_user(employeeId, idea_id)
-    if not permitted:
+
+    if not is_admin(request):
         return {}, STATUS_FORBIDDEN
 
     message = idea_DB.update(request.json, idea_id)
@@ -629,8 +628,7 @@ def get_idea_scores(idea_id, personal_id):
     return data, STATUS_OK
 
 
-# ----------------------------------------------
-
+# ------------- AWARDS ENDPOINTS -----------------
 @app.route('/getCostReduction')
 def getCostReduction():
     value = idea_DB.costReductionValue()
