@@ -30,7 +30,7 @@ SCORE_DETAIL_ALREADY_EXISTS = 8
 AWARD_ALREADY_EXISTS = 9
 EVCRITS_ALREADY_EXISTS = 10
 CAT_ALREADY_EXISTS  = 11
-RUDE_CONSEPT = 12
+RUDE_concept = 12
 
 ### STATUS CODES
 STATUS_OK           = 200
@@ -52,14 +52,14 @@ def log(to_print):
     print(to_print)
 
 
-def has_rude_consept(text):
+def has_rude_concept(text):
     sansorchi = Sansorchi()
     return sansorchi.is_bad_word(text)
 
 
 def remove_bad_words(text):
     sansorchi = Sansorchi()
-    return sansorchi.remove_bad_words(text)
+    return sansorchi.remove_bad_words(text, replace_text='*')
 
 
 def solar_date_now():

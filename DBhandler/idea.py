@@ -768,15 +768,15 @@ def change_idea_status(idea_id, data):
     #     return DB_ERROR
 
 
-def idea_has_rude_consept(idea_id):
+def idea_has_rude_concept(idea_id):
     idea = getIdeaByID(idea_id)
     idea = json.loads(idea)
     title = idea['title']
     text = idea['text']
-    
-    consept_is_rudely = has_rude_consept(text) or has_rude_consept(title)
 
-    if consept_is_rudely:
+    concept_is_rudely = has_rude_concept(text) or has_rude_concept(title)
+
+    if concept_is_rudely:
         return remove_bad_words(title), remove_bad_words(text), True
     
     else:

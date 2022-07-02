@@ -341,19 +341,19 @@ def change_idea_status(idea_id):
     return {}, STATUS_OK
 
 
-@app.route('/has_rude_consept/<int:idea_id>')
+@app.route('/has_rude_concept/<int:idea_id>')
 @login_required()
-def has_rude_consept(idea_id):
+def has_rude_concept(idea_id):
 
     if not is_admin(request):
         return {}, STATUS_FORBIDDEN
 
-    idea_title, idea_text, consept_is_rudely = idea_DB.idea_has_rude_consept(idea_id)
+    idea_title, idea_text, concept_is_rudely = idea_DB.idea_has_rude_concept(idea_id)
         
     return {
             'idea_title': idea_title,
             'idea_text': idea_text,
-            'result': consept_is_rudely
+            'result': concept_is_rudely
             }, STATUS_OK
 
 
@@ -470,8 +470,8 @@ def create_comment():
     if message == DB_ERROR:
         return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
 
-    elif message == RUDE_CONSEPT:
-        return {'message': RUDE_CONSEPT}, STATUS_BAD_REQUEST
+    elif message == RUDE_concept:
+        return {'message': RUDE_concept}, STATUS_BAD_REQUEST
 
     return {}, STATUS_CREATED
 
