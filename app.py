@@ -53,14 +53,15 @@ def current_user(request):
     jwt_token = request.headers['Authorization'].split()[1]
     personal_id = tpi_DB.get(jwt_token)
     user = employee_DB.get_by_personal_id(personal_id)
+    user = dict(json.loads(current_user(request)))
     return user
 
 
 def is_admin(request):
-    return dict(json.loads(current_user(request)))['isAdmin'] == 1
+    return current_user(request)['isAdmin'] == 1
 
 def is_committeeMember(request):
-    return dict(json.loads(current_user(request)))['committeeMember'] == 1
+    return current_user(request)['committeeMember'] == 1
 
 
 @app.after_request

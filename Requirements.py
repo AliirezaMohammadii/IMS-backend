@@ -44,9 +44,6 @@ STATUS_NOT_FOUND    = 404
 STATUS_INTERNAL_SERVER_ERROR = 500
 
 
-ADMIN_personal_id = '11111111'
-
-
 def log(to_print):
     print('#LOG -> ', end='')
     print(to_print)
