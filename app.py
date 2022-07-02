@@ -470,8 +470,8 @@ def create_comment():
     if message == DB_ERROR:
         return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
 
-    elif message == RUDE_concept:
-        return {'message': RUDE_concept}, STATUS_BAD_REQUEST
+    elif message == RUDE_CONCEPT:
+        return {'message': RUDE_CONCEPT}, STATUS_BAD_REQUEST
 
     return {}, STATUS_CREATED
 
