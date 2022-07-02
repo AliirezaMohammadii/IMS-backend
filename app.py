@@ -208,6 +208,8 @@ def set_as_committeeMember(personal_id_):
 
     employee_DB.set_as_committeeMember(personal_id_)
 
+    return {}, STATUS_OK
+
 
 @app.route('/set_as_ordinaryMember/<personal_id_>', methods=['POST'])
 @login_required()
@@ -218,6 +220,8 @@ def set_as_ordinaryMember(personal_id_):
 
     employee_DB.set_as_ordinaryMember(personal_id_)
 
+    return {}, STATUS_OK
+
 
 @app.route('/get_all_users', methods=['GET'])
 @login_required()
@@ -226,7 +230,8 @@ def get_all_users():
     if not is_admin(request):
         return {}, STATUS_FORBIDDEN
 
-    employee_DB.get_all_employees()
+    data = employee_DB.get_all_employees()
+    return data, STATUS_OK
 
 
 # ------ IDEA ENDPOINTS ------
