@@ -118,13 +118,27 @@ def deleteALL():
         close_db()
         return DB_ERROR
 
+
+def checkIfLotteryMonthExists(firstDayOfLastMonth, cursor): 
+    select_query = 'SELECT * FROM award WHERE award.time=?  and award.type= ? '
+    cursor.execute(select_query, (firstDayOfLastMonth , 'lottery'))
+    employeeAward = cursor.fetchone()
+    print(employeeAward)
+    return employeeAward
+
+
 def getAwardByUsername(personal_id):  # Awards received by an employee.
+    db = get_db()
+    cursor = db.cursor()
     select_query = 'SELECT * FROM award INNER JOIN employee ON employee.id = award.employeeId WHERE employee.personal_id=? '
     cursor.execute(select_query, (personal_id,))
     employeeAward = cursor.fetchall()
     return employeeAward
 
+
 def getAwards():    # All awards given so far.
+    db = get_db()
+    cursor = db.cursor()
     select_query = 'SELECT * FROM award INNER JOIN employee ON employee.id = award.employeeId'
     cursor.execute(select_query)
     awards = cursor.fetchall()
@@ -206,11 +220,3 @@ def sumAwardsValue():
         close_db()
         return DB_ERROR
 
-
-def checkIfLotteryMonthExists(firstDayOfLastMonth, cursor): 
-    select_query = 'SELECT * FROM award WHERE award.time=?  and award.type= ? '
-    cursor.execute(select_query, (firstDayOfLastMonth , 'lottery'))
-    employeeAward = cursor.fetchone()
-    print(employeeAward)
-    return employeeAward
-    
