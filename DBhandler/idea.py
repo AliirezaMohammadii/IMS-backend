@@ -539,6 +539,11 @@ def awardBestIdeasByLotteryMONTH():
     source_date = khayyam.JalaliDatetime.now()
     firstDayOfLastMonth = str(JalaliDatetime(source_date.year, source_date.month-1, 1))[0:-10]
     lastDayOfLastMonth  = str(JalaliDatetime(source_date.year, source_date.month-1, 31,23,59))[0:-10]
+
+    exists = award_DB.checkIfLotteryMonthExists(firstDayOfLastMonth, cursor)
+    if (exists):
+        return AWARD_ALREADY_EXISTS
+
     select_query = 'SELECT  idea.employeeId ,idea.id , idea.categoryId , idea.title ,idea.text , idea.costReduction , idea.time , idea.status , employee.personal_id , employee.firstName , employee.lastName , ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  , ifnull(cntComments,0) commentsCount , ifnull(totalScore.meanScore,0) meanScore '\
                     'FROM idea INNER JOIN employee ON idea.employeeId =employee.id '\
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntUP FROM ideaVote Where ideaVote.type is not null and ideaVote.type =1 Group BY (ideaVote.ideaId) ) C ON C.ideaId = idea.id '\
