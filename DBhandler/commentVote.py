@@ -122,10 +122,16 @@ def delete(commentId, employeeId):
 
 
 def getCommentVoteByID(id):
+    db = get_db()
+    cursor = db.cursor()
+
     select_query = 'SELECT * FROM commentVote WHERE id=?'
     cursor.execute(select_query, (id,))
     commentVote = cursor.fetchall()
+
+    close_db()
     return commentVote
+
 
 def getCommentVoteByEmployeeComment(employeeID , commentID,cursor):
     select_query = 'SELECT * FROM commentVote '\
@@ -135,6 +141,7 @@ def getCommentVoteByEmployeeComment(employeeID , commentID,cursor):
     cursor.execute(select_query, fields)
     commentVote = cursor.fetchone()
     return commentVote
+
 
 def getCommentVoteByEmployeePersonalIDCommentID(personalID, commentID):
     db = get_db()
@@ -150,6 +157,7 @@ def getCommentVoteByEmployeePersonalIDCommentID(personalID, commentID):
     commentVote = cursor.fetchone()
     return commentVote
     
+
 def get_table_size(cursor):
     cursor.execute("select max(ifnull(id,0)) from commentVote")
     results = cursor.fetchone()[0]

@@ -499,7 +499,7 @@ def get_idea_comments(idea_id):
 @login_required()
 def delete_comment(comment_id):
 
-    employeeId = request.json['employeeId']
+    employeeId = current_user()['id']
     permitted = comment_DB.comment_is_for_user(employeeId, comment_id) or is_admin(request)
     if not permitted:
         return {}, STATUS_FORBIDDEN
