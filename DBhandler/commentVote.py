@@ -174,7 +174,7 @@ def like_comment(commentId, employeeId):
     }
     message = create(data_dict)
     if message == COMMENTVOTE_ALREADY_EXISTS:
-        message =  update(data_dict)
+        message = update(data_dict)
 
     return message
 
@@ -201,3 +201,4 @@ def clear_table():
     close_db()
 
     return 'CommentVote table Has been cleared succesfully.'
+    
