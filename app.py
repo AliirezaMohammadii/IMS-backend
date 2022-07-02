@@ -690,66 +690,54 @@ def getIdeaCounts():
     return value
 
 
-@app.route('/getBestIdeasByUsersALL')
+@app.route('/getBestIdeasByUsers')
 @login_required()
-def getBestIdeasByUsersALL():
-    value = idea_DB.getBestIdeasByUsersALL()
+def getBestIdeasByUsers():
+
+    type = request.json['type']
+    value = ''
+
+    if type == 'ALL':
+        value = idea_DB.getBestIdeasByUsersALL()
+    elif type == 'MONTH':
+        value = idea_DB.getBestIdeasByUsersMONTH()
+    else:
+        value = idea_DB.getBestIdeasByUsersWEEK()
+
     return value
 
 
-@app.route('/getBestIdeasByUsersMONTH')
+@app.route('/getBestIdeasByCommittee')
 @login_required()
-def getBestIdeasByUsersMONTH():
-    value = idea_DB.getBestIdeasByUsersMONTH()
+def getBestIdeasByCommittee():
+
+    type = request.json['type']
+    value = ''
+
+    if type == 'ALL':
+        value = idea_DB.getBestIdeasByCommitteeALL()
+    elif type == 'MONTH':
+        value = idea_DB.getBestIdeasByCommitteeMONTH()
+    else:
+        value = idea_DB.getBestIdeasByCommitteeWEEK()
+
     return value
 
 
-@app.route('/getBestIdeasByUsersWEEK')
+@app.route('/awardBestIdeasByCommittee')
 @login_required()
-def getBestIdeasByUsersWEEK():
-    value = idea_DB.getBestIdeasByUsersWEEK()
-    return value
+def awardBestIdeasByCommittee():
 
+    type = request.json['type']
+    value = ''
 
-@app.route('/getBestIdeasByCommitteeALL')
-@login_required()
-def getBestIdeasByCommitteeALL():
-    value = idea_DB.getBestIdeasByCommitteeALL()
-    return value
+    if type == 'ALL':
+        value = idea_DB.awardBestIdeasByCommitteeALL()
+    elif type == 'MONTH':
+        value = idea_DB.awardBestIdeasByCommitteeMONTH()
+    else:
+        value = idea_DB.awardBestIdeasByCommitteeWEEK()
 
-
-@app.route('/getBestIdeasByCommitteeMONTH')
-@login_required()
-def getBestIdeasByCommitteeMONTH():
-    value = idea_DB.getBestIdeasByCommitteeMONTH()
-    return value
-
-
-@app.route('/getBestIdeasByCommitteeWEEK')
-@login_required()
-def getBestIdeasByCommitteeWEEK():
-    value = idea_DB.getBestIdeasByCommitteeWEEK()
-    return value
-
-
-@app.route('/awardBestIdeasByCommitteeWEEK')
-@login_required()
-def awardBestIdeasByCommitteeWEEK():
-    value = idea_DB.awardBestIdeasByCommitteeWEEK()
-    return value
-
-
-@app.route('/awardBestIdeasByCommitteeMONTH')
-@login_required()
-def awardBestIdeasByCommitteeMONTH():
-    value = idea_DB.awardBestIdeasByCommitteeMONTH()
-    return value
-
-
-@app.route('/awardBestIdeasByCommitteeALL')
-@login_required()
-def awardBestIdeasByCommitteeALL():
-    value = idea_DB.awardBestIdeasByCommitteeALL()
     return value
 
 
