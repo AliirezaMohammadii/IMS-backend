@@ -506,8 +506,8 @@ def getCommentsByIdeaIDLoggedIn(idea_id):
         elif message == DB_ERROR:
             return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
 
-    data = message
-    return data, STATUS_OK
+    data =  message
+    return data,  STATUS_OK 
 
 
 
