@@ -494,7 +494,7 @@ def awardBestIdeasByCommitteeMONTH():
                         'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
                         'WHERE idea.status != ? and idea.status != ? and idea.time >= ? and idea.time <= ? '\
                         'Order BY  meanScore  DESC , idea.time DESC ) A '\
-                        'LIMIT 10'
+                        'LIMIT 1'
     try:
         cursor.execute(select_query,('NotChecked','Rejected',firstDayOfLastMonth,lastDayOfLastMonth,))
         ideas = cursor.fetchall()
