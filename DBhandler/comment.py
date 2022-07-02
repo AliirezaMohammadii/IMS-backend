@@ -172,6 +172,30 @@ def getCommentsByIdeaID(id):  # Get an idea comments with votes for each comment
         return DB_ERROR
 
 
+def getCommentsByIdeaID_loggedIn(id,personal_id):  # Get an idea comments with votes for each comment and information about the employee who submitted the comment
+
+    db = get_db()
+    cursor = db.cursor()
+
+    select_query = 'SELECT  comment.id , comment.employeeId, comment.text, comment.time , employee.personal_id , employee.firstName , employee.lastName ,ifnull(cntUP,0) upvotes  ,  ifnull(cntDOWN,0) downvotes  '\
+                    'FROM comment INNER JOIN employee ON comment.employeeId=employee.id '\
+                    'LEFT JOIN ( SELECT commentVote.commentId , commentVote.type ,count(commentVote.type) as cntUP FROM commentVote Where commentVote.type is not null and commentVote.type =1 Group BY (commentVote.commentId) ) C ON C.commentId = comment.id '\
+                    'LEFT JOIN ( SELECT commentVote.commentId , commentVote.type ,count(commentVote.type) as cntDOWN FROM commentVote Where commentVote.type is not null and commentVote.type =2 Group BY (commentVote.commentId) ) D ON D.commentId = comment.id '\
+                    'LEFT JOIN ( SELECT commentVote.commentId , commentVote.type as userVote from commentVote inner join employee on employee.id = commentVote.employeeId Where employee.personal_id =? ) S ON S.commentId = comment.id  '\
+                    'Where comment.ideaId=? Order BY comment.time DESC'\
+
+    try:
+        cursor.execute(select_query, (personal_id,id,))
+        comments = cursor.fetchall()
+        close_db()
+        return convert_to_json_editTime(comments)
+        # return convert_to_json(comments)
+
+    except sqlite3.Error:  
+        close_db()
+        return DB_ERROR
+
+
 def like_comment(comment_id, employeeId):
     data_dict = {
         'personal_id' : employeeId,
