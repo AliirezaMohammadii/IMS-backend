@@ -494,6 +494,22 @@ def get_idea_comments(idea_id):
     data = message
     return data, STATUS_OK
 
+@app.route('/get_idea_comments_loggedIn/<idea_id>', methods=['POST'])
+def getCommentsByIdeaIDLoggedIn(idea_id):
+    personal_id = get_personal_id(request)
+    message = comment_DB.getCommentsByIdeaID_loggedIn(idea_id ,personal_id)
+
+    if type(message) is int:
+        if message == NOT_FOUND:
+            return {'message': NOT_FOUND}, STATUS_BAD_REQUEST
+
+        elif message == DB_ERROR:
+            return {'message': DB_ERROR}, STATUS_INTERNAL_SERVER_ERROR
+
+    data = message
+    return data, STATUS_OK
+
+
 
 @app.route('/delete_comment/<int:comment_id>', methods=['DELETE'])
 @login_required()
