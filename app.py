@@ -43,7 +43,7 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 db.init_app(app)
 
 
-def get_personal_id(request):
+def request.json['personal_id']:
     jwt_token = request.headers['Authorization'].split()[1]
     personal_id = tpi_DB.get(jwt_token)
     return personal_id
@@ -138,7 +138,7 @@ def signup():
 @login_required()
 def get_user(personal_id_):
 
-    personal_id = get_personal_id(request)
+    personal_id = request.json['personal_id']
     permitted = personal_id == personal_id_ or is_admin(request)
 
     if not permitted:
@@ -161,7 +161,7 @@ def get_user(personal_id_):
 @login_required()
 def update_user():
 
-    personal_id = get_personal_id(request)
+    personal_id = request.json['personal_id']
     permitted = personal_id == request.json['personal_id']
 
     if not permitted:
@@ -182,7 +182,7 @@ def update_user():
 @login_required()
 def delete_user(personal_id_):
 
-    personal_id = get_personal_id(request)
+    personal_id = request.json['personal_id']
     permitted = personal_id == personal_id_ or is_admin(request)
 
     if not permitted:
@@ -264,7 +264,7 @@ def get_idea(idea_id):
 @app.route('/get_idea_loggedIn/<idea_id>', methods=['POST'])
 @login_required()
 def get_idea_loggedIn(idea_id):
-    personal_id = get_personal_id(request)
+    personal_id = request.json['personal_id']
     message = idea_DB.getIdeaByID_loggedIn(idea_id, personal_id)
 
     if type(message) is int:
@@ -375,8 +375,8 @@ def has_rude_concept(idea_id):
 @app.route('/like_idea/<idea_id>', methods=['POST'])
 @login_required()
 def like_idea(idea_id):
-    personal_id = get_personal_id(request)
-    idea = dict(json.loads(idea_DB.getIdeaByID(idea_id)))
+    personal_id = request.json['personal_id']
+    idea = dict(json.loads(idea_DB.getIdeaByID(idea_id))) 
     
     not_permitted = idea['personal_id'] == personal_id
     if not_permitted:
@@ -394,7 +394,7 @@ def like_idea(idea_id):
 @app.route('/dislike_idea/<idea_id>', methods=['POST'])
 @login_required()
 def dislike_idea(idea_id):
-    personal_id = get_personal_id(request)
+    personal_id = request.json['personal_id']
 
     idea = dict(json.loads(idea_DB.getIdeaByID(idea_id)))
 
@@ -507,7 +507,7 @@ def get_idea_comments(idea_id):
 
 @app.route('/get_idea_comments_loggedIn/<idea_id>', methods=['POST'])
 def getCommentsByIdeaIDLoggedIn(idea_id):
-    personal_id = get_personal_id(request)
+    personal_id = request.json['personal_id']
     message = comment_DB.getCommentsByIdeaID_loggedIn(idea_id ,personal_id)
 
     if type(message) is int:
@@ -546,7 +546,7 @@ def delete_comment(comment_id):
 @login_required()
 def like_comment(comment_id):
 
-    personal_id = get_personal_id(request)
+    personal_id = request.json['personal_id']
     comment = comment_DB.getCommentByID(comment_id)
     comment = json.loads(comment)
     employeeId = employee_DB.get_user_id(personal_id)
@@ -568,7 +568,7 @@ def like_comment(comment_id):
 @login_required()
 def dislike_comment(comment_id):
 
-    personal_id = get_personal_id(request)
+    personal_id = request.json['personal_id']
     comment = comment_DB.getCommentByID(comment_id)
     comment = json.loads(comment)
     employeeId = employee_DB.get_user_id(personal_id)
