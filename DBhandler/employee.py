@@ -153,10 +153,10 @@ def get_by_personal_id(personal_id):
 def get_all_employees():
     db = get_db()
     cursor = db.cursor()
-    select_query = 'SELECT * FROM employee'
+    select_query = 'SELECT * FROM employee where isAdmin= ? '
 
     try:
-        cursor.execute(select_query)
+        cursor.execute(select_query,(0,))
         employees = cursor.fetchall()
         close_db()
         return convert_to_json(employees)
