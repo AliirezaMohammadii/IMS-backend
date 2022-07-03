@@ -729,8 +729,8 @@ def getBestIdeas():
     return value
 
 
-@app.route('/awardBestIdeasByCommittee')
-@login_required()
+@app.route('/awardBestIdeasByCommittee', methods=['POST'])
+# @login_required()
 def awardBestIdeasByCommittee():
 
     type = request.json['type']
