@@ -703,8 +703,7 @@ def getIdeaCounts():
     value = idea_DB.ideasCount()
     return value
 
-
-@app.route('/getBestIdeas')
+@app.route('/getBestIdeas', methods=["POST"])
 def getBestIdeas():
 
     type = request.json['type']
@@ -730,8 +729,8 @@ def getBestIdeas():
     return value
 
 
-@app.route('/awardBestIdeasByCommittee')
-@login_required()
+@app.route('/awardBestIdeasByCommittee', methods=['POST'])
+# @login_required()
 def awardBestIdeasByCommittee():
 
     type = request.json['type']
@@ -748,7 +747,7 @@ def awardBestIdeasByCommittee():
 
 
 @app.route('/awardBestIdeasByLotteryMONTH')
-@login_required()
+# @login_required()
 def awardBestIdeasByLotteryMONTH():
     value = idea_DB.awardBestIdeasByLotteryMONTH()
     return value
