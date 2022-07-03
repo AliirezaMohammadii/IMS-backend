@@ -565,7 +565,8 @@ def awardBestIdeasByLotteryMONTH():
         close_db()
         print(ideas)
         if len(ideas)==0:
-            return MESSAGE_OK
+            data = {}
+            return json.dumps(data)
 
         rowOfWinner  = random.randint(0, len(ideas)-1)
         print(len(ideas), rowOfWinner)
