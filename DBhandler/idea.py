@@ -291,8 +291,8 @@ def getBestIdeasByUsersMONTH():
     db = get_db()
     cursor = db.cursor()
     source_date = khayyam.JalaliDatetime.now()
-    firstDayOfLastMonth = str(JalaliDatetime(source_date.year, source_date.month-1, 1))[0:-10]
-    lastDayOfLastMonth  = str(JalaliDatetime(source_date.year, source_date.month-1, 31,23,59))[0:-10]
+    firstDayOfLastMonth = str(JalaliDatetime(source_date.year, source_date.month, 1))[0:-10]
+    lastDayOfLastMonth  = str(JalaliDatetime(source_date.year, source_date.month, 31,23,59))[0:-10]
     #print(firstDayOfLastMonth)
     #print(lastDayOfLastMonth)
     # ideas + upvotes + down_votes + employees info
@@ -325,8 +325,8 @@ def getBestIdeasByUsersWEEK():
     cursor = db.cursor()
     source_date = khayyam.JalaliDatetime.now()
 
-    firstDayOfLastWeek=   str(JalaliDate(source_date -timedelta(7+JalaliDate(source_date).weekday())))
-    lastDayOfLastWeek = str(JalaliDate(source_date -timedelta(1+JalaliDate(source_date).weekday())))
+    firstDayOfLastWeek=   str(JalaliDate(source_date -timedelta(7+JalaliDate(source_date).weekday() ) +timedelta(7)))
+    lastDayOfLastWeek = str(JalaliDate(source_date -timedelta(1+JalaliDate(source_date).weekday()) +timedelta(7)))
 
     #print(firstDayOfLastWeek)
     #print(lastDayOfLastWeek)
@@ -383,8 +383,8 @@ def getBestIdeasByCommitteeMONTH():
     db = get_db()
     cursor = db.cursor()
     source_date = khayyam.JalaliDatetime.now()
-    firstDayOfLastMonth = str(JalaliDatetime(source_date.year, source_date.month-1, 1))[0:-10]
-    lastDayOfLastMonth  = str(JalaliDatetime(source_date.year, source_date.month-1, 31,23,59))[0:-10]
+    firstDayOfLastMonth = str(JalaliDatetime(source_date.year, source_date.month, 1))[0:-10]
+    lastDayOfLastMonth  = str(JalaliDatetime(source_date.year, source_date.month, 31,23,59))[0:-10]
     #print(firstDayOfLastMonth)
     #print(lastDayOfLastMonth)
     # ideas + upvotes + down_votes + employees info
@@ -418,8 +418,8 @@ def getBestIdeasByCommitteeWEEK():
     cursor = db.cursor()
     source_date = khayyam.JalaliDatetime.now()
 
-    firstDayOfLastWeek=   str(JalaliDate(source_date -timedelta(7+JalaliDate(source_date).weekday())))
-    lastDayOfLastWeek = str(JalaliDate(source_date -timedelta(1+JalaliDate(source_date).weekday())))
+    firstDayOfLastWeek=   str(JalaliDate(source_date -timedelta(7+JalaliDate(source_date).weekday())+timedelta(7)))
+    lastDayOfLastWeek = str(JalaliDate(source_date -timedelta(1+JalaliDate(source_date).weekday())+timedelta(7)))
 
     #print(firstDayOfLastWeek)
     #print(lastDayOfLastWeek)
