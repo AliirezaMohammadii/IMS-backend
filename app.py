@@ -43,15 +43,16 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 db.init_app(app)
 
 
-def request.json['personal_id']:
-    jwt_token = request.headers['Authorization'].split()[1]
-    personal_id = tpi_DB.get(jwt_token)
-    return personal_id
+
+# def request.json['personal_id']:
+#     jwt_token = request.headers['Authorization'].split()[1]
+#     personal_id = tpi_DB.get(jwt_token)
+#     return personal_id
 
 
 def current_user(request):
     jwt_token = request.headers['Authorization'].split()[1]
-    personal_id = tpi_DB.get(jwt_token)
+    personal_id = request.json['personal_id']
     user = employee_DB.get_by_personal_id(personal_id)
     return dict(json.loads(user))
 

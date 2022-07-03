@@ -65,20 +65,20 @@ def create(data):
                    'VALUES (?, ?, ?, ?, ?, ?, ?, ? , ?)'
     fields = (id, firstName, lastName, personal_id, hashed_password, mobile, email, committeeMember,isAdmin)
 
-    try:
-        #check if employee already exists :
-        if getEmployeeByPersonalId(personal_id, cursor) is not None:
-            return USER_ALREADY_EXISTS
+    # try:
+    #check if employee already exists :
+    if getEmployeeByPersonalId(personal_id, cursor) is not None:
+        return USER_ALREADY_EXISTS
 
-        # insert into db:
-        cursor.execute(insert_query, fields)
-        db.commit()
-        close_db()
-        return MESSAGE_OK
+    # insert into db:
+    cursor.execute(insert_query, fields)
+    db.commit()
+    close_db()
+    return MESSAGE_OK
 
-    except sqlite3.Error:  
-        close_db()
-        return DB_ERROR
+    # except sqlite3.Error:
+    close_db()
+    return DB_ERROR
 
 
 def update(data):
