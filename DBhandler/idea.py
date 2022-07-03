@@ -498,6 +498,9 @@ def awardBestIdeasByCommitteeMONTH():
         cursor.execute(select_query,('NotChecked','Rejected',firstDayOfLastMonth,lastDayOfLastMonth,))
         ideas = cursor.fetchall()
         close_db()
+        if len(ideas)==0:
+            data = {}
+            return json.dumps(data)
         print(ideas)
         idea = ideas[0]
         
