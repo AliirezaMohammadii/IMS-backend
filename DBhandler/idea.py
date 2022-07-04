@@ -734,6 +734,7 @@ def dislike_idea(ideaId, employeeId):
     return message
 
 
+
 def get_all_ideas():
     db = get_db()
     cursor = db.cursor()
@@ -746,11 +747,11 @@ def get_all_ideas():
                     'LEFT JOIN ( SELECT ideaVote.ideaId , ideaVote.type ,count(ideaVote.type) as cntDOWN FROM ideaVote Where ideaVote.type is not null and ideaVote.type =2 Group BY (ideaVote.ideaId) ) D ON D.ideaId = idea.id '\
                     'LEFT JOIN ( SELECT comment.ideaId ,count(comment.id) as cntComments FROM comment ) E ON E.ideaId = idea.id  '\
                         'LEFT JOIN totalScore ON totalScore.ideaId =idea.id  '\
-                            'WHERE idea.status != ? '\
-                        'Order BY idea.status ASC , idea.time DESC'\
+                        'WHERE idea.status != ?  Order BY  idea.status= ?  DESC, idea.status= ?  DESC, idea.status= ?  DESC, idea.status= ?  DESC , idea.time DESC'\
 
     try:
-        cursor.execute(select_query,('NotChecked',))
+        cursor.execute(select_query,('NotChecked', 'Pending','Accepted','Rejected','Implemented'))
+
         ideas = cursor.fetchall()
         close_db()
         return convert_to_json(ideas)

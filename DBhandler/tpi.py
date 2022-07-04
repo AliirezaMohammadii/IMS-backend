@@ -1,4 +1,3 @@
-
 import json
 import re
 import sys
@@ -28,13 +27,13 @@ def create(data):
     db = get_db()
     cursor = db.cursor()
 
-    id = get_table_size(cursor)+1
-    jwt_token   = data["jwt_token"]
+    id = get_table_size(cursor) + 1
+    jwt_token = data["jwt_token"]
     personal_id = data["personal_id"]
 
     print('\ncreate - jwt_token:', jwt_token)
     print('create - personal_id:', personal_id)
-   
+
     insert_query = 'INSERT INTO tpi (id, jwt_token, personal_id) ' \
                    'VALUES (?, ?, ?)'
     fields = (id, jwt_token, personal_id)
@@ -47,7 +46,7 @@ def create(data):
         print('create - Ok')
         return MESSAGE_OK
 
-    except sqlite3.Error:  
+    except sqlite3.Error:
         close_db()
         return DB_ERROR
 
@@ -63,4 +62,3 @@ def get(jwt_token):
     close_db()
 
     return personal_id
-    
